@@ -15,6 +15,7 @@
         <table class="table">
             {% for book in books %}
                 <tr>
+                    <td><img src="{{ book.get_thumb_url() }}" /></td>
                     <td>{{ book.title }} </td>
                     <td>{{ book.author }} </td>
                 </tr>

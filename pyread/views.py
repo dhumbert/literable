@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 from pyread import app, model
 
 
@@ -15,8 +15,6 @@ def add_book():
 
 @app.route("/books/add", methods=['POST'])
 def add_book_post():
-    attrs = (request.form['title'], request.form['author'], request.files['file'])
+    attrs = (request.form['title'], request.form['author'], request.files['file'], request.files['cover'])
     if model.save_book(attrs):
-        pass
-
-    return 'asdf'
+        return redirect(url_for('list_books'))
