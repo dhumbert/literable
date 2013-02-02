@@ -13,10 +13,10 @@
     <div class="navbar navbar-inverse navbar-static-top">
         <div class="navbar-inner">
             <div class="container">
-                <a class="brand" href="#">pyRead</a>
+                <a class="brand" href="{{ url_for('list_books') }}">pyRead</a>
 
                 <ul class="nav">
-                    <li class="active"><a href="{{ url_for('list_books') }}">Books</a></li>
+                    <li><a href="{{ url_for('add_book') }}"><i class="icon-plus-sign icon-white"></i> Add Book</a></li>
                 </ul>
             </div>
         </div>

@@ -2,22 +2,16 @@
 
 {% block content %}
     
-    <div class="row">
-        <div class="span4">
-            <h1>Books</h1>
-        </div>
-        <div class="span2 pull-right add-book-btn">
-            <a href="{{ url_for('add_book') }}" class="btn"><i class="icon-plus-sign"></i> Add Book</a>
-        </div>
-    </div>
+    <h1>Library</h1>
 
     {% if books %}
-        <table class="table">
+        <table class="table table-striped">
             {% for book in books %}
                 <tr>
                     <td><img src="{{ book.get_thumb_url() }}" /></td>
                     <td>{{ book.title }} </td>
                     <td>{{ book.author }} </td>
+                    <td><a href="{{ url_for('download_book', id=book.id) }}" class="btn"><i class="icon-download-alt"></i> Download</a></td>
                 </tr>
             {% endfor %}
         </table>

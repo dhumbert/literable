@@ -1,4 +1,5 @@
 import Image
+from flask import send_from_directory
 from pyread import book_upload_set, cover_upload_set, db
 
 
@@ -17,6 +18,12 @@ def save_book(attrs):
         db.session.commit()
 
         return True
+
+
+def download_book(id):
+    book = Book.query.get(id)
+    if book:
+        return send_from_directory(book_upload_set.config.destination, book.filename, as_attachment=True)
 
 
 def create_thumbnail(file):
