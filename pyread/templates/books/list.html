@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    
+    <div class="row">
+        <div class="span4">
+            <h1>Books</h1>
+        </div>
+        <div class="span2 pull-right add-book-btn">
+            <a href="{{ url_for('add_book') }}" class="btn"><i class="icon-plus-sign"></i> Add Book</a>
+        </div>
+    </div>
+
+    {% if books %}
+        <table class="table">
+            {% for book in books %}
+                <tr>
+                    <td>{{ book.title }} </td>
+                    <td>{{ book.author }} </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        No books
+    {% endif %}
+
+{% endblock %}

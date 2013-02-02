@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>pyRead</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-responsive.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="#">pyRead</a>
+
+                <ul class="nav">
+                    <li class="active"><a href="{{ url_for('list_books') }}">Books</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="content" class="container">{% block content %}{% endblock %}</div>
+
+    <script>
+      var dojoConfig = {
+          async: 1,
+          baseUrl: "{{ url_for('static', filename='js/dojo/') }}",
+          packages: [
+              { name: "bootstrap", location: "Dojo-Bootstrap" }
+          ]
+      };
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.8.1/dojo/dojo.js" data-dojo-config="async: true"></script>
+
+</body>
+</html>
