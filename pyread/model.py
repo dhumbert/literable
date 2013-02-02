@@ -1,5 +1,3 @@
-import os
-from werkzeug import secure_filename
 from pyread import book_upload_set, db
 
 def get_books():
