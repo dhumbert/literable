@@ -53,3 +53,7 @@
 .book-form label {
     margin-top: 1em;
 }
+
+.tag-list {
+    -webkit-column-count: 4;
+}

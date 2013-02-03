@@ -16,6 +16,8 @@ def get_book(id):
 def get_books_by_tag(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()
     books = db.session.query(Book).with_parent(tag, 'books')
+    books = None if books.count() == 0 else books
+
     return (books, tag)
 
 
@@ -70,6 +72,10 @@ def slugify(text, delim=u'-'):
         if word:
             result.append(word)
     return unicode(delim.join(result))
+
+
+def get_tags():
+    return Tag.query.order_by(Tag.name).all()
 
 books_tags = db.Table('books_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),

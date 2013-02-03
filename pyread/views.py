@@ -41,7 +41,8 @@ def edit_book_do(id):
 
 @app.route("/tags")
 def list_tags():
-    return 'asdf'
+    tags = model.get_tags()
+    return render_template('tags/list.html', tags=tags)
 
 @app.route("/tags/<tag>")
 def tag(tag):
