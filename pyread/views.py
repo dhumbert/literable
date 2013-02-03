@@ -39,6 +39,11 @@ def edit_book_do(id):
     return redirect(url_for('edit_book', id=id))
 
 
+@app.route("/tags")
+def list_tags():
+    return 'asdf'
+
 @app.route("/tags/<tag>")
 def tag(tag):
-    pass
+    books, tag = model.get_books_by_tag(tag)
+    return render_template('books/list.html', books=books, tag=tag)

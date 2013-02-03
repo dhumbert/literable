@@ -13,8 +13,12 @@
     text-align: center;
 }
 
+.row-library .cell-info {
+    padding-left: 2em;
+}
+
 .row-library .cell-info h3 {
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .row-library .cell-info h4 {

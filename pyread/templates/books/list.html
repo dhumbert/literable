@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if tag %}
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('list_books') }}">Library</a><span class="divider">/</span></li>
+            <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
+            <li class="active">{{ tag.name }}</li>
+        </ul>
+    {% endif %}
+
     {% if books %}
             {% for book in books %}
                 <div class="row row-library">
-                    <div class="span2 cell-cover">
+                    <div class="span1 cell-cover">
                         <img src="{{ book.get_thumb_url() }}" />
                     </div>
 

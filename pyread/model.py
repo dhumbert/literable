@@ -13,6 +13,12 @@ def get_book(id):
     return Book.query.get_or_404(id)
 
 
+def get_books_by_tag(slug):
+    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    books = db.session.query(Book).with_parent(tag, 'books')
+    return (books, tag)
+
+
 def save_book(attrs):
         filename = book_upload_set.save(attrs[2])
         cover = cover_upload_set.save(attrs[3])
