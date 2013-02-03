@@ -5,19 +5,32 @@
     <h1>Library</h1>
 
     {% if books %}
-        <table class="table table-striped">
             {% for book in books %}
-                <tr>
-                    <td><img src="{{ book.get_thumb_url() }}" /></td>
-                    <td>{{ book.title }} </td>
-                    <td>{{ book.author }} </td>
-                    <td>
+                <div class="row row-library">
+                    <div class="span2 cell-cover">
+                        <img src="{{ book.get_thumb_url() }}" />
+                    </div>
+
+                    <div class="span7 cell-info">
+                        <h3>{{ book.title }}</h3>
+                        <h4>{{ book.author }}</h4>
+
+                        <ul class="book-tags">
+                            <li><i class="icon-tags"></i></li>
+                            {% for tag in book.tags %}
+                                <li>
+                                    {{ tag.name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="span3 cell-actions">
                         <a href="{{ url_for('download_book', id=book.id) }}" class="btn"><i class="icon-download-alt"></i> Download</a>
                         <a href="{{ url_for('edit_book', id=book.id) }}" class="btn"><i class="icon-edit"></i> Edit</a>
-                    </td>
-                </tr>
+                    </div>
+                </div>
             {% endfor %}
-        </table>
     {% else %}
         No books
     {% endif %}

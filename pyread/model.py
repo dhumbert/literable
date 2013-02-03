@@ -128,7 +128,7 @@ class Book(db.Model):
         self.empty_tags()
 
         for tag in tag_string.split(','):
-            name = tag.strip().title()
+            name = tag.strip().lower()
             if len(name) > 0:
                 # check for existing tag
                 t = Tag.query.filter_by(name=name).first()
