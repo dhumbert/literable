@@ -37,3 +37,8 @@ def edit_book(id):
 def edit_book_do(id):
     model.edit_book(id, request.form, request.files)
     return redirect(url_for('edit_book', id=id))
+
+
+@app.route("/tags/<tag>")
+def tag(tag):
+    pass

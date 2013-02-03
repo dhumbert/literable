@@ -1,5 +1,6 @@
 import Image
 import os
+import re
 from flask import send_from_directory
 from pyread import book_upload_set, cover_upload_set, db
 
@@ -53,6 +54,16 @@ def create_thumbnail(file):
     new_filename = "thumb-%s" % file
     image.save(cover_upload_set.path(new_filename))
 
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+
+def slugify(text, delim=u'-'):
+    """Generates an ASCII-only slug."""
+    result = []
+    for word in _punct_re.split(text.lower()):
+        if word:
+            result.append(word)
+    return unicode(delim.join(result))
 
 books_tags = db.Table('books_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),
@@ -65,6 +76,19 @@ class Tag(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    slug = db.Column(db.String)
+
+    def generate_slug(self, depth=0):
+        base_slug = search_for = slugify(self.name)
+
+        if depth > 0:
+            search_for = slugify("%s-%d" % (self.name, depth))
+
+        result = Tag.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
 
 
 class Book(db.Model):
@@ -135,5 +159,6 @@ class Book(db.Model):
                 if t is None:
                     t = Tag()
                     t.name = name
+                    t.slug = t.generate_slug()
 
                 self.tags.append(t)

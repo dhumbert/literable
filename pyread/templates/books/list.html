@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-    
-    <h1>Library</h1>
-
     {% if books %}
             {% for book in books %}
                 <div class="row row-library">
@@ -19,7 +16,7 @@
                             <li><i class="icon-tags"></i></li>
                             {% for tag in book.tags %}
                                 <li>
-                                    {{ tag.name }}
+                                    <a href="{{ url_for('tag', tag=tag.slug) }}">{{ tag.name }}</a>
                                 </li>
                             {% endfor %}
                         </ul>
