@@ -11,13 +11,13 @@ def list_books():
 @app.route("/books/add")
 def add_book():
     book = model.Book()  # blank book obj for form
-    return render_template('books/add.html', book=book)
+    genres = model.get_genres()
+    return render_template('books/add.html', book=book, genres=genres)
 
 
 @app.route("/books/add", methods=['POST'])
 def add_book_post():
-    attrs = (request.form['title'], request.form['author'], request.files['file'], request.files['cover'])
-    if model.save_book(attrs):
+    if model.add_book(request.form, request.files):
         return redirect(url_for('list_books'))
 
 
@@ -29,8 +29,9 @@ def download_book(id):
 @app.route("/books/edit/<int:id>")
 def edit_book(id):
     book = model.get_book(id)
+    genres = model.get_genres()
     if book:
-        return render_template('books/edit.html', book=book)
+        return render_template('books/edit.html', book=book, genres=genres)
 
 
 @app.route("/books/edit/<int:id>", methods=['POST'])
@@ -44,7 +45,20 @@ def list_tags():
     tags = model.get_tags()
     return render_template('tags/list.html', tags=tags)
 
+
 @app.route("/tags/<tag>")
 def tag(tag):
     books, tag = model.get_books_by_tag(tag)
     return render_template('books/list.html', books=books, tag=tag)
+
+
+@app.route("/genres")
+def list_genres():
+    genres = model.get_genres()
+    return render_template('genres/list.html', genres=genres)
+
+
+@app.route("/genre/<genre>")
+def genre(genre):
+    books, genre = model.get_books_by_genre(genre)
+    return render_template('books/list.html', books=books, genre=genre)

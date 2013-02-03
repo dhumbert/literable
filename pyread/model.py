@@ -15,23 +15,33 @@ def get_book(id):
 
 def get_books_by_tag(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = db.session.query(Book).with_parent(tag, 'books')
+    books = db.session.query(Book).with_parent(tag, 'books').order_by(Book.title)
     books = None if books.count() == 0 else books
 
     return (books, tag)
 
 
-def save_book(attrs):
-        filename = book_upload_set.save(attrs[2])
-        cover = cover_upload_set.save(attrs[3])
+def get_books_by_genre(slug):
+    genre = Genre.query.filter_by(slug=slug).first_or_404()
+    books = db.session.query(Book).with_parent(genre, 'books').order_by(Book.title)
+    books = None if books.count() == 0 else books
+
+    return (books, genre)
+
+
+def add_book(form, files):
+        filename = book_upload_set.save(files['file'])
+        cover = cover_upload_set.save(files['cover'])
 
         create_thumbnail(cover)
 
         book = Book()
-        book.title = attrs[0]
-        book.author = attrs[1]
+        book.title = form['title']
+        book.author = form['author']
         book.filename = filename
         book.cover = cover
+        book.genre_id = form['genre'] if form['genre'] else None
+        book.update_tags(form['tags'])
 
         db.session.add(book)
         db.session.commit()
@@ -44,6 +54,7 @@ def edit_book(id, form, files):
     if book:
         book.title = form['title']
         book.author = form['author']
+        book.genre_id = form['genre'] if form['genre'] else None
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_tags(form['tags'])
@@ -77,6 +88,11 @@ def slugify(text, delim=u'-'):
 def get_tags():
     return Tag.query.order_by(Tag.name).all()
 
+
+def get_genres():
+    return Genre.query.order_by(Genre.name).all()
+
+
 books_tags = db.Table('books_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),
     db.Column('book_id', db.Integer, db.ForeignKey('books.id'))
@@ -91,7 +107,7 @@ class Tag(db.Model):
     slug = db.Column(db.String)
 
     def generate_slug(self, depth=0):
-        base_slug = search_for = slugify(self.name)
+        search_for = slugify(self.name)
 
         if depth > 0:
             search_for = slugify("%s-%d" % (self.name, depth))
@@ -113,6 +129,8 @@ class Book(db.Model):
     cover = db.Column(db.String)
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books', lazy='dynamic'), order_by=[Tag.name])
+    genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
+    genre = db.relationship('Genre')
 
     def get_thumb_url(self):
         return cover_upload_set.url('thumb-' + self.cover)
@@ -174,3 +192,14 @@ class Book(db.Model):
                     t.slug = t.generate_slug()
 
                 self.tags.append(t)
+
+
+class Genre(db.Model):
+    __tablename__ = 'genres'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    slug = db.Column(db.String)
+
+    books = db.relationship('Book', backref=db.backref('books'), order_by=[Book.title])
+

@@ -27,6 +27,15 @@
     margin-top: 0;
 }
 
+.row-library .cell-info .book-genre {
+    font-size: 90%;
+    color: #666;
+}
+
+.row-library .cell-info .book-genre a {
+    margin-left: 0.35em;
+}
+
 .book-tags {
     list-style-type: none;
     margin-left: 0;

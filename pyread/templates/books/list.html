@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if tag %}
+    {% if tag or genre %}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('list_books') }}">Library</a><span class="divider">/</span></li>
-            <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
-            <li class="active">{{ tag.name }}</li>
+            {% if tag %}
+                <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
+                <li class="active">{{ tag.name }}</li>
+            {% endif %}
+
+            {% if genre %}
+                <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
+                <li class="active">{{ genre.name }}</li>
+            {% endif %}
         </ul>
     {% endif %}
 
@@ -19,6 +26,13 @@
                     <div class="span7 cell-info">
                         <h3>{{ book.title }}</h3>
                         <h4>{{ book.author }}</h4>
+
+                        {% if book.genre %}
+                            <div class="book-genre">
+                                <i class="icon-folder-open"></i>
+                                <a href="{{ url_for('genre', genre=book.genre.slug) }}">{{ book.genre.name }}</a>
+                            </div>
+                        {% endif %}
 
                         {% if book.tags %}
                             <ul class="book-tags">

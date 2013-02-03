@@ -10,8 +10,10 @@
 
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span9">
-        <option value="fiction">Fiction</option>
-        <option value="nonfiction">Nonfiction</option>
+        <option value="">-- None --</option>
+        {% for genre in genres %}
+            <option value="{{ genre.id }}" {% if genre.id == book.genre_id %}selected="selected"{% endif %}>{{ genre.name }}</option>
+        {% endfor %}
     </select>
 
     <label for="file">File</label>
