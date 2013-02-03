@@ -6,7 +6,7 @@
     <input type="text" name="author" id="author" value="{{ book.author }}" class="span9">
 
     <label for="tags">Tags</label>
-    <input type="text" name="tags" id="tags" class="span9">
+    <input type="text" name="tags" id="tags" value="{{ book.get_tag_string() }}" class="span9">
 
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span9">

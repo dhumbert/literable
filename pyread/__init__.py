@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.config['LIBRARY_PATH'] = "/Users/dhumbert/tmp/books/"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://goread:goread@localhost:5432/goread'
 db = SQLAlchemy(app)
 #db.create_all()
 

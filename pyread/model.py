@@ -9,7 +9,7 @@ def get_books():
 
 
 def get_book(id):
-    return Book.query.get(id)
+    return Book.query.get_or_404(id)
 
 
 def save_book(attrs):
@@ -37,6 +37,7 @@ def edit_book(id, form, files):
         book.author = form['author']
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
+        book.update_tags(form['tags'])
         db.session.commit()
 
 
@@ -53,6 +54,19 @@ def create_thumbnail(file):
     image.save(cover_upload_set.path(new_filename))
 
 
+books_tags = db.Table('books_tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),
+    db.Column('book_id', db.Integer, db.ForeignKey('books.id'))
+)
+
+
+class Tag(db.Model):
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+
 class Book(db.Model):
     __tablename__ = 'books'
 
@@ -61,6 +75,8 @@ class Book(db.Model):
     author = db.Column(db.String)
     filename = db.Column(db.String)
     cover = db.Column(db.String)
+
+    tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books', lazy='dynamic'), order_by=[Tag.name])
 
     def get_thumb_url(self):
         return cover_upload_set.url('thumb-' + self.cover)
@@ -99,3 +115,25 @@ class Book(db.Model):
             create_thumbnail(cover)
         except:
             pass  # couldn't upload cover. maybe blank upload?
+
+    def get_tag_string(self):
+        tags = [tag.name for tag in self.tags]
+        return ', '.join(tags)
+
+    def empty_tags(self):
+        self.tags[:] = []
+        db.session.flush()
+
+    def update_tags(self, tag_string):
+        self.empty_tags()
+
+        for tag in tag_string.split(','):
+            name = tag.strip().title()
+            if len(name) > 0:
+                # check for existing tag
+                t = Tag.query.filter_by(name=name).first()
+                if t is None:
+                    t = Tag()
+                    t.name = name
+
+                self.tags.append(t)

@@ -32,6 +32,7 @@ def edit_book(id):
     if book:
         return render_template('books/edit.html', book=book)
 
+
 @app.route("/books/edit/<int:id>", methods=['POST'])
 def edit_book_do(id):
     model.edit_book(id, request.form, request.files)
