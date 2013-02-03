@@ -4,32 +4,6 @@
 
 <h1>Add Book</h1>
 
-<form method="post" class="form-horizontal" enctype="multipart/form-data">
-    <label for="title">Title</label>
-    <input type="text" name="title" id="title">
-
-    <label for="author">Author</label>
-    <input type="text" name="author" id="author">
-
-    <label for="tags">Tags</label>
-    <input type="text" name="tags" id="tags">
-
-    <label for="genre">Genre</label>
-    <select name="genre" id="genre">
-        <option value="fiction">Fiction</option>
-        <option value="nonfiction">Nonfiction</option>
-    </select>
-
-    <label for="file">File</label>
-    <input type="file" name="file" id="file" />
-
-    <label for="cover">Cover Image</label>
-    <input type="file" name="cover" id="cover" />
-
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{{ url_for('list_books') }}" class="btn">Cancel</a>
-    </div>
-</form>
+{% include 'books/form.html' %}
 
 {% endblock %}

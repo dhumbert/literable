@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Edit Book</h1>
+
+<div class="row">
+    <div class="span2 book-edit-meta pull-right">
+        {% if book.cover %}
+            <div class="current-cover">
+                <img src="{{ book.get_thumb_url() }}">
+            </div>
+        {% endif %}
+
+        {% if book.filename %}
+            <div class="current-file">
+                <a href="{{ url_for('download_book', id=book.id) }}"><i class="icon-download-alt"></i> {{ book.get_format() }}</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="span9 pull-left">
+        {% include 'books/form.html' %}
+    </div>
+</div>
+
+{% endblock %}

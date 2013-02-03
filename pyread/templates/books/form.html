@@ -1,0 +1,34 @@
+<form method="post" class="form-horizontal book-form" enctype="multipart/form-data">
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title" value="{{ book.title }}" class="span9">
+
+    <label for="author">Author</label>
+    <input type="text" name="author" id="author" value="{{ book.author }}" class="span9">
+
+    <label for="tags">Tags</label>
+    <input type="text" name="tags" id="tags" class="span9">
+
+    <label for="genre">Genre</label>
+    <select name="genre" id="genre" class="span9">
+        <option value="fiction">Fiction</option>
+        <option value="nonfiction">Nonfiction</option>
+    </select>
+
+    <label for="file">File</label>
+    {% if book.filename %}
+        <span class="help-block">Leave blank to keep current file.</span>
+    {% endif %}
+    <input type="file" name="file" id="file" />
+
+
+    <label for="cover">Cover Image</label>
+    {% if book.cover %}
+        <span class="help-block">Leave blank to keep current cover.</span>
+    {% endif %}
+    <input type="file" name="cover" id="cover" />
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{{ url_for('list_books') }}" class="btn">Cancel</a>
+    </div>
+</form>

@@ -23,3 +23,15 @@ def add_book_post():
 @app.route("/books/download/<int:id>")
 def download_book(id):
     return model.download_book(id)
+
+
+@app.route("/books/edit/<int:id>")
+def edit_book(id):
+    book = model.get_book(id)
+    if book:
+        return render_template('books/edit.html', book=book)
+
+@app.route("/books/edit/<int:id>", methods=['POST'])
+def edit_book_do(id):
+    model.edit_book(id, request.form, request.files)
+    return redirect(url_for('edit_book', id=id))
