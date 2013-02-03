@@ -10,7 +10,8 @@ def list_books():
 
 @app.route("/books/add")
 def add_book():
-    return render_template('books/add.html')
+    book = model.Book()  # blank book obj for form
+    return render_template('books/add.html', book=book)
 
 
 @app.route("/books/add", methods=['POST'])

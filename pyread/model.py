@@ -18,7 +18,12 @@ def save_book(attrs):
 
         create_thumbnail(cover)
 
-        book = Book(attrs[0], attrs[1], filename, cover)
+        book = Book()
+        book.title = attrs[0]
+        book.author = attrs[1]
+        book.filename = filename
+        book.cover = cover
+
         db.session.add(book)
         db.session.commit()
 
@@ -56,12 +61,6 @@ class Book(db.Model):
     author = db.Column(db.String)
     filename = db.Column(db.String)
     cover = db.Column(db.String)
-
-    def __init__(self, title, author, filename, cover):
-        self.title = title
-        self.author = author
-        self.filename = filename
-        self.cover = cover
 
     def get_thumb_url(self):
         return cover_upload_set.url('thumb-' + self.cover)
