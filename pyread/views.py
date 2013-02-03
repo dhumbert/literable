@@ -1,5 +1,6 @@
+import json
 from flask import render_template, request, redirect, url_for
-from pyread import app, model
+from pyread import app, model, content_type
 
 
 @app.route("/")
@@ -62,3 +63,11 @@ def list_genres():
 def genre(genre):
     books, genre = model.get_books_by_genre(genre)
     return render_template('books/list.html', books=books, genre=genre)
+
+
+@app.route("/ajax/tags")
+@content_type("application/json")
+def ajax_tags():
+    tags = model.get_tags()
+    names = [tag.name for tag in tags]
+    return json.dumps(names)

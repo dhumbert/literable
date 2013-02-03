@@ -1,0 +1,3 @@
+[submodule "pyread/static/js/tagmanager"]
+	path = pyread/static/js/tagmanager
+	url = git@github.com:max-favilli/tagmanager.git

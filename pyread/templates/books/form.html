@@ -6,7 +6,7 @@
     <input type="text" name="author" id="author" value="{{ book.author }}" class="span9">
 
     <label for="tags">Tags</label>
-    <input type="text" name="tags" id="tags" value="{{ book.get_tag_string() }}" class="span9">
+    <input type="text" id="tags" name="fakeTags" class="input-small" autocomplete="off">
 
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span9">
@@ -34,3 +34,27 @@
       <a href="{{ url_for('list_books') }}" class="btn">Cancel</a>
     </div>
 </form>
+
+{% block footer_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/tagmanager/bootstrap-tagmanager.css') }}">
+<script type="text/javascript" src="{{ url_for('static', filename='js/tagmanager/bootstrap-tagmanager.js') }}"></script>
+<script>
+    (function(){
+        $('#tags').typeahead({
+            source: function(query, process) {
+                return $.get('{{ url_for("ajax_tags") }}', {query: query}, function(data){
+                    return process(data);
+                });
+            }
+        });
+
+        $('#tags').tagsManager({
+            hiddenTagListName: 'tags',
+            preventSubmitOnEnter: true,
+            typeahead: true,
+            typeaheadAjaxSource: '{{ url_for("ajax_tags") }}',
+            prefilled: '{{ book.get_tag_string() }}'
+        });
+    })();
+</script>
+{% endblock %}
