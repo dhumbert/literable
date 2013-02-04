@@ -1,5 +1,5 @@
 import json
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from pyread import app, model, content_type
 
 
@@ -37,7 +37,11 @@ def edit_book(id):
 
 @app.route("/books/edit/<int:id>", methods=['POST'])
 def edit_book_do(id):
-    model.edit_book(id, request.form, request.files)
+    if model.edit_book(id, request.form, request.files):
+        flash('Your changes were saved', 'success')
+    else:
+        flash('Error saving changes', 'error')
+
     return redirect(url_for('edit_book', id=id))
 
 

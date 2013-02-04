@@ -59,6 +59,8 @@ def edit_book(id, form, files):
         book.attempt_to_update_cover(files['cover'])
         book.update_tags(form['tags'])
         db.session.commit()
+        return True
+    return False
 
 
 def download_book(id):

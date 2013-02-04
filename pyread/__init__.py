@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 app.config['LIBRARY_PATH'] = "/Users/dhumbert/tmp/books/"
+app.secret_key = "=JbX0gvs3ivIZkST+HI"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://goread:goread@localhost:5432/goread'
 db = SQLAlchemy(app)

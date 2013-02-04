@@ -26,7 +26,11 @@
         </div>
     </div>
 
-    <div id="content" class="container">{% block content %}{% endblock %}</div>
+    <div id="content" class="container">
+      {% include "messages.html" %}
+      
+      {% block content %}{% endblock %}
+    </div>
 
     {% block footer_scripts %}{% endblock %}
 </body>

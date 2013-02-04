@@ -2,6 +2,14 @@
     margin-top: 1em;
 }
 
+.alert ul {
+    margin: 0;
+}
+
+.alert ul li {
+    list-style-type: none;
+}
+
 .row-library {
     margin-bottom: 2em;
     padding-bottom: 2em;
