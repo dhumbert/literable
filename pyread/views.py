@@ -11,7 +11,7 @@ def list_books():
 
 @app.route("/books/add")
 def add_book():
-    book = model.Book()  # blank book obj for form
+    book = model.get_book(None)  # blank book obj for form
     return render_template('books/add.html', book=book, genre_select=model.generate_genre_tree_select)
 
 
