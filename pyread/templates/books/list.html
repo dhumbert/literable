@@ -11,6 +11,11 @@
 
             {% if genre %}
                 <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
+
+                {% for genre in genre.get_parents() %}
+                    <li><a href="{{ url_for('list_genres', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
+                {% endfor %}
+
                 <li class="active">{{ genre.name }}</li>
             {% endif %}
         </ul>
@@ -30,6 +35,10 @@
                         {% if book.genre %}
                             <div class="book-genre">
                                 <i class="icon-folder-open"></i>
+                                {% for genre in book.genre.get_parents() %}
+                                    <a href="{{ url_for('genre', genre=genre.slug) }}">{{ genre.name }}</a>
+                                    <i class="icon-chevron-right"></i>
+                                {% endfor %}
                                 <a href="{{ url_for('genre', genre=book.genre.slug) }}">{{ book.genre.name }}</a>
                             </div>
                         {% endif %}

@@ -8,6 +8,8 @@
     <label for="tags">Tags</label>
     <input type="text" id="tags" name="fakeTags" class="input-small" autocomplete="off">
 
+    {{ genre_select(selected=book.genre_id) | safe }}
+
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span9">
         <option value="">-- None --</option>

@@ -95,6 +95,34 @@ def get_genres():
     return Genre.query.order_by(Genre.name).all()
 
 
+def get_toplevel_genres():
+    return Genre.query.filter_by(parent_id=None).order_by(Genre.name).all()
+
+
+def generate_genre_tree_select(selected=None):
+    output = """<select name="genre">"""
+    output = output + """<option value="">-- None --</option>"""
+
+    for parent in get_toplevel_genres():
+        output = output + _recurse_select_level(parent, selected=selected)
+
+    output = output + "</select>"
+    return output
+
+
+def _recurse_select_level(parent, depth=0, selected=None):
+    name = ("&mdash;" * depth) + " " + parent.name
+
+    selected_string = """ selected="selected" """ if selected == parent.id else ""
+
+    output = """<option value="%s"%s>%s</option>""" % (parent.id, selected_string, name)
+
+    if parent.children:
+        for child in parent.children:
+            output = output + _recurse_select_level(child, depth=depth+1, selected=selected)
+
+    return output
+
 books_tags = db.Table('books_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),
     db.Column('book_id', db.Integer, db.ForeignKey('books.id'))
@@ -202,6 +230,19 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     slug = db.Column(db.String)
+    parent_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
+
+    children = db.relationship("Genre", backref=db.backref("genres", remote_side=id))
 
     books = db.relationship('Book', backref=db.backref('books'), order_by=[Book.title])
+
+    def get_parents(self):
+        parents = []
+        if self.parent_id:
+            parent = Genre.query.get(self.parent_id)
+            if parent:
+                parents.append(parent)
+                parents = parent.get_parents() + parents
+
+        return parents
 
