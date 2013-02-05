@@ -12,7 +12,7 @@ def list_books():
 @app.route("/books/add")
 def add_book():
     book = model.get_book(None)  # blank book obj for form
-    return render_template('books/add.html', book=book, genre_select=model.generate_genre_tree_select)
+    return render_template('books/add.html', book=book, genre_options=model.generate_genre_tree_select_options)
 
 
 @app.route("/books/add", methods=['POST'])
@@ -30,7 +30,7 @@ def download_book(id):
 def edit_book(id):
     book = model.get_book(id)
     if book:
-        return render_template('books/edit.html', book=book, genre_select=model.generate_genre_tree_select)
+        return render_template('books/edit.html', book=book, genre_options=model.generate_genre_tree_select_options)
 
 
 @app.route("/books/edit/<int:id>", methods=['POST'])

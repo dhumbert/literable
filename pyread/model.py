@@ -53,9 +53,17 @@ def add_book(form, files):
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
+        # user is adding a new genre
+        if form['new-genre-name']:
+            genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
+        elif form['genre']:
+            genre_id = form['genre']
+        else:
+            genre_id = None
+
         book.title = form['title']
         book.author = form['author']
-        book.genre_id = form['genre'] if form['genre'] else None
+        book.genre_id = genre_id
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_tags(form['tags'])
@@ -82,14 +90,22 @@ def get_toplevel_genres():
     return Genre.query.filter_by(parent_id=None).order_by(Genre.name).all()
 
 
-def generate_genre_tree_select(selected=None):
-    output = """<select name="genre">"""
-    output = output + """<option value="">-- None --</option>"""
+def add_genre(name, parent=None):
+    genre = Genre()
+    genre.name = name
+    genre.slug = genre.generate_slug()
+    genre.parent_id = parent if parent else None
+    db.session.add(genre)
+    db.session.commit()
+    return genre.id
+
+
+def generate_genre_tree_select_options(selected=None):
+    output = ""
 
     for parent in get_toplevel_genres():
         output = output + _recurse_select_level(parent, selected=selected)
 
-    output = output + "</select>"
     return output
 
 

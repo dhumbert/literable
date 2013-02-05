@@ -74,3 +74,8 @@
 .tag-list {
     -webkit-column-count: 4;
 }
+
+#new-genre .well {
+    margin-top: 1em;
+    padding-top: 0;
+}

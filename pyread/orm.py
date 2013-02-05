@@ -124,3 +124,15 @@ class Genre(db.Model):
                 parents = parent.get_parents() + parents
 
         return parents
+
+    def generate_slug(self, depth=0):
+        search_for = utils.slugify(self.name)
+
+        if depth > 0:
+            search_for = utils.slugify("%s-%d" % (self.name, depth))
+
+        result = Genre.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
