@@ -13,7 +13,7 @@
                 <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
 
                 {% for genre in genre.get_parents() %}
-                    <li><a href="{{ url_for('list_genres', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
+                    <li><a href="{{ url_for('genre', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
                 {% endfor %}
 
                 <li class="active">{{ genre.name }}</li>
