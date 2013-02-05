@@ -36,12 +36,20 @@ def add_book(form, files):
 
         utils.create_thumbnail(cover)
 
+        # user is adding a new genre
+        if form['new-genre-name']:
+            genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
+        elif form['genre']:
+            genre_id = form['genre']
+        else:
+            genre_id = None
+
         book = Book()
         book.title = form['title']
         book.author = form['author']
         book.filename = filename
         book.cover = cover
-        book.genre_id = form['genre'] if form['genre'] else None
+        book.genre_id = genre_id
         book.update_tags(form['tags'])
 
         db.session.add(book)
