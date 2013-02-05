@@ -57,8 +57,8 @@ def tag(tag):
 
 @app.route("/genres")
 def list_genres():
-    genres = model.get_genres()
-    return render_template('genres/list.html', genres=genres)
+    genre_list = model.generate_genre_tree_list
+    return render_template('genres/list.html', genre_list=genre_list)
 
 
 @app.route("/genre/<genre>")

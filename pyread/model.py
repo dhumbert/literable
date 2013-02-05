@@ -1,4 +1,4 @@
-from flask import send_from_directory
+from flask import send_from_directory, url_for
 from pyread import book_upload_set, cover_upload_set, db, utils
 from pyread.orm import Book, Genre, Tag
 
@@ -128,4 +128,28 @@ def _recurse_select_level(parent, depth=0, selected=None):
         for child in parent.children:
             output = output + _recurse_select_level(child, depth=depth + 1, selected=selected)
 
+    return output
+
+
+def generate_genre_tree_list():
+    output = ""
+
+    for parent in get_toplevel_genres():
+        output = output + _recurse_list_level(parent)
+
+    return output
+
+
+def _recurse_list_level(parent):
+    output = "<li>"
+    output = """<a href="%s">%s</a>""" % (url_for('genre', genre=parent.slug), output + parent.name)
+
+    if parent.children:
+        output = output + "<ul>"
+        for child in parent.children:
+            output = output + _recurse_list_level(child)
+
+        output = output + "</ul>"
+
+    output = output + "</li>"
     return output

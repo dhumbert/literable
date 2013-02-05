@@ -6,14 +6,8 @@
         <li class="active">Genres</li>
     </ul>
 
-    {% if genres %}
-        <ul class="tag-list">
-            {% for genre in genres %}
-                <li><a href="{{ url_for('genre', genre=genre.slug) }}">{{ genre.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        No genres
-    {% endif %}
+    <ul class="genre-list">
+        {{ genre_list() | safe }}
+    </ul>
 
 {% endblock %}
