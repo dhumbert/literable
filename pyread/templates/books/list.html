@@ -28,9 +28,21 @@
                         <img src="{{ book.get_thumb_url() }}" />
                     </div>
 
-                    <div class="span7 cell-info">
+                    <div class="span8 cell-info">
                         <h3>{{ book.title }}</h3>
                         <h4>{{ book.author }}</h4>
+
+                        {% if book.description %}
+                            <div class="description">
+                                <p class="description-summary">
+                                    {{ book.description | truncate(150) }}
+                                    <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>
+                                </p>
+                                <div id="description-{{ book.id }}" class="collapsible collapse">
+                                    {{ book.description | nl2br }}
+                                </div>
+                            </div>
+                        {% endif %}
 
                         {% if book.genre %}
                             <div class="book-genre">
@@ -55,14 +67,34 @@
                         {% endif %}
                     </div>
 
-                    <div class="span3 cell-actions">
-                        <a href="{{ url_for('download_book', id=book.id) }}" class="btn"><i class="icon-download-alt"></i> Download</a>
-                        <a href="{{ url_for('edit_book', id=book.id) }}" class="btn"><i class="icon-edit"></i> Edit</a>
+                    <div class="span2 cell-actions">
+                        <p><a href="{{ url_for('download_book', id=book.id) }}" class="btn"><i class="icon-download-alt"></i> {{ book.get_format() }}</a></p>
+                        <p><a href="{{ url_for('edit_book', id=book.id) }}" class="btn"><i class="icon-edit"></i> Edit</a></p>
                     </div>
                 </div>
             {% endfor %}
     {% else %}
         No books found.
     {% endif %}
+
+{% endblock %}
+
+{% block footer_scripts %}
+
+<script>
+(function(){
+    $('.description').on('show', function(e){
+        var $parent = $(this).closest('.description');
+        $parent.find('.description-summary').css('color', '#efefef');
+        $parent.find('.collapse-description').text('less');
+    });
+
+    $('.description').on('hidden', function(e){
+        var $parent = $(this).closest('.description');
+        $parent.find('.description-summary').css('color', 'inherit');
+        $parent.find('.collapse-description').text('more');
+    });
+})();
+</script>
 
 {% endblock %}

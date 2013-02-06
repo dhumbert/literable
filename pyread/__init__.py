@@ -3,6 +3,8 @@ from functools import wraps
 from flask import Flask, make_response
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
+from pyread.filters import nl2br
+
 
 app = Flask(__name__)
 
@@ -12,6 +14,8 @@ app.secret_key = "=JbX0gvs3ivIZkST+HI"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://goread:goread@localhost:5432/goread'
 db = SQLAlchemy(app)
 #db.create_all()
+
+app.jinja_env.filters['nl2br'] = nl2br
 
 #uploads
 current_path = os.path.dirname(os.path.abspath(__file__))

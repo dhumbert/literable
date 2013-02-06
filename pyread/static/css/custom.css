@@ -16,9 +16,16 @@
     border-bottom: 1px solid #ccc;
 }
 
-.row-library .cell-cover,
-.row-library .cell-actions {
+.row-library .cell-cover {
     text-align: center;
+}
+
+.row-library .cell-actions {
+    text-align: right;
+}
+
+.row-library .cell-actions a {
+    min-width: 4em;
 }
 
 .row-library .cell-info {

@@ -5,13 +5,16 @@
     <label for="author">Author</label>
     <input type="text" name="author" id="author" value="{{ book.author }}" class="span9">
 
+    <label for="description">Description</label>
+    <textarea name="description" id="description" class="span9" rows="10">{{ book.description }}</textarea>
+
     <label for="tags">Tags</label>
     <input type="text" id="tags" name="fakeTags" class="input-small" autocomplete="off">
 
     
 
     <label for="genre">Genre</label>
-    <select name="genre" id="genre" class="span8">
+    <select name="genre" id="genre" class="span7">
         <option value="">-- None --</option>
         {{ genre_options(selected=book.genre_id) | safe }}
     </select>

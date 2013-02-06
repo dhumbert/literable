@@ -47,6 +47,7 @@ def add_book(form, files):
         book = Book()
         book.title = form['title']
         book.author = form['author']
+        book.description = form['description']
         book.filename = filename
         book.cover = cover
         book.genre_id = genre_id
@@ -71,6 +72,7 @@ def edit_book(id, form, files):
 
         book.title = form['title']
         book.author = form['author']
+        book.description = form['description']
         book.genre_id = genre_id
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])

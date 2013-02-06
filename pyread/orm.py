@@ -36,6 +36,7 @@ class Book(db.Model):
     author = db.Column(db.String)
     filename = db.Column(db.String)
     cover = db.Column(db.String)
+    description = db.Column(db.Text)
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books', lazy='dynamic'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
