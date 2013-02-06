@@ -6,7 +6,7 @@ from pyread import app, model, content_type
 @app.route("/")
 def list_books():
     books = model.get_books()
-    return render_template('books/list.html', books=books)
+    return render_template('books/list.html', books=books, len=len)
 
 
 @app.route("/books/add")
