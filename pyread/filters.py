@@ -10,3 +10,10 @@ def nl2br(eval_ctx, value):
     if eval_ctx.autoescape:
         result = Markup(result)
     return result
+
+
+def none2blank(value):
+    if value is None:
+        return ""
+    else:
+        return value
