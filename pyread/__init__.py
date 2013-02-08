@@ -6,12 +6,10 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from pyread.filters import nl2br
 
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_object('pyread.config')
+app.config.from_pyfile('application.cfg')
 
-app.config['LIBRARY_PATH'] = "/home/ubuntu/tmp/books/"
-app.secret_key = "=JbX0gvs3ivIZkST+HI"
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://goread:goread@localhost:5432/goread'
 db = SQLAlchemy(app)
 #db.create_all()
 

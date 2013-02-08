@@ -1,4 +1,5 @@
 venv/*
+instance/*
 *.pyc
 *.db
 pyread/static/uploads/*
