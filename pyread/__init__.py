@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Flask, make_response
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
-from pyread.filters import nl2br
+from pyread.filters import nl2br, none2blank
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -14,6 +14,7 @@ db = SQLAlchemy(app)
 #db.create_all()
 
 app.jinja_env.filters['nl2br'] = nl2br
+app.jinja_env.filters['none2blank'] = none2blank
 
 #uploads
 current_path = os.path.dirname(os.path.abspath(__file__))

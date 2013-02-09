@@ -34,13 +34,17 @@
 
                         {% if book.description %}
                             <div class="description">
-                                <p class="description-summary">
-                                    {{ book.description | truncate(150) }}
-                                    <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>
-                                </p>
-                                <div id="description-{{ book.id }}" class="collapsible collapse">
+                                {% if len(book.description) > 50 %}
+                                    <p class="description-summary">
+                                        {{ book.description | truncate(150) }}
+                                        <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>
+                                    </p>
+                                    <div id="description-{{ book.id }}" class="collapsible collapse">
+                                        {{ book.description | nl2br }}
+                                    </div>
+                                {% else %}
                                     {{ book.description | nl2br }}
-                                </div>
+                                {% endif %}
                             </div>
                         {% endif %}
 
