@@ -25,7 +25,7 @@
 }
 
 .row-library .cell-actions a {
-    min-width: 4em;
+    min-width: 5em;
 }
 
 .row-library .cell-info {
@@ -71,6 +71,10 @@
 }
 
 .book-edit-meta .current-file {
+    margin-top: 0.5em;
+}
+
+.book-edit-meta .edit-delete {
     margin-top: 0.5em;
 }
 

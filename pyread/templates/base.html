@@ -33,6 +33,8 @@
       {% block content %}{% endblock %}
     </div>
 
+    <script src="{{ url_for('static', filename='js/application.js') }}"></script>
     {% block footer_scripts %}{% endblock %}
+    {% include "modal.html" %}
 </body>
 </html>
