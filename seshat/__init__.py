@@ -15,6 +15,7 @@ db = SQLAlchemy(app)
 
 app.jinja_env.filters['nl2br'] = nl2br
 app.jinja_env.filters['none2blank'] = none2blank
+app.jinja_env.globals['len'] = len
 
 #uploads
 current_path = os.path.dirname(os.path.abspath(__file__))

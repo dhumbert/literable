@@ -7,7 +7,7 @@ from seshat import app, model, content_type, auth
 @auth.requires_auth
 def list_books():
     books = model.get_books()
-    return render_template('books/list.html', books=books, len=len)
+    return render_template('books/list.html', books=books)
 
 
 @app.route("/books/add")
