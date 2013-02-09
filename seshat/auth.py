@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, Response
-from pyread import app
+from seshat import app
 
 
 def check_auth(username, password):

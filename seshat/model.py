@@ -1,6 +1,6 @@
 from flask import send_from_directory, url_for, flash
-from pyread import book_upload_set, db
-from pyread.orm import Book, Genre, Tag
+from seshat import book_upload_set, db
+from seshat.orm import Book, Genre, Tag
 
 
 def get_books():

@@ -3,11 +3,11 @@ from functools import wraps
 from flask import Flask, make_response
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
-from pyread.filters import nl2br, none2blank
+from seshat.filters import nl2br, none2blank
 
 
 app = Flask(__name__, instance_relative_config=True)
-app.config.from_object('pyread.config')
+app.config.from_object('seshat.config')
 app.config.from_pyfile('application.cfg')
 
 db = SQLAlchemy(app)
@@ -38,4 +38,4 @@ def content_type(content_type):
         return do_output
     return decorator
 
-import pyread.views
+import seshat.views

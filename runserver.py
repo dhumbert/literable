@@ -1,4 +1,4 @@
-from pyread import app
+from seshat import app
 
 
 app.run(debug=True, host='0.0.0.0')

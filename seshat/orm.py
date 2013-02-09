@@ -1,6 +1,6 @@
 import os
 from flask import url_for
-from pyread import db, book_upload_set, cover_upload_set, utils
+from seshat import db, book_upload_set, cover_upload_set, utils
 
 
 books_tags = db.Table('books_tags',

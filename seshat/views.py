@@ -1,6 +1,6 @@
 import json
 from flask import render_template, request, redirect, url_for, flash
-from pyread import app, model, content_type, auth
+from seshat import app, model, content_type, auth
 
 
 @app.route("/")
