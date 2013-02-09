@@ -1,6 +1,6 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response
-from seshat import app, model, content_type, auth, book_upload_set
+from seshat import app, model, content_type, auth
 
 
 @app.route("/")
@@ -30,7 +30,9 @@ def add_book_post():
 def download_book(id):
     book = model.get_book(id)
     response = Response()
-    response.headers['X-Accel-Redirect'] = book_upload_set.url(book.filename)
+    # todo: there has to be a better way to do this.
+    # book_upload_set.url doesn't generate the right URL for nginx
+    response.headers['X-Accel-Redirect'] = app.config['UPLOADS_DEFAULT_URL'] + 'library/' + book.filename
     response.headers['Content-Disposition'] = 'attachment; filename=%s' % book.filename
     return response
 
