@@ -55,6 +55,14 @@ class Book(db.Model):
         else:
             return None
 
+    def remove_file(self):
+        if self.filename:
+            os.remove(book_upload_set.path(self.filename))
+
+    def remove_cover(self):
+        if self.cover:
+            os.remove(cover_upload_set.path(self.cover))
+
     def attempt_to_update_file(self, file):
         try:
             filename = book_upload_set.save(file)
@@ -62,7 +70,7 @@ class Book(db.Model):
                 if self.filename:
                     # remove current file if user uploaded new one
                     try:
-                        os.remove(book_upload_set.path(self.filename))
+                        self.remove_file()
                     except:
                         pass  # can't delete old book. not the end of the world.
 
@@ -77,7 +85,7 @@ class Book(db.Model):
                 if self.cover:
                     # remove current cover if user uploaded new one
                     try:
-                        os.remove(cover_upload_set.path(self.cover))
+                        self.remove_cover()
                     except:
                         pass  # can't delete old cover. not the end of the world.
 

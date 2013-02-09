@@ -1,5 +1,5 @@
-from flask import send_from_directory, url_for
-from pyread import book_upload_set, cover_upload_set, db, utils
+from flask import send_from_directory, url_for, flash
+from pyread import book_upload_set, db
 from pyread.orm import Book, Genre, Tag
 
 
@@ -76,6 +76,23 @@ def edit_book(id, form, files):
         db.session.commit()
         return True
     return False
+
+
+def delete_book(id):
+    book = get_book(id)
+
+    try:
+        book.remove_file()
+    except:
+        flash('Unable to delete file', 'error')
+
+    try:
+        book.remove_cover()
+    except:
+        flash('Unable to delete cover', 'error')
+
+    db.session.delete(book)
+    db.session.commit()
 
 
 def download_book(id):
