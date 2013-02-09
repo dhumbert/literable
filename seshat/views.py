@@ -1,6 +1,6 @@
 import json
-from flask import render_template, request, redirect, url_for, flash
-from seshat import app, model, content_type, auth
+from flask import render_template, request, redirect, url_for, flash, Response
+from seshat import app, model, content_type, auth, book_upload_set
 
 
 @app.route("/")
@@ -26,8 +26,13 @@ def add_book_post():
 
 @app.route("/books/download/<int:id>")
 @auth.requires_auth
+@content_type('application/octet-stream')
 def download_book(id):
-    return model.download_book(id)
+    book = model.get_book(id)
+    response = Response()
+    response.headers['X-Accel-Redirect'] = book_upload_set.url(book.filename)
+    response.headers['Content-Disposition'] = 'attachment; filename=%s' % book.filename
+    return response
 
 
 @app.route("/books/edit/<int:id>")

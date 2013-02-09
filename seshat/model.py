@@ -95,12 +95,6 @@ def delete_book(id):
     db.session.commit()
 
 
-def download_book(id):
-    book = get_book(id)
-    if book:
-        return send_from_directory(book_upload_set.config.destination, book.filename)
-
-
 def get_tags():
     return Tag.query.order_by(Tag.name).all()
 
