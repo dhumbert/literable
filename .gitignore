@@ -1,5 +1,7 @@
+/seshat-gunicorn.sh
 venv/*
 instance/*
+*.log
 *.pyc
 *.db
 seshat/static/uploads/*
