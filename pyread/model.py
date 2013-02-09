@@ -31,11 +31,6 @@ def get_books_by_genre(slug):
 
 
 def add_book(form, files):
-        filename = book_upload_set.save(files['file'])
-        cover = cover_upload_set.save(files['cover'])
-
-        utils.create_thumbnail(cover)
-
         # user is adding a new genre
         if form['new-genre-name']:
             genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
@@ -48,10 +43,11 @@ def add_book(form, files):
         book.title = form['title']
         book.author = form['author']
         book.description = form['description']
-        book.filename = filename
-        book.cover = cover
         book.genre_id = genre_id
         book.update_tags(form['tags'])
+
+        book.attempt_to_update_file(files['file'])
+        book.attempt_to_update_cover(files['cover'])
 
         db.session.add(book)
         db.session.commit()
