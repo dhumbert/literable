@@ -2,7 +2,7 @@
 set -e
 HOME=/var/www/seshat
 LOGFILE=$HOME/seshat.log
-NUM_WORKERS=10
+NUM_WORKERS=2
 # user/group to run as
 USER=LOREM
 GROUP=IPSUM
