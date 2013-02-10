@@ -6,4 +6,5 @@ def deploy():
     with cd('/var/www/seshat'):
         run('git pull')
         run('. venv/bin/activate && pip install -r requirements.txt')
+        run('. venv/bin/activate && python manage.py migrate upgrade head')
     sudo('start seshat')

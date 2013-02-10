@@ -1,13 +1,14 @@
 Flask==0.9
+-e git+https://github.com/tobiasandtobias/flask-alembic.git@d0f4d3523e115d6376aeba3b0b0cbba3af888add#egg=Flask_Alembic-dev
 Flask-SQLAlchemy==0.16
+Flask-Script==0.5.3
 Flask-Uploads==0.1.3
 Jinja2==2.6
+Mako==0.7.3
+MarkupSafe==0.15
 PIL==1.1.7
 SQLAlchemy==0.8.0b2
 Werkzeug==0.8.3
-argparse==1.2.1
-gevent==0.13.8
-greenlet==0.4.0
-gunicorn==0.17.2
+alembic==0.4.2
 psycopg2==2.4.6
 wsgiref==0.1.2
