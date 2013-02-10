@@ -4,6 +4,7 @@ from seshat import app, model, content_type, auth
 
 
 @app.route("/")
+@app.route("/books")
 @auth.requires_auth
 def list_books():
     books = model.get_books()
@@ -92,10 +93,42 @@ def genre(genre):
     return render_template('books/list.html', books=books, genre=genre)
 
 
+@app.route("/series")
+@auth.requires_auth
+def list_series():
+    series = model.get_series()
+    return render_template('series/list.html', series=series)
+
+
+@app.route("/series/<series>")
+@auth.requires_auth
+def series(series):
+    books, series = model.get_books_by_series(series)
+    return render_template('books/list.html', books=books, series=series)
+
+
 @app.route("/ajax/tags")
 @content_type("application/json")
 @auth.requires_auth
 def ajax_tags():
     tags = model.get_tags()
     names = [tag.name for tag in tags]
+    return json.dumps(names)
+
+
+@app.route("/ajax/series")
+@content_type("application/json")
+@auth.requires_auth
+def ajax_series():
+    series = model.get_series()
+    titles = [sery.title for sery in series]
+    return json.dumps(titles)
+
+
+@app.route("/ajax/author")
+@content_type("application/json")
+@auth.requires_auth
+def ajax_author():
+    authors = model.get_authors()
+    names = [author for author in authors]
     return json.dumps(names)

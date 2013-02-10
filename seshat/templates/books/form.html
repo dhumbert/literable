@@ -3,7 +3,7 @@
     <input type="text" name="title" id="title" value="{{ book.title | none2blank }}" class="span9">
 
     <label for="author">Author</label>
-    <input type="text" name="author" id="author" value="{{ book.author | none2blank }}" class="span9">
+    <input type="text" name="author" id="author" value="{{ book.author | none2blank }}" class="span9" autocomplete="off">
 
     <label for="description">Description</label>
     <textarea name="description" id="description" class="span9" rows="10">{{ book.description | none2blank }}</textarea>
@@ -11,6 +11,14 @@
     <label for="tags">Tags</label>
     <input type="text" id="tags" name="fakeTags" class="input-small" autocomplete="off">
 
+    
+    <label for="series">Series</label>
+    <input type="text" name="series" id="series" value="{{ book.series.title | none2blank }}" class="span7" autocomplete="off">
+
+    <span class="input-prepend">
+        <span class="add-on">#</span>
+        <input class="span1" type="number" name="series_seq" id="series_seq" value="{{ book.series_seq | none2blank }}">
+    </span>
     
 
     <label for="genre">Genre</label>
@@ -62,6 +70,22 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/tagmanager/bootstrap-tagmanager.js') }}"></script>
 <script>
     (function(){
+        $('#author').typeahead({
+            source: function(query, process) {
+                return $.get('{{ url_for("ajax_author") }}', {query: query}, function(data){
+                    return process(data);
+                });
+            }
+        });
+
+        $('#series').typeahead({
+            source: function(query, process) {
+                return $.get('{{ url_for("ajax_series") }}', {query: query}, function(data){
+                    return process(data);
+                });
+            }
+        });
+
         $('#tags').typeahead({
             source: function(query, process) {
                 return $.get('{{ url_for("ajax_tags") }}', {query: query}, function(data){

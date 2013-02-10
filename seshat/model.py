@@ -1,6 +1,6 @@
 from flask import send_from_directory, url_for, flash
 from seshat import book_upload_set, db
-from seshat.orm import Book, Genre, Tag
+from seshat.orm import Book, Genre, Tag, Series
 
 
 def get_books():
@@ -30,6 +30,14 @@ def get_books_by_genre(slug):
     return (books, genre)
 
 
+def get_books_by_series(slug):
+    sery = Series.query.filter_by(slug=slug).first_or_404()
+    books = db.session.query(Book).with_parent(sery, 'books').order_by(Book.series_seq)
+    books = None if books.count() == 0 else books
+
+    return (books, sery)
+
+
 def add_book(form, files):
         # user is adding a new genre
         if form['new-genre-name']:
@@ -45,6 +53,7 @@ def add_book(form, files):
         book.description = form['description']
         book.genre_id = genre_id
         book.update_tags(form['tags'])
+        book.update_series(form['series'], form['series_seq'])
 
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
@@ -72,6 +81,7 @@ def edit_book(id, form, files):
         book.genre_id = genre_id
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
+        book.update_series(form['series'], form['series_seq'])
         book.update_tags(form['tags'])
         db.session.commit()
         return True
@@ -101,6 +111,20 @@ def get_tags():
 
 def get_genres():
     return Genre.query.order_by(Genre.name).all()
+
+
+def get_series():
+    return Series.query.order_by(Series.title).all()
+
+
+def get_authors():
+    authors = set()
+
+    books = get_books();
+    for book in books:
+        authors.add(book.author)
+
+    return authors
 
 
 def get_toplevel_genres():

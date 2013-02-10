@@ -29,6 +29,26 @@ class Tag(db.Model):
             return self.generate_slug(depth + 1)
 
 
+class Series(db.Model):
+    __tablename__ = 'series'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    slug = db.Column(db.String)
+    description = db.Column(db.Text)
+
+    def generate_slug(self, depth=0):
+        search_for = utils.slugify(self.title)
+
+        if depth > 0:
+            search_for = utils.slugify("%s-%d" % (self.title, depth))
+
+        result = Series.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
+
+
 class Book(db.Model):
     __tablename__ = 'books'
 
@@ -42,6 +62,10 @@ class Book(db.Model):
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books', lazy='dynamic'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
     genre = db.relationship('Genre')
+
+    series_id = db.Column(db.Integer, db.ForeignKey('series.id'))
+    series = db.relationship('Series', backref=db.backref('books', lazy='dynamic'))
+    series_seq = db.Column(db.Integer)
 
     def get_thumb_url(self):
         if self.cover:
@@ -116,6 +140,19 @@ class Book(db.Model):
                     t.slug = t.generate_slug()
 
                 self.tags.append(t)
+
+    def update_series(self, series, seq):
+        if series:
+            books_series = Series.query.filter_by(title=series).first()
+            if not books_series:
+                books_series = Series()
+                books_series.title = series
+                books_series.slug = books_series.generate_slug()
+                db.session.add(books_series)
+            self.series = books_series
+
+        if self.series_seq:
+            self.series_seq = seq
 
 
 class Genre(db.Model):
