@@ -10,11 +10,8 @@ Calibre is great for desktop ebook management, but it's a kitchen-sink sort of a
 At the moment, you can clone Seshat into a directory and run:
 
     pip install -r requirements.txt
-    python
-    >>> from seshat import db
-    >>> db.create_all()
-    >>> quit()
-    python seshat.py
+    python manage.py migrate upgrade head
+    python manage.py run
 
 This will start Seshat on port 5000, and create an SQLite database in the Seshat directory. The default login is books:books.
 
@@ -23,9 +20,7 @@ A better way is something like the following:
     mkdir instance
     cp seshat/config.py instance/application.cfg
     
-And change configuration settings as necessary to connect to a database, set the library path, etc.
-
-This setup process is unnecessarily complex and will be streamlined in the future.
+And change configuration settings as necessary to connect to a database, set the library path, etc. Then run the commands above.
 
 ## Deploying
 
