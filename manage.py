@@ -8,9 +8,9 @@ manager.add_command("migrate", ManageMigrations())
 
 
 @manager.command
-def run():
-    """Run Seshat using the built-in server"""
-    app.run(debug=True, host='0.0.0.0')
+def debug():
+    """ Run the server in debug mode"""
+    app.run('0.0.0.0', debug=True)
 
 
 if __name__ == "__main__":

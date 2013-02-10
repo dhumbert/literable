@@ -36,6 +36,10 @@
     margin: 0;
 }
 
+.row-library .cell-info .book-series {
+    margin: 0 0 0.5em 0;
+}
+
 .row-library .cell-info h4 {
     font-weight: normal;
     color: #888;
