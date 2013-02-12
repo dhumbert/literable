@@ -59,7 +59,7 @@ class Book(db.Model):
     cover = db.Column(db.String)
     description = db.Column(db.Text)
 
-    tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books', lazy='dynamic'), order_by=[Tag.name])
+    tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
     genre = db.relationship('Genre')
 

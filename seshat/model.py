@@ -1,10 +1,19 @@
-from flask import send_from_directory, url_for, flash
-from seshat import book_upload_set, db
+from flask import url_for, flash
+from seshat import db, app
 from seshat.orm import Book, Genre, Tag, Series
 
 
-def get_books():
-    return Book.query.order_by(Book.title).all()
+def _get_page(page):
+    if page is None:
+        page = 1
+    else:
+        page = int(page)
+    return page
+
+
+def get_books(page):
+    page = max(1, _get_page(page))
+    return Book.query.order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_book(id):
@@ -14,26 +23,32 @@ def get_book(id):
         return Book.query.get_or_404(id)
 
 
-def get_books_by_tag(slug):
+def get_books_by_tag(slug, page):
+    page = max(1, _get_page(page))
+
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = db.session.query(Book).with_parent(tag, 'books').order_by(Book.title)
-    books = None if books.count() == 0 else books
+    books = Book.query.filter(Book.tags.any(Tag.id == tag.id)).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = None if len(books.items) == 0 else books
 
     return (books, tag)
 
 
-def get_books_by_genre(slug):
+def get_books_by_genre(slug, page):
+    page = max(1, _get_page(page))
+
     genre = Genre.query.filter_by(slug=slug).first_or_404()
-    books = db.session.query(Book).with_parent(genre, 'books').order_by(Book.title)
-    books = None if books.count() == 0 else books
+    books = Book.query.filter_by(genre_id=genre.id).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = None if len(books.items) == 0 else books
 
     return (books, genre)
 
 
-def get_books_by_series(slug):
+def get_books_by_series(slug, page):
+    page = max(1, _get_page(page))
+
     sery = Series.query.filter_by(slug=slug).first_or_404()
-    books = db.session.query(Book).with_parent(sery, 'books').order_by(Book.series_seq)
-    books = None if books.count() == 0 else books
+    books = Book.query.filter_by(series_id=sery.id).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = None if len(books.items) == 0 else books
 
     return (books, sery)
 

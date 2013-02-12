@@ -7,7 +7,7 @@ from seshat import app, model, content_type, auth
 @app.route("/books")
 @auth.requires_auth
 def list_books():
-    books = model.get_books()
+    books = model.get_books(request.args.get('page'))
     return render_template('books/list.html', books=books)
 
 
@@ -75,7 +75,7 @@ def list_tags():
 @app.route("/tags/<tag>")
 @auth.requires_auth
 def tag(tag):
-    books, tag = model.get_books_by_tag(tag)
+    books, tag = model.get_books_by_tag(tag, request.args.get('page'))
     return render_template('books/list.html', books=books, tag=tag)
 
 
@@ -89,7 +89,7 @@ def list_genres():
 @app.route("/genre/<genre>")
 @auth.requires_auth
 def genre(genre):
-    books, genre = model.get_books_by_genre(genre)
+    books, genre = model.get_books_by_genre(genre, request.args.get('page'))
     return render_template('books/list.html', books=books, genre=genre)
 
 
@@ -103,7 +103,7 @@ def list_series():
 @app.route("/series/<series>")
 @auth.requires_auth
 def series(series):
-    books, series = model.get_books_by_series(series)
+    books, series = model.get_books_by_series(series, request.args.get('page'))
     return render_template('books/list.html', books=books, series=series)
 
 
