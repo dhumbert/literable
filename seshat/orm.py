@@ -151,7 +151,7 @@ class Book(db.Model):
                 db.session.add(books_series)
             self.series = books_series
 
-        if self.series_seq:
+        if seq:
             self.series_seq = seq
 
 
