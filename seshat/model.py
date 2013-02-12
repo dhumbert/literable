@@ -135,7 +135,7 @@ def get_series():
 def get_authors():
     authors = set()
 
-    books = get_books();
+    books = Book.query.order_by(Book.author).all()
     for book in books:
         authors.add(book.author)
 
