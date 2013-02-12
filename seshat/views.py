@@ -8,7 +8,7 @@ from seshat import app, model, content_type, auth
 @auth.requires_auth
 def list_books():
     books = model.get_books(request.args.get('page'))
-    return render_template('books/list.html', books=books)
+    return render_template('books/list.html', books=books, pagination='books/pagination.html')
 
 
 @app.route("/books/add")
@@ -76,7 +76,7 @@ def list_tags():
 @auth.requires_auth
 def tag(tag):
     books, tag = model.get_books_by_tag(tag, request.args.get('page'))
-    return render_template('books/list.html', books=books, tag=tag)
+    return render_template('books/list.html', books=books, tag=tag, pagination='tags/pagination.html')
 
 
 @app.route("/genres")
@@ -90,7 +90,7 @@ def list_genres():
 @auth.requires_auth
 def genre(genre):
     books, genre = model.get_books_by_genre(genre, request.args.get('page'))
-    return render_template('books/list.html', books=books, genre=genre)
+    return render_template('books/list.html', books=books, genre=genre, pagination='genres/pagination.html')
 
 
 @app.route("/series")
@@ -104,7 +104,7 @@ def list_series():
 @auth.requires_auth
 def series(series):
     books, series = model.get_books_by_series(series, request.args.get('page'))
-    return render_template('books/list.html', books=books, series=series)
+    return render_template('books/list.html', books=books, series=series, pagination='series/pagination.html')
 
 
 @app.route("/ajax/tags")
