@@ -40,7 +40,7 @@
     margin: 0 0 0.5em 0;
 }
 
-.row-library .cell-info h4 {
+.row-library .cell-info h4 a {
     font-weight: normal;
     color: #888;
     margin-top: 0;

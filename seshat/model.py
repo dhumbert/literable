@@ -53,6 +53,16 @@ def get_books_by_series(slug, page):
     return (books, sery)
 
 
+def get_books_by_author(slug, page):
+    page = max(1, _get_page(page))
+
+    author = Author.query.filter_by(slug=slug).first_or_404()
+    books = Book.query.filter_by(author_id=author.id).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = None if len(books.items) == 0 else books
+
+    return (books, author)
+
+
 def add_book(form, files):
         # user is adding a new genre
         if form['new-genre-name']:
