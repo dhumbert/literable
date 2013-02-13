@@ -130,5 +130,5 @@ def ajax_series():
 @auth.requires_auth
 def ajax_author():
     authors = model.get_authors()
-    names = [author for author in authors]
+    names = [author.name for author in authors]
     return json.dumps(names)

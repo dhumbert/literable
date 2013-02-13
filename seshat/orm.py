@@ -49,12 +49,30 @@ class Series(db.Model):
             return self.generate_slug(depth + 1)
 
 
+class Author(db.Model):
+    __tablename__ = 'authors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    slug = db.Column(db.String)
+
+    def generate_slug(self, depth=0):
+        search_for = utils.slugify(self.name)
+
+        if depth > 0:
+            search_for = utils.slugify("%s-%d" % (self.name, depth))
+
+        result = Author.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
+
+
 class Book(db.Model):
     __tablename__ = 'books'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
-    author = db.Column(db.String)
     filename = db.Column(db.String)
     cover = db.Column(db.String)
     description = db.Column(db.Text)
@@ -66,6 +84,9 @@ class Book(db.Model):
     series_id = db.Column(db.Integer, db.ForeignKey('series.id'))
     series = db.relationship('Series', backref=db.backref('books', lazy='dynamic'))
     series_seq = db.Column(db.Integer)
+
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
+    author = db.relationship('Author', backref=db.backref('books', lazy='dynamic'))
 
     def get_thumb_url(self):
         if self.cover:
@@ -153,6 +174,16 @@ class Book(db.Model):
 
         if seq:
             self.series_seq = seq
+
+    def update_author(self, name):
+        if name:
+            book_author = Author.query.filter_by(name=name).first()
+            if not book_author:
+                book_author = Author()
+                book_author.name = name
+                book_author.slug = book_author.generate_slug()
+                db.session.add(book_author)
+            self.author = book_author
 
 
 class Genre(db.Model):

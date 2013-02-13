@@ -1,6 +1,6 @@
 from flask import url_for, flash
 from seshat import db, app
-from seshat.orm import Book, Genre, Tag, Series
+from seshat.orm import Book, Genre, Tag, Series, Author
 
 
 def _get_page(page):
@@ -64,9 +64,9 @@ def add_book(form, files):
 
         book = Book()
         book.title = form['title']
-        book.author = form['author']
         book.description = form['description']
         book.genre_id = genre_id
+        book.update_author(form['author'])
         book.update_tags(form['tags'])
         book.update_series(form['series'], form['series_seq'])
 
@@ -91,9 +91,9 @@ def edit_book(id, form, files):
             genre_id = None
 
         book.title = form['title']
-        book.author = form['author']
         book.description = form['description']
         book.genre_id = genre_id
+        book.update_author(form['author'])
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_series(form['series'], form['series_seq'])
@@ -133,13 +133,7 @@ def get_series():
 
 
 def get_authors():
-    authors = set()
-
-    books = Book.query.order_by(Book.author).all()
-    for book in books:
-        authors.add(book.author)
-
-    return authors
+    return Author.query.order_by(Author.name).all()
 
 
 def get_toplevel_genres():
