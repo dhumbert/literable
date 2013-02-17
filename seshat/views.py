@@ -107,6 +107,20 @@ def series(series):
     return render_template('books/list.html', books=books, series=series, pagination='series/pagination.html')
 
 
+@app.route("/author/<author>")
+@auth.requires_auth
+def author(author):
+    books, author = model.get_books_by_author(author, request.args.get('page'))
+    return render_template('books/list.html', books=books, author=author, pagination='authors/pagination.html')
+
+
+@app.route("/authors")
+@auth.requires_auth
+def list_authors():
+    authors = model.get_authors()
+    return render_template('authors/list.html', authors=authors)
+
+
 @app.route("/ajax/tags")
 @content_type("application/json")
 @auth.requires_auth

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if tag or genre or series %}
+    {% if tag or genre or series or author %}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('list_books') }}">Library</a><span class="divider">/</span></li>
             {% if tag %}
@@ -22,6 +22,11 @@
             {% if series %}
                 <li><a href="{{ url_for('list_series') }}">Series</a><span class="divider">/</span></li>
                 <li class="active">{{ series.title }}</li>
+            {% endif %}
+
+            {% if author %}
+                <li><a href="{{ url_for('list_authors') }}">Authors</a><span class="divider">/</span></li>
+                <li class="active">{{ author.name }}</li>
             {% endif %}
         </ul>
     {% endif %}
@@ -44,11 +49,17 @@
                         <div class="book-series">
                             <a href="{{ url_for('series', series=book.series.slug) }}">
                                 <span class="label label-info">{{ book.series.title }}</span></a>
-                            <span class="seq label">Book {{ book.series_seq }}</span>
+                            {% if book.series_seq %}
+                                <span class="seq label">Book {{ book.series_seq }}</span>
+                            {% endif %}
                         </div>
                     {% endif %}
 
-                    <h4>{{ book.author.name }}</h4>
+                    <h4 class="author">
+                        <a href="{{ url_for('author', author=book.author.slug) }}">
+                            {{ book.author.name }}
+                        </a>
+                    </h4>
 
                     {% if book.description %}
                         <div class="description">
