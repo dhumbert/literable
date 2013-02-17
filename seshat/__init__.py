@@ -22,7 +22,7 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOADS_DEFAULT_DEST'] = os.path.join(current_path, os.path.join('static', 'uploads'))
 app.config['UPLOADS_DEFAULT_URL'] = '/static/uploads/'
 
-book_upload_set = uploads.UploadSet('books', extensions=('txt', 'rtf', 'epub', 'mobi', 'pdf'), default_dest=lambda x: app.config['LIBRARY_PATH'])
+book_upload_set = uploads.UploadSet('books', extensions=app.config['EBOOK_EXTENSIONS'], default_dest=lambda x: app.config['LIBRARY_PATH'])
 cover_upload_set = uploads.UploadSet('covers', uploads.IMAGES)
 
 uploads.configure_uploads(app, (book_upload_set, cover_upload_set))
