@@ -15,4 +15,5 @@ def deploy():
 
 
 def backup_locally():
+    """Backup ebook and cover files from remote host to local"""
     local('rsync -r -a -v -e "ssh -l %s" --delete %s:"%s" "%s"' % (env.user, env.host, remote_dir_to_backup, local_backup_dir))

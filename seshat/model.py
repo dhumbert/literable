@@ -16,6 +16,10 @@ def get_books(page):
     return Book.query.order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
+def get_all_books():
+    return Book.query.order_by(Book.title).all()
+
+
 def get_book(id):
     if id is None:
         return Book()  # blank book object
