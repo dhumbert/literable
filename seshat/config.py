@@ -5,3 +5,4 @@ USERNAME = "books"
 PASSWORD = "books"
 BOOKS_PER_PAGE = 10
 EBOOK_EXTENSIONS = ('epub', 'pdf')
+WRITE_META_ON_SAVE = True

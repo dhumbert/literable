@@ -90,6 +90,9 @@ def add_book(form, files):
         db.session.add(book)
         db.session.commit()
 
+        if app.config['WRITE_META_ON_SAVE']:
+            book.write_meta()
+
         return True
 
 
@@ -113,6 +116,10 @@ def edit_book(id, form, files):
         book.update_series(form['series'], form['series_seq'])
         book.update_tags(form['tags'])
         db.session.commit()
+
+        if app.config['WRITE_META_ON_SAVE']:
+            book.write_meta()
+
         return True
     return False
 

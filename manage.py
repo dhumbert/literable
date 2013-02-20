@@ -15,6 +15,7 @@ def debug():
 
 @manager.command
 def write_meta():
+    """Write meta to ebook files"""
     for book in model.get_all_books():
         print "Writing meta for %s" % book.title
         book.write_meta()
