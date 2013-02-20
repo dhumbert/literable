@@ -1,6 +1,6 @@
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
-from seshat import app, epub
+from seshat import app, model
 
 
 manager = Manager(app)
@@ -14,8 +14,10 @@ def debug():
 
 
 @manager.command
-def write_epub_metadata():
-    epub.write_all_meta()
+def write_meta():
+    for book in model.get_all_books():
+        print "Writing meta for %s" % book.title
+        book.write_meta()
 
 
 if __name__ == "__main__":
