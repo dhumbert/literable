@@ -78,7 +78,8 @@
     margin-top: 0.5em;
 }
 
-.book-edit-meta .edit-delete {
+.book-edit-meta .edit-delete,
+.book-edit-meta .edit-write-meta {
     margin-top: 0.5em;
 }
 

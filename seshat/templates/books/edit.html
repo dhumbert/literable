@@ -16,6 +16,10 @@
             <div class="current-file">
                 <a href="{{ url_for('download_book', id=book.id) }}"><i class="icon-download-alt"></i> {{ book.get_format() }}</a>
             </div>
+
+            <div class="edit-write-meta">
+                <a class="btn btn-info warn" data-warning="This will alter the ebook file. Are you sure you want to continue?" href="{{ url_for('write_book_meta', id=book.id) }}"><i class="icon-pencil icon-white"></i> Save meta</a>
+            </div>
         {% endif %}
 
         <div class="edit-delete">

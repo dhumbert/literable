@@ -65,6 +65,14 @@ def delete_book(id):
     return redirect(url_for('list_books'))
 
 
+@app.route("/books/write-meta/<int:id>")
+@auth.requires_auth
+def write_book_meta(id):
+    book = model.get_book(id)
+    book.write_meta()
+    flash('Saved file metadata', 'success')
+    return redirect(url_for('edit_book', id=id))
+
 @app.route("/tags")
 @auth.requires_auth
 def list_tags():
