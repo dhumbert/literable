@@ -216,6 +216,7 @@ class Book(db.Model):
         subjects = genre + tags
 
         epub.write_epub_meta(epub_file, self.title, self.author.name,
+            description=self.description,
             cover=cover, series=series,
             series_seq=self.series_seq,
             subjects=subjects)
