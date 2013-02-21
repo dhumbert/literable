@@ -1,6 +1,6 @@
 import os
 from flask import url_for
-from seshat import db, book_upload_set, cover_upload_set, utils, epub
+from seshat import db, book_upload_set, cover_upload_set, utils, epub, app
 
 
 books_tags = db.Table('books_tags',
@@ -193,6 +193,8 @@ class Book(db.Model):
     def _write_epub_meta(self):
         epub_file = book_upload_set.path(self.filename)
 
+        title = self._build_meta_title()
+
         if self.cover:
             cover = cover_upload_set.path(self.cover)
         else:
@@ -215,11 +217,22 @@ class Book(db.Model):
 
         subjects = genre + tags
 
-        epub.write_epub_meta(epub_file, self.title, self.author.name,
+        epub.write_epub_meta(epub_file, title, self.author.name,
             description=self.description,
-            cover=cover, series=series,
-            series_seq=self.series_seq,
+            cover=cover,
             subjects=subjects)
+
+    def _build_meta_title(self):
+        title = self.title
+        if app.config['ADD_SERIES_TO_META_TITLE']:
+            if self.series:
+                prepend_title = self.series.title
+                if self.series_seq:
+                    prepend_title = "%s %d - " % (prepend_title, self.series_seq)
+
+                title = prepend_title + title
+        return title
+
 
 
 class Genre(db.Model):
