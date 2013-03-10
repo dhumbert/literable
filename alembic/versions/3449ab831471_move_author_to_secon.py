@@ -14,10 +14,11 @@ from alembic import op
 import sqlalchemy as sa
 from seshat.utils import slugify
 
-connection = op.get_bind()
 
 
 def upgrade():
+    connection = op.get_bind()
+
     op.create_table('authors',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(), nullable=True),
@@ -52,6 +53,8 @@ def upgrade():
 
 
 def downgrade():
+    connection = op.get_bind()
+
     op.add_column('books',
         sa.Column('author', sa.String())
     )
