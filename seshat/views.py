@@ -132,7 +132,7 @@ def list_authors():
 @auth.requires_auth
 def recent():
     books = model.get_recent_books()
-    return render_template('books/list.html', books=books, recent=True)
+    return render_template('books/list.html', books=books, recent=True, pagination='books/pagination.html')
 
 
 
