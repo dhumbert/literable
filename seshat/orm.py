@@ -76,6 +76,7 @@ class Book(db.Model):
     filename = db.Column(db.String)
     cover = db.Column(db.String)
     description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime())
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))

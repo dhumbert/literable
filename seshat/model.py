@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import url_for, flash
 from seshat import db, app
 from seshat.orm import Book, Genre, Tag, Series, Author
@@ -25,6 +26,10 @@ def get_book(id):
         return Book()  # blank book object
     else:
         return Book.query.get_or_404(id)
+
+
+def get_recent_books():
+    return Book.query.order_by('created_at desc, id desc').paginate(1, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
@@ -83,6 +88,7 @@ def add_book(form, files):
         book.update_author(form['author'])
         book.update_tags(form['tags'])
         book.update_series(form['series'], form['series_seq'])
+        book.created_at = datetime.now()
 
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])

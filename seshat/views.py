@@ -128,6 +128,13 @@ def list_authors():
     authors = model.get_authors()
     return render_template('authors/list.html', authors=authors)
 
+@app.route("/recent")
+@auth.requires_auth
+def recent():
+    books = model.get_recent_books()
+    return render_template('books/list.html', books=books, recent=True)
+
+
 
 @app.route("/ajax/tags")
 @content_type("application/json")
