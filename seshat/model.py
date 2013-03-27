@@ -73,33 +73,42 @@ def get_books_by_author(slug, page):
 
 
 def add_book(form, files):
-        # user is adding a new genre
-        if form['new-genre-name']:
-            genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-        elif form['genre']:
-            genre_id = form['genre']
-        else:
-            genre_id = None
+    if 'title' not in form or not form['title'].strip():
+        raise ValueError("Title must not be blank")
 
-        book = Book()
-        book.title = form['title']
-        book.description = form['description']
-        book.genre_id = genre_id
-        book.update_author(form['author'])
+    # user is adding a new genre
+    if 'new-genre-name' in form:
+        genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
+    elif 'genre' in form:
+        genre_id = form['genre']
+    else:
+        genre_id = None
+
+    book = Book()
+    book.title = form['title']
+    book.description = form['description']
+    book.genre_id = genre_id
+    book.update_author(form['author'])
+
+    if 'tags' in form:
         book.update_tags(form['tags'])
-        book.update_series(form['series'], form['series_seq'])
-        book.created_at = datetime.now()
 
+    book.update_series(form['series'], form['series_seq'])
+    #book.created_at = datetime.now()
+
+    if 'file' in files:
         book.attempt_to_update_file(files['file'])
+
+    if 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
 
-        db.session.add(book)
-        db.session.commit()
+    db.session.add(book)
+    db.session.commit()
 
-        if app.config['WRITE_META_ON_SAVE']:
-            book.write_meta()
+    if app.config['WRITE_META_ON_SAVE']:
+        book.write_meta()
 
-        return True
+    return True
 
 
 def edit_book(id, form, files):
@@ -120,7 +129,12 @@ def edit_book(id, form, files):
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_series(form['series'], form['series_seq'])
-        book.update_tags(form['tags'])
+
+        if 'tags' in form:
+            book.update_tags(form['tags'])
+        else:
+            book.empty_tags()
+
         db.session.commit()
 
         if app.config['WRITE_META_ON_SAVE']:

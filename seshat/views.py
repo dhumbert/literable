@@ -21,8 +21,12 @@ def add_book():
 @app.route("/books/add", methods=['POST'])
 @auth.requires_auth
 def add_book_post():
-    if model.add_book(request.form, request.files):
+    try:
+        model.add_book(request.form, request.files)
         return redirect(url_for('list_books'))
+    except ValueError as e:
+        flash(e, 'error')
+        return redirect(url_for('add_book'))
 
 
 @app.route("/books/download/<int:id>")
