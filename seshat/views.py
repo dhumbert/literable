@@ -135,9 +135,8 @@ def list_authors():
 @app.route("/recent")
 @auth.requires_auth
 def recent():
-    books = model.get_recent_books()
+    books = model.get_recent_books(request.args.get('page'))
     return render_template('books/list.html', books=books, recent=True, pagination='books/pagination.html')
-
 
 
 @app.route("/ajax/tags")

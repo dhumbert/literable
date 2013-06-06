@@ -28,8 +28,9 @@ def get_book(id):
         return Book.query.get_or_404(id)
 
 
-def get_recent_books():
-    return Book.query.order_by('created_at desc, id desc').paginate(1, per_page=app.config['BOOKS_PER_PAGE'])
+def get_recent_books(page):
+    page = max(1, _get_page(page))
+    return Book.query.order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
