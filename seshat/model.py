@@ -78,7 +78,7 @@ def add_book(form, files):
         raise ValueError("Title must not be blank")
 
     # user is adding a new genre
-    if 'new-genre-name' in form:
+    if 'new-genre-name' in form and form['new-genre-name'].strip() != '':
         genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
     elif 'genre' in form:
         genre_id = form['genre']
