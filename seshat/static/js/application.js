@@ -21,6 +21,7 @@
     $('.rating').raty({
         path: 'static/img',
         number: 4,
+        hints: ['Poor', 'Average', 'Good', 'Excellent'],
         score: function() {
             return $(this).attr('data-score');
         },
