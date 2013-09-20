@@ -100,3 +100,8 @@
     margin-top: 1em;
     padding-top: 0;
 }
+
+.login-form input {
+    padding: 5px 10px;
+    width: 22em;
+}

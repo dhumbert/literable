@@ -10,26 +10,9 @@
 </head>
 
 <body>
-    <div class="navbar navbar-inverse navbar-static-top">
-        <div class="navbar-inner">
-            <div class="container">
-                <a class="brand" href="{{ url_for('list_books') }}">seshat</a>
-
-                <ul class="nav">
-                    <li><a href="{{ url_for('list_genres') }}">Genres</a></li>
-                    <li><a href="{{ url_for('list_tags') }}">Tags</a></li>
-                    <li><a href="{{ url_for('list_series') }}">Series</a></li>
-                    <li><a href="{{ url_for('list_authors') }}">Authors</a></li>
-                    <li><a href="{{ url_for('recent') }}">Recent</a></li>
-                    <li><a href="{{ url_for('add_book') }}">Add Book</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    {% block top %}{% endblock %}
 
     <div id="content" class="container">
-      {% include "messages.html" %}
-      
       {% block content %}{% endblock %}
     </div>
 

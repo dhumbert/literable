@@ -1,7 +1,8 @@
 from datetime import datetime
+import hashlib
 from flask import url_for, flash
 from seshat import db, app
-from seshat.orm import Book, Genre, Tag, Series, Author
+from seshat.orm import Book, Genre, Tag, Series, Author, User
 
 
 def _get_page(page):
@@ -237,3 +238,12 @@ def _recurse_list_level(parent):
 
     output = output + "</li>"
     return output
+
+
+def authenticate(username, password):
+    hashed_pass = hashlib.sha1(password).hexdigest()
+    users = db.session.query(User).filter(User.username==username)
+    for user in users:
+        return user
+
+    return None

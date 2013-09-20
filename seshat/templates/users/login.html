@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="span4 offset4">
+      <div class="well">
+        <legend>Sign in to Seshat</legend>
+        <form method="POST" action="" accept-charset="UTF-8" class="login-form">
+            {% include "messages.html" %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input class="" placeholder="Username" type="text" name="username">
+            <input class="" placeholder="Password" type="password" name="password"> 
+
+            <div>
+                <button class="btn-info btn" type="submit">Login</button>      
+            </div>
+        </form>    
+      </div>
+    </div>
+</div>
+{% endblock %}
