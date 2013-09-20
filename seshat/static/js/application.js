@@ -17,4 +17,22 @@
             $('#base-modal').modal('show');
         });
     }
+
+    $('.rating').raty({
+        path: 'static/img',
+        number: 4,
+        score: function() {
+            return $(this).attr('data-score');
+        },
+        click: function(score) {
+            var params = {
+                book_id: $(this).data('book-id'),
+                score: score
+            };
+
+            $.post('/ajax/rate', params, function(data){
+                console.log(data);
+            });
+        }
+    });
 })();

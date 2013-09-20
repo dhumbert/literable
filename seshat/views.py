@@ -164,3 +164,14 @@ def ajax_author():
     authors = model.get_authors()
     names = [author.name for author in authors]
     return json.dumps(names)
+
+
+@app.route("/ajax/rate", methods=['POST'])
+@auth.requires_auth
+def ajax_rate():
+    score = request.form['score']
+    book_id = request.form['book_id']
+    book = model.get_book(book_id)
+    book.rate(score)
+    return json.dumps(True)
+

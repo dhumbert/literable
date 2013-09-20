@@ -77,6 +77,7 @@ class Book(db.Model):
     cover = db.Column(db.String)
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime())
+    rating = db.Column(db.Integer())
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
@@ -234,6 +235,9 @@ class Book(db.Model):
                 title = prepend_title + title
         return title
 
+    def rate(self, score):
+        self.rating = score
+        db.session.commit()
 
 
 class Genre(db.Model):

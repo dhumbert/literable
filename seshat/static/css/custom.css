@@ -28,6 +28,11 @@
     min-width: 5em;
 }
 
+.row-library .cell-actions .rating {
+    float: right;
+    margin-right: 0.75em;
+}
+
 .row-library .cell-info {
     padding-left: 2em;
 }
