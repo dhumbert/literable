@@ -19,7 +19,7 @@
     }
 
     $('.rating').raty({
-        path: 'static/img',
+        path: '/static/img',
         number: 4,
         hints: ['Poor', 'Average', 'Good', 'Excellent'],
         score: function() {
