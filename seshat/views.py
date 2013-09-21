@@ -67,7 +67,11 @@ def edit_book_do(id):
 def delete_book(id):
     model.delete_book(id)
     flash('Book deleted', 'success')
-    return redirect(url_for('list_books'))
+    try:
+        url = request.args.get('next')
+    except KeyError:
+        url = url_for('list_books')
+    return redirect(url)
 
 
 @app.route("/books/write-meta/<int:id>")
