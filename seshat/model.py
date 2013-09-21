@@ -193,6 +193,21 @@ def add_genre(name, parent=None):
     return genre.id
 
 
+def delete_tax(tax, ids):
+    obj = {
+        'genre': Genre,
+        'tag': Tag,
+        'series': Series,
+        'author': Author
+    }[tax]
+
+    for id in ids:
+        t = obj.query.get(int(id))
+        db.session.delete(t)
+
+    db.session.commit()
+
+
 def add_user(username, password):
     u = User()
     u.username = username
@@ -245,7 +260,8 @@ def generate_genre_tree_list():
 
 def _recurse_list_level(parent):
     output = "<li>"
-    output = """<a href="%s">%s</a>""" % (url_for('genre', genre=parent.slug), output + parent.name)
+    output = output + """<span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="%d"></span>""" % parent.id
+    output = output + """<a href="%s">%s</a>""" % (url_for('genre', genre=parent.slug), parent.name)
 
     if parent.children:
         output = output + "<ul>"

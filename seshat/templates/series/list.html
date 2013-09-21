@@ -6,14 +6,23 @@
         <li class="active">Series</li>
     </ul>
 
-    {% if series %}
-        <ul class="tag-list">
-            {% for sery in series %}
-                <li><a href="{{ url_for('series', series=sery.slug) }}">{{ sery.title }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        No series
-    {% endif %}
+    {% include 'tax_edit_btn.html' %}
+
+    <form method="post">
+        {% include 'tax_actions.html' %}
+
+        {% if series %}
+            <ul class="tag-list">
+                {% for sery in series %}
+                    <li>
+                        <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ sery.id }}"></span>
+                        <a href="{{ url_for('series', series=sery.slug) }}">{{ sery.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No series
+        {% endif %}
+    </form>
 
 {% endblock %}

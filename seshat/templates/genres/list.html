@@ -6,8 +6,13 @@
         <li class="active">Genres</li>
     </ul>
 
-    <ul class="genre-list">
-        {{ genre_list() | safe }}
-    </ul>
+    {% include 'tax_edit_btn.html' %}
+
+    <form method="post">
+        {% include 'tax_actions.html' %}
+        <ul class="genre-list">
+            {{ genre_list() | safe }}
+        </ul>
+    </form>
 
 {% endblock %}

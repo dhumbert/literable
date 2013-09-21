@@ -82,9 +82,14 @@ def write_book_meta(id):
     flash('Saved file metadata', 'success')
     return redirect(url_for('edit_book', id=id))
 
-@app.route("/tags")
+@app.route("/tags", methods=["GET", "POST"])
 @login_required
 def list_tags():
+    if request.method == 'POST':
+        model.delete_tax('tag', request.form.getlist('delete'))
+        flash('Deleted tag(s)', 'success')
+        return redirect(url_for('list_tags'))
+
     tags = model.get_tags()
     return render_template('tags/list.html', tags=tags)
 
@@ -96,9 +101,13 @@ def tag(tag):
     return render_template('books/list.html', books=books, tag=tag, pagination='tags/pagination.html')
 
 
-@app.route("/genres")
+@app.route("/genres", methods=["GET", "POST"])
 @login_required
 def list_genres():
+    if request.method == 'POST':
+        model.delete_tax('genre', request.form.getlist('delete'))
+        flash('Deleted genre(s)', 'success')
+        return redirect(url_for('list_genres'))
     genre_list = model.generate_genre_tree_list
     return render_template('genres/list.html', genre_list=genre_list)
 
@@ -110,9 +119,14 @@ def genre(genre):
     return render_template('books/list.html', books=books, genre=genre, pagination='genres/pagination.html')
 
 
-@app.route("/series")
+@app.route("/series", methods=["GET", "POST"])
 @login_required
 def list_series():
+    if request.method == 'POST':
+        model.delete_tax('series', request.form.getlist('delete'))
+        flash('Deleted series', 'success')
+        return redirect(url_for('list_series'))
+
     series = model.get_series()
     return render_template('series/list.html', series=series)
 
@@ -131,9 +145,14 @@ def author(author):
     return render_template('books/list.html', books=books, author=author, pagination='authors/pagination.html')
 
 
-@app.route("/authors")
+@app.route("/authors", methods=["GET", "POST"])
 @login_required
 def list_authors():
+    if request.method == 'POST':
+        model.delete_tax('author', request.form.getlist('delete'))
+        flash('Deleted author(s)', 'success')
+        return redirect(url_for('list_authors'))
+
     authors = model.get_authors()
     return render_template('authors/list.html', authors=authors)
 

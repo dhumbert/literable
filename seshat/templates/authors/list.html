@@ -6,14 +6,23 @@
         <li class="active">Authors</li>
     </ul>
 
-    {% if authors %}
-        <ul class="tag-list">
-            {% for author in authors %}
-                <li><a href="{{ url_for('author', author=author.slug) }}">{{ author.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        No authors
-    {% endif %}
+    {% include 'tax_edit_btn.html' %}
+
+    <form method="post">
+        {% include 'tax_actions.html' %}
+
+        {% if authors %}
+            <ul class="tag-list">
+                {% for author in authors %}
+                    <li>
+                        <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ author.id }}"></span>
+                        <a href="{{ url_for('author', author=author.slug) }}">{{ author.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No authors
+        {% endif %}
+    </form>
 
 {% endblock %}

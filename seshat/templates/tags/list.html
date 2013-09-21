@@ -6,14 +6,23 @@
         <li class="active">Tags</li>
     </ul>
 
-    {% if tags %}
-        <ul class="tag-list">
-            {% for tag in tags %}
-                <li><a href="{{ url_for('tag', tag=tag.slug) }}">{{ tag.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        No tags
-    {% endif %}
+    {% include 'tax_edit_btn.html' %}
+
+    <form method="post">
+        {% include 'tax_actions.html' %}
+
+        {% if tags %}
+            <ul class="tag-list">
+                {% for tag in tags %}
+                    <li>
+                        <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ tag.id }}"></span>
+                        <a href="{{ url_for('tag', tag=tag.slug) }}">{{ tag.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No tags
+        {% endif %}
+    </form>
 
 {% endblock %}

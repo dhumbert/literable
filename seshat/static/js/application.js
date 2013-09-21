@@ -18,6 +18,13 @@
         });
     }
 
+    if ($('.edit-tax').length) {
+        $('.edit-tax').on('click', function(e){
+            $('.tax-actions').slideToggle();
+            $('.delete-checkbox').toggle();
+        });
+    }
+
     $('.rating').raty({
         path: '/static/img',
         number: 4,
