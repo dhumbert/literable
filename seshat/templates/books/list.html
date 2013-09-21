@@ -1,7 +1,7 @@
 {% extends "base_nav.html" %}
 
 {% block content %}
-    {% if tag or genre or series or author or recent %}
+    {% if tag or genre or series or author or recent or search %}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('list_books') }}">Library</a><span class="divider">/</span></li>
             {% if tag %}
@@ -31,6 +31,10 @@
 
             {% if recent %}
                 <li class="active">Recent Books</li>
+            {% endif %}
+
+            {% if search %}
+                <li class="active">Search Results for "{{ search }}"</li>
             {% endif %}
         </ul>
     {% endif %}

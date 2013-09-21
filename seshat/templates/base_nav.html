@@ -17,6 +17,11 @@
 
             <ul class="nav pull-right">
                 <li>
+                    <form class="navbar-search pull-left" action="{{ url_for('search') }}">
+                        <input type="text" class="search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">
+                    </form>
+                </li>
+                <li>
                     <a href="{{ url_for('logout') }}">Log Out</a>
                 </li>
             </uk>

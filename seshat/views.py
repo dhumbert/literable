@@ -182,6 +182,14 @@ def logout():
     logout_user()
     return redirect('/login')
 
+
+@app.route("/search")
+@login_required
+def search():
+    term = request.args.get('q')
+    books = model.search_books(term, request.args.get('page'))
+    return render_template('books/list.html', books=books, search=term, pagination='books/pagination_search.html')
+
 @app.route("/ajax/tags")
 @content_type("application/json")
 @login_required
