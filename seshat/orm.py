@@ -1,4 +1,4 @@
-import os
+import os, hashlib
 from flask import url_for
 from seshat import db, book_upload_set, cover_upload_set, utils, epub, app
 
@@ -292,4 +292,9 @@ class User(db.Model):
     def get_id(self):
         return unicode(self.id)
 
+    def set_password(self, password):
+        self.password = hashlib.sha1(password).hexdigest()
+
+    def __repr__(self):
+        return unicode(self.username)
 

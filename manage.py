@@ -21,5 +21,22 @@ def write_meta():
         book.write_meta()
 
 
+@manager.command
+def add_user(username, password):
+    id = model.add_user(username, password)
+    print "User added with ID {0}".format(id)
+
+
+@manager.command
+def list_users():
+    for user in model.get_users():
+        print user
+
+
+@manager.command
+def delete_user(username):
+    model.delete_user(username)
+    print "User deleted"
+
 if __name__ == "__main__":
     manager.run()

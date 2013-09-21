@@ -193,6 +193,24 @@ def add_genre(name, parent=None):
     return genre.id
 
 
+def add_user(username, password):
+    u = User()
+    u.username = username
+    u.set_password(password)
+    db.session.add(u)
+    db.session.commit()
+    return u.id
+
+
+def get_users():
+    return User.query.order_by(User.username).all()
+
+
+def delete_user(username):
+    u = User.query.filter_by(username=username).first()
+    db.session.delete(u)
+    db.session.commit()
+
 def generate_genre_tree_select_options(selected=None):
     output = ""
 
