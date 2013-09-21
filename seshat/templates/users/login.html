@@ -7,7 +7,9 @@
         <legend>Sign in to Seshat</legend>
         <form method="POST" action="" accept-charset="UTF-8" class="login-form">
             {% include "messages.html" %}
-            <input type="hidden" name="next" value="{{ next }}">
+            {% if next: %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
             <input class="" placeholder="Username" type="text" name="username">
             <input class="" placeholder="Password" type="password" name="password"> 
 

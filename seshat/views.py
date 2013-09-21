@@ -1,6 +1,6 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response
-from flask.ext.login import login_required, login_user
+from flask.ext.login import login_required, login_user, logout_user
 from seshat import app, model, content_type
 
 
@@ -144,15 +144,20 @@ def recent():
 def login():
     if request.method == 'POST':
         user = model.authenticate(request.form['username'], request.form['password'])
-        if user is not None:
+        if user:
             login_user(user)
-            url = request.form['next'] if request.form['next'] is not None else ''
+            url = request.form['next'] if 'next' in request.form else '/'
             return redirect(url)
         else:
             flash('Invalid login', 'error')
             return redirect('/login')
     return render_template('users/login.html', next=request.args.get('next'))
 
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect('/login')
 
 @app.route("/ajax/tags")
 @content_type("application/json")
