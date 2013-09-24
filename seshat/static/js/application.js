@@ -1,5 +1,7 @@
-(function(){
-    $('#base-modal').modal();
+$(document).ready(function(){
+    $('#base-modal').modal({
+        show: false
+    });
 
     if ($('.warn').length) {
         $('.warn').on('click', function(e){
@@ -25,22 +27,26 @@
         });
     }
 
-    $('.rating').raty({
-        path: '/static/img',
-        number: 4,
-        hints: ['Poor', 'Average', 'Good', 'Excellent'],
-        score: function() {
-            return $(this).attr('data-score');
-        },
-        click: function(score) {
-            var params = {
-                book_id: $(this).data('book-id'),
-                score: score
-            };
+    if ($('.rating').length) {
+        $.getScript('/static/js/raty/jquery.raty.min.js', function(){
+            $('.rating').raty({
+                path: '/static/img',
+                number: 4,
+                hints: ['Poor', 'Average', 'Good', 'Excellent'],
+                score: function() {
+                    return $(this).attr('data-score');
+                },
+                click: function(score) {
+                    var params = {
+                        book_id: $(this).data('book-id'),
+                        score: score
+                    };
 
-            $.post('/ajax/rate', params, function(data){
-                console.log(data);
+                    $.post('/ajax/rate', params, function(data){
+                        console.log(data);
+                    });
+                }
             });
-        }
-    });
-})();
+        });
+    }
+});
