@@ -2,6 +2,13 @@
 
 Seshat is a web interface for your ebook collection. I built it because I wanted an easy way to browse and download books into iBooks, but it should work equally well for other use cases.
 
+## Demo
+[Click here to check out a demo of Seshat](http://seshatdemo.dhwebco.com).
+
+## Screenshot
+
+![Seshat screenshot](/demo/screenshot.png "Oooh, pretty...")
+
 ## What about Calibre?
 
 Calibre is great for desktop ebook management, but it's a kitchen-sink sort of application. It's huge and unwieldy, and good luck installing it on a headless server. It can be done, but it's not easy. Seshat is designed specifically to be a web front-end for your ebook collection.
