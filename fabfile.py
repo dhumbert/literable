@@ -24,6 +24,6 @@ def backup_locally():
 
 def restore_demo():
     """Restore demo data"""
-    local('source setdbenv && psql -h localhost -d seshat_demo -U seshat_demo -a -f demo/demo.sql')
+    local('source setdbenv && psql -h localhost -d seshat_demo -U seshat_demo -a -f demo/demo.sql', shell='/bin/bash')
     local('rm -rf seshat/static/uploads')
     local('cp -R demo/uploads seshat/static')
