@@ -24,6 +24,6 @@ def backup_locally():
 
 def restore_demo():
     """Restore demo data"""
-    local('psql -h localhost -d seshat_demo -u seshat_demo -a -f demo/demo.sql')
+    local('psql -h localhost -d seshat_demo -U seshat_demo -a -f demo/demo.sql')
     local('rm -rf seshat/static/uploads')
     local('cp -R demo/uploads seshat/static')
