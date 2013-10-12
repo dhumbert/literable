@@ -18,9 +18,13 @@ At the moment, you can clone Seshat into a directory and run:
 
     pip install -r requirements.txt
     python manage.py migrate upgrade head
-    python manage.py run
+    python manage.py runserver
 
-This will start Seshat on port 5000, and create an SQLite database in the Seshat directory. The default login is books:books.
+This will start Seshat on port 5000, and create an SQLite database in the Seshat directory.
+
+To add a user, use the following command:
+
+    python manage.py add_user username password
 
 A better way is something like the following:
 
