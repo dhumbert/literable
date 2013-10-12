@@ -30,5 +30,10 @@
 </div>
 <div class="container">
     {% include "messages.html" %}
+    {% if demo %}
+        <div class="alert alert-info">
+            This is a demo. The library will be deleted and recreated every hour.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

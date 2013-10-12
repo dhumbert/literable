@@ -6,6 +6,11 @@
       <div class="well">
         <legend>Sign in to Seshat</legend>
         <form method="POST" action="" accept-charset="UTF-8" class="login-form">
+            {% if demo %}
+                <div class="alert alert-info">
+                    This is a demo. Login as demo/demo.
+                </div>
+            {% endif %}
             {% include "messages.html" %}
             {% if next: %}
                 <input type="hidden" name="next" value="{{ next }}">
