@@ -17,3 +17,10 @@ def deploy():
 def backup_locally():
     """Backup ebook and cover files from remote host to local"""
     local('rsync -r -a -v -e "ssh -l %s" --delete %s:"%s" "%s"' % (env.user, env.host, remote_dir_to_backup, local_backup_dir))
+
+
+def restore_demo():
+    """Restore demo data"""
+    local('psql -h localhost -d goread -a -f demo/demo.sql')
+    local('rm -rf seshat/static/uploads')
+    local('cp -R demo/uploads seshat/static')

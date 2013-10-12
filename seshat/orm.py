@@ -173,9 +173,13 @@ class Book(db.Model):
                 books_series.slug = books_series.generate_slug()
                 db.session.add(books_series)
             self.series = books_series
+        else:
+            self.series = None
 
         if seq:
             self.series_seq = seq
+        else:
+            self.series_seq = None
 
     def update_author(self, name):
         if name:
