@@ -12,6 +12,10 @@ PIL==1.1.7
 SQLAlchemy==0.8.0b2
 Werkzeug==0.8.3
 alembic==0.4.2
+argparse==1.2.1
+gevent==0.13.8
+greenlet==0.4.1
+gunicorn==18.0
 lxml==3.1.0
 paramiko==1.9.0
 psycopg2==2.4.6
