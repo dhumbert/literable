@@ -5,13 +5,16 @@ remote_dir_to_backup = '/var/www/seshat/seshat/static/uploads/'
 local_backup_dir = '/Users/dhumbert/Dropbox/Books/seshatBackup/'
 
 
-def deploy():
-    sudo('stop seshat')
-    with cd('/var/www/seshat'):
+def deploy(demo=False):
+    path = '/var/www/seshat' if not demo else '/var/www/seshat_demo'
+    app = 'seshat' if not demo else 'seshat_demo'
+
+    sudo("stop {0}".format(app))
+    with cd(path):
         run('git pull')
         run('. venv/bin/activate && pip install -r requirements.txt')
         run('. venv/bin/activate && python manage.py migrate upgrade head')
-    sudo('start seshat')
+    sudo("start {0}".format(app))
 
 
 def backup_locally():
@@ -21,6 +24,6 @@ def backup_locally():
 
 def restore_demo():
     """Restore demo data"""
-    local('psql -h localhost -d goread -a -f demo/demo.sql')
+    local('psql -h localhost -d seshat_demo -a -f demo/demo.sql')
     local('rm -rf seshat/static/uploads')
     local('cp -R demo/uploads seshat/static')
