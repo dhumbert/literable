@@ -5,3 +5,4 @@ instance/*
 *.pyc
 *.db
 seshat/static/uploads/*
+setdbenv
