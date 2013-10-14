@@ -3,7 +3,7 @@
 {% block content %}
     {% if tag or genre or series or author or recent or search %}
         <ul class="breadcrumb">
-            <li><a href="{{ url_for('list_books') }}">Library</a><span class="divider">/</span></li>
+            <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
             {% if tag %}
                 <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
                 <li class="active">{{ tag.name }}</li>

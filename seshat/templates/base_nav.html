@@ -4,21 +4,20 @@
 <div class="navbar navbar-inverse navbar-static-top">
     <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="{{ url_for('list_books') }}">seshat</a>
+            <a class="brand" href="{{ url_for('recent') }}">seshat</a>
 
             <ul class="nav">
                 <li><a href="{{ url_for('list_genres') }}">Genres</a></li>
                 <li><a href="{{ url_for('list_tags') }}">Tags</a></li>
                 <li><a href="{{ url_for('list_series') }}">Series</a></li>
                 <li><a href="{{ url_for('list_authors') }}">Authors</a></li>
-                <li><a href="{{ url_for('recent') }}">Recent</a></li>
                 <li><a href="{{ url_for('add_book') }}">Add Book</a></li>
             </ul>
 
             <ul class="nav pull-right">
                 <li>
                     <form class="navbar-search pull-left" action="{{ url_for('search') }}">
-                        <input type="text" class="search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">
+                        <input type="text" class="span2 search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">
                     </form>
                 </li>
                 <li>

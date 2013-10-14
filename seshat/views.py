@@ -6,10 +6,11 @@ from seshat import app, model, content_type
 
 @app.route("/")
 @app.route("/books")
+@app.route("/recent")
 @login_required
-def list_books():
-    books = model.get_books(request.args.get('page'))
-    return render_template('books/list.html', books=books, pagination='books/pagination.html')
+def recent():
+    books = model.get_recent_books(request.args.get('page'))
+    return render_template('books/list.html', books=books, recent=True, pagination='books/pagination_recent.html')
 
 
 @app.route("/books/add")
@@ -24,7 +25,7 @@ def add_book():
 def add_book_post():
     try:
         model.add_book(request.form, request.files)
-        return redirect(url_for('list_books'))
+        return redirect(url_for('recent'))
     except ValueError as e:
         flash(e, 'error')
         return redirect(url_for('add_book'))
@@ -70,7 +71,7 @@ def delete_book(id):
     try:
         url = request.args.get('next')
     except KeyError:
-        url = url_for('list_books')
+        url = url_for('recent')
     return redirect(url)
 
 
@@ -155,12 +156,6 @@ def list_authors():
 
     authors = model.get_authors()
     return render_template('authors/list.html', authors=authors)
-
-@app.route("/recent")
-@login_required
-def recent():
-    books = model.get_recent_books(request.args.get('page'))
-    return render_template('books/list.html', books=books, recent=True, pagination='books/pagination_recent.html')
 
 
 @app.route("/login", methods=['GET', 'POST'])
