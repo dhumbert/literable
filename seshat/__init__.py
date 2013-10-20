@@ -4,6 +4,7 @@ from flask import Flask, make_response
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
+from flaskext.markdown import Markdown
 from seshat.filters import nl2br, none2blank
 
 
@@ -12,6 +13,8 @@ app.config.from_object('seshat.config')
 app.config.from_pyfile('application.cfg')
 
 db = SQLAlchemy(app)
+
+Markdown(app)
 
 login = LoginManager()
 login.init_app(app)

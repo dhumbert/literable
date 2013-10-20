@@ -77,10 +77,10 @@
                                     <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>
                                 </p>
                                 <div id="description-{{ book.id }}" class="collapsible collapse">
-                                    {{ book.description | nl2br }}
+                                    {{ book.description | markdown }}
                                 </div>
                             {% else %}
-                                {{ book.description | nl2br }}
+                                {{ book.description | markdown }}
                             {% endif %}
                         </div>
                     {% endif %}
