@@ -1,3 +1,0 @@
-[submodule "seshat/static/js/tagmanager"]
-	path = seshat/static/js/tagmanager
-	url = git@github.com:max-favilli/tagmanager.git
