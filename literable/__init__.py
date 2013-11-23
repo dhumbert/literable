@@ -5,11 +5,11 @@ from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flaskext.markdown import Markdown
-from seshat.filters import nl2br, none2blank
+from literable.filters import nl2br, none2blank
 
 
 app = Flask(__name__, instance_relative_config=True)
-app.config.from_object('seshat.config')
+app.config.from_object('literable.config')
 app.config.from_pyfile('application.cfg')
 
 db = SQLAlchemy(app)
@@ -49,7 +49,7 @@ def content_type(content_type):
 
 @login.user_loader
 def load_user(id):
-    from seshat.orm import User
+    from literable.orm import User
     return User.query.get(int(id))
 
-import seshat.views
+import literable.views

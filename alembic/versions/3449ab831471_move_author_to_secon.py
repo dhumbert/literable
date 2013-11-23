@@ -12,7 +12,7 @@ down_revision = '483158bd72bc'
 
 from alembic import op
 import sqlalchemy as sa
-from seshat.utils import slugify
+from literable.utils import slugify
 
 
 

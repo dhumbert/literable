@@ -1,6 +1,6 @@
 import re
 import Image
-from seshat import cover_upload_set
+from literable import cover_upload_set
 
 
 def slugify(text, delim=u'-'):

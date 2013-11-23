@@ -1,6 +1,6 @@
 import os, hashlib
 from flask import url_for
-from seshat import db, book_upload_set, cover_upload_set, utils, epub, app
+from literable import db, book_upload_set, cover_upload_set, utils, epub, app
 
 
 books_tags = db.Table('books_tags',

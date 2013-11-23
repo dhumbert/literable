@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
-from seshat import app, model
+from literable import app, model
 
 
 manager = Manager(app)

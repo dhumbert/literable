@@ -1,13 +1,13 @@
 from fabric.api import *
 
 
-remote_dir_to_backup = '/var/www/seshat/seshat/static/uploads/'
-local_backup_dir = '/Users/dhumbert/Dropbox/Books/seshatBackup/'
+remote_dir_to_backup = '/var/www/literable/literable/static/uploads/'
+local_backup_dir = '/Users/dhumbert/Dropbox/Books/literableBackup/'
 
 
 def deploy(demo=False):
-    path = '/var/www/seshat' if not demo else '/var/www/seshat_demo'
-    app = 'seshat' if not demo else 'seshat_demo'
+    path = '/var/www/literable' if not demo else '/var/www/literable_demo'
+    app = 'literable' if not demo else 'literable_demo'
 
     sudo("stop {0}".format(app))
     with cd(path):
@@ -24,6 +24,6 @@ def backup_locally():
 
 def restore_demo():
     """Restore demo data"""
-    local('source setdbenv && psql -h localhost -d seshat_demo -U seshat_demo -a -f demo/demo.sql', shell='/bin/bash')
-    local('rm -rf seshat/static/uploads')
-    local('cp -R demo/uploads seshat/static')
+    local('source setdbenv && psql -h localhost -d literable_demo -U literable_demo -a -f demo/demo.sql', shell='/bin/bash')
+    local('rm -rf literable/static/uploads')
+    local('cp -R demo/uploads literable/static')

@@ -1,7 +1,7 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response
 from flask.ext.login import login_required, login_user, logout_user
-from seshat import app, model, content_type
+from literable import app, model, content_type
 
 
 @app.route("/")

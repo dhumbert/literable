@@ -1,9 +1,9 @@
-/seshat-gunicorn.sh
+/literable-gunicorn.sh
 venv/*
 instance/*
 *.log
 *.pyc
 *.db
-seshat/static/uploads/*
+literable/static/uploads/*
 setdbenv
 .idea

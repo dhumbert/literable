@@ -1,8 +1,8 @@
 from datetime import datetime
 import hashlib
 from flask import url_for, flash
-from seshat import db, app
-from seshat.orm import Book, Genre, Tag, Series, Author, User
+from literable import db, app
+from literable.orm import Book, Genre, Tag, Series, Author, User
 
 
 def _get_page(page):
