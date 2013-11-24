@@ -38,7 +38,3 @@ And change configuration settings as necessary to connect to a database, set the
 literable is built on [Flask](http://flask.pocoo.org/), so any WSGI server will work. See the [Flask docs on deploying](http://flask.pocoo.org/docs/deploying/) for more information.
 
 I am using [Gunicorn](http://gunicorn.org/), [nginx](http://nginx.org/en/), [Upstart](http://upstart.ubuntu.com/), and [gevent](http://www.gevent.org/) for running my literable library.
-
-## What does "literable" mean?
-
-[literable](http://en.wikipedia.org/wiki/literable) was the Egyption goddess of wisdom, knowledge, and writing.
