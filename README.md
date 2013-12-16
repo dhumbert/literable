@@ -3,7 +3,7 @@
 Literable is a web interface for your ebook collection. I built it because I wanted an easy way to browse and download books into iBooks, but it should work equally well for other use cases.
 
 ## Demo
-[Click here to check out a demo of literable](http://literabledemo.dhwebco.com).
+[Click here to check out a demo of literable](http://demo.literable.co).
 
 ## Screenshot
 
