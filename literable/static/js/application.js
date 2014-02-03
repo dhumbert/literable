@@ -49,4 +49,19 @@ $(document).ready(function(){
             });
         });
     }
+
+    if ($('#lookupTitle').length) {
+        $('#lookupTitle').click(function(){
+            var title = $('#title').val();
+
+            $.getJSON('https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(title), function(data){
+                if (data['totalItems'] > 0) {
+                    // todo: allow choice. for now pick first
+                    var item = data['items'][0]['volumeInfo'];
+                    $('#author').val(item['authors'][0]);
+                    $('#description').val(item['description']);
+                }
+            });
+        });
+    }
 });
