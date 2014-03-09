@@ -1,125 +1,66 @@
 {% extends "base_nav.html" %}
 
 {% block content %}
-    {% if tag or genre or series or author or recent or search %}
-        <ul class="breadcrumb">
-            <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
-            {% if tag %}
-                <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
-                <li class="active">{{ tag.name }}</li>
-            {% endif %}
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
+        {% if tag %}
+            <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
+            <li class="active">{{ tag.name }}</li>
+        {% endif %}
 
-            {% if genre %}
-                <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
+        {% if genre %}
+            <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
 
-                {% for genre in genre.get_parents() %}
-                    <li><a href="{{ url_for('genre', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
-                {% endfor %}
+            {% for genre in genre.get_parents() %}
+                <li><a href="{{ url_for('genre', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
+            {% endfor %}
 
-                <li class="active">{{ genre.name }}</li>
-            {% endif %}
+            <li class="active">{{ genre.name }}</li>
+        {% endif %}
 
-            {% if series %}
-                <li><a href="{{ url_for('list_series') }}">Series</a><span class="divider">/</span></li>
-                <li class="active">{{ series.title }}</li>
-            {% endif %}
+        {% if series %}
+            <li><a href="{{ url_for('list_series') }}">Series</a><span class="divider">/</span></li>
+            <li class="active">{{ series.title }}</li>
+        {% endif %}
 
-            {% if author %}
-                <li><a href="{{ url_for('list_authors') }}">Authors</a><span class="divider">/</span></li>
-                <li class="active">{{ author.name }}</li>
-            {% endif %}
+        {% if author %}
+            <li><a href="{{ url_for('list_authors') }}">Authors</a><span class="divider">/</span></li>
+            <li class="active">{{ author.name }}</li>
+        {% endif %}
 
-            {% if recent %}
-                <li class="active">Recent Books</li>
-            {% endif %}
+        {% if recent %}
+            <li class="active">Recent Books</li>
+        {% endif %}
 
-            {% if search %}
-                <li class="active">Search Results for "{{ search }}"</li>
-            {% endif %}
-        </ul>
-    {% endif %}
+        {% if search %}
+            <li class="active">Search Results for "{{ search }}"</li>
+        {% endif %}
+
+        {% if reading_list %}
+            <li class="active">My Reading List</li>
+        {% endif %}
+    </ul>
 
     {% if books.items %}
         {% if books.pages > 1 %}
-            {% include pagination %} 
+            {% include pagination %}
         {% endif %}
 
-        {% for book in books.items %}
-            <div class="row row-library">
-                <div class="span1 cell-cover">
-                    <img src="{{ book.get_thumb_url() }}" />
-                </div>
-
-                <div class="span8 cell-info">
-                    <h3>{{ book.title }}</h3>
-                    
-                    {% if book.series %}
-                        <div class="book-series">
-                            <a href="{{ url_for('series', series=book.series.slug) }}">
-                                <span class="label label-info">{{ book.series.title }}</span></a>
-                            {% if book.series_seq %}
-                                <span class="seq label">Book {{ book.series_seq }}</span>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-
-                    <h4 class="author">
-                        <a href="{{ url_for('author', author=book.author.slug) }}">
-                            {{ book.author.name }}
-                        </a>
-                    </h4>
-
-                    {% if book.description %}
-                        <div class="description">
-                            {% if len(book.description) > 50 %}
-                                <p class="description-summary">
-                                    {{ book.description | truncate(150) }}
-                                    <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>
-                                </p>
-                                <div id="description-{{ book.id }}" class="collapsible collapse">
-                                    {{ book.description | markdown }}
-                                </div>
-                            {% else %}
-                                {{ book.description | markdown }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-
-                    {% if book.genre %}
-                        <div class="book-genre">
-                            <i class="icon-folder-open"></i>
-                            {% for genre in book.genre.get_parents() %}
-                                <a href="{{ url_for('genre', genre=genre.slug) }}">{{ genre.name }}</a>
-                                <i class="icon-chevron-right"></i>
-                            {% endfor %}
-                            <a href="{{ url_for('genre', genre=book.genre.slug) }}">{{ book.genre.name }}</a>
-                        </div>
-                    {% endif %}
-
-                    {% if book.tags %}
-                        <ul class="book-tags">
-                            <li><i class="icon-tags"></i></li>
-                            {% for tag in book.tags %}
-                                <li>
-                                    <a href="{{ url_for('tag', tag=tag.slug) }}">{{ tag.name }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="span2 cell-actions">
-                    <p><a href="{{ url_for('download_book', id=book.id) }}" class="btn"><i class="icon-download-alt"></i> {{ book.get_format() }}</a></p>
-                    <p><a href="{{ url_for('edit_book', id=book.id) }}" class="btn"><i class="icon-edit"></i> Edit</a></p>
-                    <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.path) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
-                    <div class="rating" data-book-id="{{ book.id }}" data-score="{{ book.rating }}"></div>
-                </div>
-            </div>
-        {% endfor %}
+        <div id="book-list">
+            {% for book in books.items %}
+                {% include 'books/list_inner.html' %}
+            {% endfor %}
+        </div>
 
         {% if books.pages > 1 %}
-            {% include pagination %} 
+            {% include pagination %}
         {% endif %}
+    {% elif books %}
+        <div id="book-list">
+            {% for book in books %}
+                {% include 'books/list_inner.html' %}
+            {% endfor %}
+        </div>
     {% else %}
         No books found.
     {% endif %}

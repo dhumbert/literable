@@ -1,5 +1,7 @@
 import os, hashlib
 from flask import url_for
+from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy
 from literable import db, book_upload_set, cover_upload_set, utils, epub, app
 
 
@@ -81,7 +83,6 @@ class Book(db.Model):
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
-    genre = db.relationship('Genre')
 
     series_id = db.Column(db.Integer, db.ForeignKey('series.id'))
     series = db.relationship('Series', backref=db.backref('books', lazy='dynamic'))
@@ -254,7 +255,7 @@ class Genre(db.Model):
 
     children = db.relationship("Genre", backref=db.backref("genres", remote_side=id))
 
-    books = db.relationship('Book', backref=db.backref('books'), order_by=[Book.title])
+    books = db.relationship('Book', backref=db.backref('genre'), order_by=[Book.title])
 
     def get_parents(self):
         parents = []
@@ -278,11 +279,25 @@ class Genre(db.Model):
         else:
             return self.generate_slug(depth + 1)
 
+
+class ReadingList(db.Model):
+    __tablename__ = 'reading_list'
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    position = db.Column(db.Integer)
+
+    book = db.relationship(Book)
+
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
+
+    _reading_list = db.relationship(ReadingList, order_by=[ReadingList.position],
+                                    collection_class=ordering_list('position'))
+    reading_list = association_proxy('_reading_list', 'book')
 
     def is_authenticated(self):
         return True

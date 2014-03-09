@@ -1,8 +1,10 @@
 from datetime import datetime
 import hashlib
 from flask import url_for, flash
+from flask.ext.login import current_user
+from sqlalchemy.exc import IntegrityError
 from literable import db, app
-from literable.orm import Book, Genre, Tag, Series, Author, User
+from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList
 
 
 def _get_page(page):
@@ -230,6 +232,38 @@ def delete_user(username):
     u = User.query.filter_by(username=username).first()
     db.session.delete(u)
     db.session.commit()
+
+
+def update_reading_list_order(user, ordering):
+    print ordering
+    for r in ReadingList.query.filter_by(user_id=user.id).all():
+        r.position = ordering[unicode(r.book_id)]
+
+    db.session.commit()
+
+
+def add_to_reading_list(user, book_id):
+    r = ReadingList()
+    r.user_id = user.id
+    r.book_id = book_id
+    r.position = 999
+
+    try:
+        db.session.add(r)
+        db.session.commit()
+    except IntegrityError:
+        pass
+
+
+def is_book_in_reading_list(book_id):
+    return ReadingList.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+
+
+def remove_from_reading_list(user, book_id):
+    r = ReadingList.query.filter_by(user_id=user.id, book_id=book_id).first()
+    db.session.delete(r)
+    db.session.commit()
+
 
 def generate_genre_tree_select_options(selected=None):
     output = ""

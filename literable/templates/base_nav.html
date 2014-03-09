@@ -15,6 +15,7 @@
             </ul>
 
             <ul class="nav pull-right">
+                <li><a href="{{ url_for('reading_list') }}"><i class="icon-list icon-white"></i> Reading List</a></li>
                 <li>
                     <form class="navbar-search pull-left" action="{{ url_for('search') }}">
                         <input type="text" class="span2 search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">

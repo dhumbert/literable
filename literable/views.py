@@ -1,8 +1,11 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response
-from flask.ext.login import login_required, login_user, logout_user
+from flask.ext.login import login_required, login_user, logout_user, current_user
+from functools import partial
 from literable import app, model, content_type
 
+
+app.jinja_env.globals['is_book_in_reading_list'] = model.is_book_in_reading_list
 
 @app.route("/")
 @app.route("/books")
@@ -146,6 +149,13 @@ def author(author):
     return render_template('books/list.html', books=books, author=author, pagination='authors/pagination.html')
 
 
+@app.route("/reading-list")
+@login_required
+def reading_list():
+    books = current_user.reading_list
+    return render_template('books/list.html', books=books, reading_list=True)
+
+
 @app.route("/authors", methods=["GET", "POST"])
 @login_required
 def list_authors():
@@ -221,3 +231,23 @@ def ajax_rate():
     book.rate(score)
     return json.dumps(True)
 
+
+@app.route("/ajax/order_reading_list", methods=['POST'])
+@login_required
+def order_reading_list():
+    model.update_reading_list_order(current_user, json.loads(request.form['data']))
+    return json.dumps(True)
+
+
+@app.route("/ajax/add_to_reading_list", methods=['POST'])
+@login_required
+def add_to_reading_list():
+    model.add_to_reading_list(current_user, request.form['book_id'])
+    return json.dumps(True)
+
+
+@app.route("/ajax/remove_from_reading_list", methods=['POST'])
+@login_required
+def remove_from_reading_list():
+    model.remove_from_reading_list(current_user, request.form['book_id'])
+    return json.dumps(True)

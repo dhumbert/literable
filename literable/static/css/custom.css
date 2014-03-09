@@ -116,3 +116,11 @@
 
 .tax-actions {
 }
+
+#book-list .row {
+    background: #fff;
+}
+
+.reading-list-reposition {
+    cursor: move;
+}
