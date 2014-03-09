@@ -315,7 +315,7 @@ def _recurse_list_level(parent):
 
 def authenticate(username, password):
     hashed_pass = hashlib.sha1(password).hexdigest()
-    users = db.session.query(User).filter(User.username==username)
+    users = db.session.query(User).filter(User.username==username, password==hashed_pass)
     for user in users:
         return user
 
