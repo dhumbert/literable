@@ -41,7 +41,7 @@
         {% endif %}
     </ul>
 
-    {% if books.items %}
+    {% if hasattr(books, 'items') %}
         {% if books.pages > 1 %}
             {% include pagination %}
         {% endif %}
