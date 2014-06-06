@@ -106,7 +106,7 @@ def add_book(form, files):
         book.update_tags(form['tags'])
 
     book.update_series(form['series'], form['series_seq'])
-    #book.created_at = datetime.now()
+    book.created_at = datetime.now()
 
     if 'file' in files:
         book.attempt_to_update_file(files['file'])
