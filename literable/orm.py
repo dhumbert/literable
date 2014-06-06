@@ -298,6 +298,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
+    admin = db.Column(db.Boolean)
 
     _reading_list = db.relationship(ReadingList, order_by=[ReadingList.position],
                                     collection_class=ordering_list('position'))

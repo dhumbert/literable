@@ -1,5 +1,5 @@
 import json
-from flask import render_template, request, redirect, url_for, flash, Response
+from flask import render_template, request, redirect, url_for, flash, Response, abort
 from flask.ext.login import login_required, login_user, logout_user, current_user
 from functools import partial
 from literable import app, model, content_type
@@ -39,6 +39,10 @@ def add_book_post():
 @content_type('application/octet-stream')
 def download_book(id):
     book = model.get_book(id)
+
+    if not model.user_can_download_book(book, current_user):
+        abort(403)
+
     response = Response()
     # todo: there has to be a better way to do this.
     # book_upload_set.url doesn't generate the right URL for nginx
@@ -52,6 +56,8 @@ def download_book(id):
 def edit_book(id):
     book = model.get_book(id)
     if book:
+        if not model.user_can_modify_book(book, current_user):
+            abort(403)
         return render_template('books/edit.html', book=book, new=False, genre_options=model.generate_genre_tree_select_options)
 
 

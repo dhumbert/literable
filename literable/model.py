@@ -16,6 +16,18 @@ def _get_page(page):
     return page
 
 
+def _privilege_filter():
+    return or_(current_user.admin, Book.user_id == current_user.id, Book.public)
+
+
+def user_can_modify_book(book, user):
+    return user.admin or book.user_id == current_user.id
+
+
+def user_can_download_book(book, user):
+    return book.public or user_can_modify_book(book, user)
+
+
 def get_books(page):
     page = max(1, _get_page(page))
     return Book.query.order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
@@ -34,19 +46,19 @@ def get_book(id):
 
 def get_recent_books(page):
     page = max(1, _get_page(page))
-    return Book.query.filter(or_(Book.user_id == current_user.id, Book.public)).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.filter(_privilege_filter()).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q, page):
     page = max(1, _get_page(page))
-    return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), or_(Book.user_id == current_user.id, Book.public))).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
     page = max(1, _get_page(page))
 
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.tags.any(Tag.id == tag.id), or_(Book.user_id == current_user.id, Book.public))).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.tags.any(Tag.id == tag.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, tag)
@@ -56,7 +68,7 @@ def get_books_by_genre(slug, page):
     page = max(1, _get_page(page))
 
     genre = Genre.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.genre_id == genre.id, or_(Book.user_id == current_user.id, Book.public))).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.genre_id == genre.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, genre)
@@ -66,7 +78,7 @@ def get_books_by_series(slug, page):
     page = max(1, _get_page(page))
 
     sery = Series.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.series_id==sery.id, or_(Book.user_id == current_user.id, Book.public))).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.series_id==sery.id, _privilege_filter())).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, sery)
@@ -76,7 +88,7 @@ def get_books_by_author(slug, page):
     page = max(1, _get_page(page))
 
     author = Author.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.author_id==author.id, or_(Book.user_id == current_user.id, Book.public))).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.author_id==author.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, author)
@@ -126,6 +138,9 @@ def add_book(form, files):
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
+        if not user_can_modify_book(book, current_user):
+            return False
+
         # user is adding a new genre
         if form['new-genre-name']:
             genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
@@ -159,6 +174,10 @@ def edit_book(id, form, files):
 
 def delete_book(id):
     book = get_book(id)
+
+    if not user_can_modify_book(book, current_user):
+        flash('You cannot delete a book you do not own', 'error')
+        return False
 
     try:
         book.remove_file()
