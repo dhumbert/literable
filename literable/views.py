@@ -23,6 +23,11 @@ def add_book():
     return render_template('books/add.html', book=book, genre_options=model.generate_genre_tree_select_options)
 
 
+@app.route("/books/add-bulk")
+@login_required
+def add_book_bulk():
+    pass
+
 @app.route("/books/add", methods=['POST'])
 @login_required
 def add_book_post():

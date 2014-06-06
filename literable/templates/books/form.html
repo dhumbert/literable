@@ -60,6 +60,12 @@
     {% endif %}
     <input type="file" name="cover" id="cover" />
 
+    <label for="cover">Cover Image</label>
+    {% if book.cover %}
+        <span class="help-block">Leave blank to keep current cover.</span>
+    {% endif %}
+    <input type="file" name="cover" id="cover" />
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save</button>
       <a href="{{ url_for('recent') }}" class="btn">Cancel</a>
