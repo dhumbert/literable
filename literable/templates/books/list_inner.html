@@ -10,7 +10,6 @@
 
     <div class="span8 cell-info">
         <h3>{{ book.title }}</h3>
-
         {% if book.series %}
             <div class="book-series">
                 <a href="{{ url_for('series', series=book.series.slug) }}">

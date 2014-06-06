@@ -80,6 +80,7 @@ class Book(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime())
     rating = db.Column(db.Integer())
+    public = db.Column(db.Boolean())
 
     tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
@@ -90,6 +91,9 @@ class Book(db.Model):
 
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
     author = db.relationship('Author', backref=db.backref('books', lazy='dynamic'))
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', backref=db.backref('books', lazy='dynamic'))
 
     def get_thumb_url(self):
         if self.cover:
@@ -294,6 +298,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
+    admin = db.Column(db.Boolean)
 
     _reading_list = db.relationship(ReadingList, order_by=[ReadingList.position],
                                     collection_class=ordering_list('position'))

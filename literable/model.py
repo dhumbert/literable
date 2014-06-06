@@ -2,6 +2,7 @@ from datetime import datetime
 import hashlib
 from flask import url_for, flash
 from flask.ext.login import current_user
+from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from literable import db, app
 from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList
@@ -13,6 +14,18 @@ def _get_page(page):
     else:
         page = int(page)
     return page
+
+
+def _privilege_filter():
+    return or_(current_user.admin, Book.user_id == current_user.id, Book.public)
+
+
+def user_can_modify_book(book, user):
+    return user.admin or book.user_id == current_user.id
+
+
+def user_can_download_book(book, user):
+    return book.public or user_can_modify_book(book, user)
 
 
 def get_books(page):
@@ -33,19 +46,19 @@ def get_book(id):
 
 def get_recent_books(page):
     page = max(1, _get_page(page))
-    return Book.query.order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.filter(_privilege_filter()).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q, page):
     page = max(1, _get_page(page))
-    return Book.query.filter(Book.title.ilike("%"+q+"%")).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
     page = max(1, _get_page(page))
 
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(Book.tags.any(Tag.id == tag.id)).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.tags.any(Tag.id == tag.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, tag)
@@ -55,7 +68,7 @@ def get_books_by_genre(slug, page):
     page = max(1, _get_page(page))
 
     genre = Genre.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter_by(genre_id=genre.id).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.genre_id == genre.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, genre)
@@ -65,7 +78,7 @@ def get_books_by_series(slug, page):
     page = max(1, _get_page(page))
 
     sery = Series.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter_by(series_id=sery.id).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.series_id==sery.id, _privilege_filter())).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, sery)
@@ -75,7 +88,7 @@ def get_books_by_author(slug, page):
     page = max(1, _get_page(page))
 
     author = Author.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter_by(author_id=author.id).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = Book.query.filter(and_(Book.author_id==author.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, author)
@@ -98,12 +111,14 @@ def add_book(form, files):
     book.description = form['description']
     book.genre_id = genre_id
     book.update_author(form['author'])
+    book.public = True if form['privacy'] == 'public' else False
+    book.user = current_user
 
     if 'tags' in form:
         book.update_tags(form['tags'])
 
     book.update_series(form['series'], form['series_seq'])
-    #book.created_at = datetime.now()
+    book.created_at = datetime.now()
 
     if 'file' in files:
         book.attempt_to_update_file(files['file'])
@@ -123,6 +138,9 @@ def add_book(form, files):
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
+        if not user_can_modify_book(book, current_user):
+            return False
+
         # user is adding a new genre
         if form['new-genre-name']:
             genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
@@ -138,6 +156,7 @@ def edit_book(id, form, files):
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_series(form['series'], form['series_seq'])
+        book.public = True if form['privacy'] == 'public' else False
 
         if 'tags' in form:
             book.update_tags(form['tags'])
@@ -155,6 +174,10 @@ def edit_book(id, form, files):
 
 def delete_book(id):
     book = get_book(id)
+
+    if not user_can_modify_book(book, current_user):
+        flash('You cannot delete a book you do not own', 'error')
+        return False
 
     try:
         book.remove_file()
