@@ -17,25 +17,16 @@ import sqlalchemy as sa
 def upgrade():
     connection = op.get_bind()
 
+    # by default, all books will be initially owned by ME! YAY!
+    users = sa.Table('users', sa.MetaData(), autoload=True, autoload_with=connection)
+    user_query = users.select().where(users.c.username == 'devin')
+    found_user = connection.execute(user_query).first()['id']
+
     op.add_column('books',
-                  sa.Column('user_id', sa.Integer(), sa.ForeignKey('users.id')))
+                  sa.Column('user_id', sa.Integer(), sa.ForeignKey('users.id'), server_default=sa.DefaultClause(str(found_user)), nullable=False))
 
     op.add_column('books',
                   sa.Column('public', sa.Boolean(), server_default=sa.DefaultClause('1'), nullable=False))
-
-    # by default, all books will be initially owned by ME! YAY!
-    books = sa.Table('books', sa.MetaData(), autoload=True, autoload_with=connection)
-    users = sa.Table('users', sa.MetaData(), autoload=True, autoload_with=connection)
-
-    for book in connection.execute(sa.select([books])).fetchall():
-        user_query = users.select().where(users.c.username == 'devin')
-        found_user = connection.execute(user_query).first()['id']
-
-        connection.execute(
-            books.update().where(books.c.id == book['id']).values(user_id=found_user)
-        )
-
-
 
 
 def downgrade():

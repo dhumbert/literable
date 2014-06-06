@@ -100,6 +100,7 @@ def add_book(form, files):
     book.genre_id = genre_id
     book.update_author(form['author'])
     book.public = True if form['privacy'] == 'public' else False
+    book.user = current_user
 
     if 'tags' in form:
         book.update_tags(form['tags'])
