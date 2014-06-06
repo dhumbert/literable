@@ -60,6 +60,15 @@
     {% endif %}
     <input type="file" name="cover" id="cover" />
 
+    <label class="radio">
+        <input type="radio" name="privacy" id="privacy" value="private" {% if not new and not book.public %}checked="checked"{% endif %}>
+        Private
+    </label>
+    <label class="radio">
+        <input type="radio" name="privacy" id="privacy" value="public" {% if new or book.public %}checked="checked"{% endif %}>
+        Public
+    </label>
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save</button>
       <a href="{{ url_for('recent') }}" class="btn">Cancel</a>
