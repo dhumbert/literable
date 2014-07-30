@@ -245,6 +245,7 @@ def add_user(username, password):
     u = User()
     u.username = username
     u.set_password(password)
+    u.admin = False
     db.session.add(u)
     db.session.commit()
     return u.id
