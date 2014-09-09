@@ -138,17 +138,23 @@ def add_book(form, files):
     return True
 
 
+
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
         if not user_can_modify_book(book, current_user):
             return False
 
+        old_genre_id = book.genre_id
+        old_author_id = book.author_id
+        old_series_id = book.series_id
+
         # user is adding a new genre
-        if form['new-genre-name']:
-            genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-        elif form['genre']:
-            genre_id = form['genre']
+        if form['new-genre-name'] or form['genre']:
+            if form['new-genre-name']:
+                genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
+            elif form['genre']:
+                genre_id = form['genre']
         else:
             genre_id = None
 
@@ -170,6 +176,13 @@ def edit_book(id, form, files):
 
         if app.config['WRITE_META_ON_SAVE']:
             book.write_meta()
+
+        if old_genre_id:
+            delete_tax_if_possible('genre', old_genre_id)
+        if old_author_id:
+            delete_tax_if_possible('author', old_author_id)
+        if old_series_id:
+            delete_tax_if_possible('series', old_series_id)
 
         return True
     return False
@@ -224,6 +237,20 @@ def add_genre(name, parent=None):
     db.session.add(genre)
     db.session.commit()
     return genre.id
+
+
+def delete_tax_if_possible(tax, id):
+    obj = {
+        'genre': Genre,
+        'tag': Tag,
+        'series': Series,
+        'author': Author
+    }[tax]
+
+    instance = obj.query.get(int(id))
+    if instance:
+        if len(instance.books) == 0: # no books left, so we can delete
+            delete_tax(tax, [id])
 
 
 def delete_tax(tax, ids):

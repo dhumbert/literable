@@ -22,6 +22,12 @@ def upgrade():
         sa.PrimaryKeyConstraint('id')
     )
 
+    connection = op.get_bind()
+    users = sa.Table('users', sa.MetaData(), autoload=True, autoload_with=connection)
+    ins = users.insert().values(id=1, username='devin', password='d033e22ae348aeb5660fc2140aec35850c4da997')
+    connection.execute(ins)
+
+
 
 def downgrade():
     op.drop_table('users')

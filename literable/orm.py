@@ -86,14 +86,14 @@ class Book(db.Model):
     genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
 
     series_id = db.Column(db.Integer, db.ForeignKey('series.id'))
-    series = db.relationship('Series', backref=db.backref('books', lazy='dynamic'))
+    series = db.relationship('Series', backref=db.backref('books'))
     series_seq = db.Column(db.Integer)
 
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
-    author = db.relationship('Author', backref=db.backref('books', lazy='dynamic'))
+    author = db.relationship('Author', backref=db.backref('books'))
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', backref=db.backref('books', lazy='dynamic'))
+    user = db.relationship('User', backref=db.backref('books'))
 
     def get_thumb_url(self):
         if self.cover:
