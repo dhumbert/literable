@@ -39,5 +39,11 @@ def delete_user(username):
     model.delete_user(username)
     print "User deleted"
 
+
+@manager.command
+def to_elasticsearch():
+    for book in model.get_all_books():
+        model.book_to_elasticsearch(book)
+
 if __name__ == "__main__":
     manager.run()

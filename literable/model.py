@@ -4,6 +4,7 @@ from flask import url_for, flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
+from elasticsearch import Elasticsearch
 from literable import db, app
 from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList
 
@@ -135,8 +136,33 @@ def add_book(form, files):
     if app.config['WRITE_META_ON_SAVE']:
         book.write_meta()
 
+    book_to_elasticsearch(book)
+
     return True
 
+
+def book_to_elasticsearch(book):
+    es_doc = {'title': book.title,
+              'description': book.description,
+              }
+    if book.series:
+        es_doc['series'] = book.series.title
+
+    if book.author:
+        es_doc['author'] = book.author.name
+
+    es = Elasticsearch(app.config['ELASTICSEARCH_NODES'])
+    es.index(app.config['ELASTICSEARCH_INDEX'],
+             app.config['ELASTICSEARCH_DOC_TYPE'],
+             body=es_doc,
+             id=book.id)
+
+
+def delete_from_elasticsearch(book):
+    es = Elasticsearch(app.config['ELASTICSEARCH_NODES'])
+    es.delete(app.config['ELASTICSEARCH_INDEX'],
+             app.config['ELASTICSEARCH_DOC_TYPE'],
+             id=book.id)
 
 
 def edit_book(id, form, files):
@@ -184,6 +210,8 @@ def edit_book(id, form, files):
         if old_series_id:
             delete_tax_if_possible('series', old_series_id)
 
+        book_to_elasticsearch(book)
+
         return True
     return False
 
@@ -207,6 +235,8 @@ def delete_book(id):
 
     db.session.delete(book)
     db.session.commit()
+
+    delete_from_elasticsearch(book)
 
 
 def get_tags():
