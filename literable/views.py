@@ -200,8 +200,9 @@ def search():
     term = request.args.get('q')
     if not term:
         term = ""
-    books = model.search_books(term, request.args.get('page'))
-    return render_template('books/list.html', books=books, search=term, pagination='books/pagination_search.html')
+    books = model.search_books(term)
+    return render_template('books/list.html', books=books, search=term)
+
 
 @app.route("/ajax/tags")
 @content_type("application/json")

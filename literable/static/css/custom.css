@@ -124,3 +124,8 @@
 .reading-list-reposition {
     cursor: move;
 }
+
+.row-library .highlight {
+    font-weight: bold;
+    color: darkorange;
+}

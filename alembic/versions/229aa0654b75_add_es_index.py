@@ -12,18 +12,19 @@ down_revision = 'ad9fe8cc23f'
 
 from alembic import op
 import sqlalchemy as sa
-from elasticsearch import Elasticsearch
+from elasticutils import get_es
 from literable import config
 
 
 def upgrade():
-    es = Elasticsearch(config.ELASTICSEARCH_NODES)
+    es = get_es(urls=config.ELASTICSEARCH_NODES)
     es.indices.create(index=config.ELASTICSEARCH_INDEX)
     es.indices.put_mapping(index=config.ELASTICSEARCH_INDEX,
                            doc_type=config.ELASTICSEARCH_DOC_TYPE,
                            body={
                                config.ELASTICSEARCH_DOC_TYPE: {
                                    'properties': {
+                                       'id': {'type': 'integer'},
                                        'title': {'type': 'string', 'analyzer': 'snowball'},
                                        'author': {'type': 'string', 'analyzer': 'snowball'},
                                        'series': {'type': 'string', 'analyzer': 'snowball'},
@@ -34,5 +35,5 @@ def upgrade():
                            })
 
 def downgrade():
-    es = Elasticsearch(config.ELASTICSEARCH_NODES)
+    es = get_es(urls=config.ELASTICSEARCH_NODES)
     es.indices.delete(index=config.ELASTICSEARCH_INDEX)

@@ -9,7 +9,7 @@
     </div>
 
     <div class="span8 cell-info">
-        <h3>{{ book.title }}</h3>
+        <h3>{{ book.title | safe }}</h3>
         {% if book.series %}
             <div class="book-series">
                 <a href="{{ url_for('series', series=book.series.slug) }}">
@@ -28,7 +28,7 @@
 
         {% if book.description %}
             <div class="description">
-                {% if len(book.description) > 50 %}
+                {% if not search and len(book.description) > 50 %}
                     <p class="description-summary">
                         {{ book.description | truncate(150) }}
                         <a href="javascript:void(0);" class="collapse-description" data-toggle="collapse" data-target="#description-{{ book.id }}">more</a>

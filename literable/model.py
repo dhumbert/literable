@@ -4,7 +4,7 @@ from flask import url_for, flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
-from elasticsearch import Elasticsearch
+from elasticutils import S, get_es
 from literable import db, app
 from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList
 
@@ -50,9 +50,53 @@ def get_recent_books(page):
     return Book.query.filter(_privilege_filter()).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
-def search_books(q, page):
-    page = max(1, _get_page(page))
-    return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+def search_books(q):
+    searcher = S()\
+        .es(urls=app.config['ELASTICSEARCH_NODES'])\
+        .indexes(app.config['ELASTICSEARCH_INDEX'])\
+        .query(_all__match=q)\
+        .highlight('*', pre_tags=['<span class="highlight">'], post_tags=["</span>"], number_of_fragments=0)  # number_of_fragments=0 means the entire field will be returned, not just highlighted snippets
+
+    # searcher = searcher[0:searcher.count()]  # get all  = searcher
+
+    found_ids = []
+    highlights = {}
+
+    results = list(searcher.values_dict('title', 'id', 'author'))
+    for result in results:
+        # can't find a way to do this with elasticutils, though ES does support min_score.
+        print result['title'][0], result.es_meta.score
+        if result.es_meta.score < 0.25:
+            continue
+
+        book_id = result['id'][0]
+
+        found_ids.append(book_id)
+
+        r = {}
+        for field, highlight in result.es_meta.highlight.iteritems():
+            r[field] = highlight[0]
+
+        if r:
+            highlights[book_id] = r
+
+    books = []
+    for id in found_ids:
+        book = Book.query.get(id)
+
+        if id in highlights:
+            if 'title' in highlights[id]:
+                book.title = highlights[id]['title']
+
+            if 'description' in highlights[id]:
+                book.description = highlights[id]['description']
+
+        books.append(book)
+
+    # todo privilege filter
+    return books
+
+    #return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
@@ -144,6 +188,7 @@ def add_book(form, files):
 def book_to_elasticsearch(book):
     es_doc = {'title': book.title,
               'description': book.description,
+              'id': book.id,
               }
     if book.series:
         es_doc['series'] = book.series.title
@@ -151,7 +196,7 @@ def book_to_elasticsearch(book):
     if book.author:
         es_doc['author'] = book.author.name
 
-    es = Elasticsearch(app.config['ELASTICSEARCH_NODES'])
+    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
     es.index(app.config['ELASTICSEARCH_INDEX'],
              app.config['ELASTICSEARCH_DOC_TYPE'],
              body=es_doc,
@@ -159,7 +204,7 @@ def book_to_elasticsearch(book):
 
 
 def delete_from_elasticsearch(book):
-    es = Elasticsearch(app.config['ELASTICSEARCH_NODES'])
+    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
     es.delete(app.config['ELASTICSEARCH_INDEX'],
              app.config['ELASTICSEARCH_DOC_TYPE'],
              id=book.id)
