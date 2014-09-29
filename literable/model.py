@@ -65,7 +65,6 @@ def search_books(q):
     results = list(searcher.values_dict('title', 'id', 'author'))
     for result in results:
         # can't find a way to do this with elasticutils, though ES does support min_score.
-        print result['title'][0], result.es_meta.score
         if result.es_meta.score < 0.25:
             continue
 
