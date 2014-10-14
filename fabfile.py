@@ -1,12 +1,12 @@
 from fabric.api import *
 
 
-remote_dir_to_backup = '/var/www/literable/literable/static/uploads/'
+remote_dir_to_backup = '/srv/literable/literable/static/uploads/'
 local_backup_dir = '/Users/dhumbert/Dropbox/Books/literableBackup/'
 
 
 def deploy(demo=False):
-    path = '/var/www/literable' if not demo else '/var/www/literable_demo'
+    path = '/srv/literable' if not demo else '/srv/literable_demo'
     app = 'literable' if not demo else 'literable_demo'
 
     sudo("stop {0}".format(app))
