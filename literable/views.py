@@ -179,7 +179,7 @@ def login():
     if request.method == 'POST':
         user = model.authenticate(request.form['username'], request.form['password'])
         if user:
-            login_user(user)
+            login_user(user, remember=True)
             url = request.form['next'] if 'next' in request.form else '/'
             return redirect(url)
         else:
