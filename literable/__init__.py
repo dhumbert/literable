@@ -29,7 +29,7 @@ app.jinja_env.globals['demo'] = app.config['DEMO']
 #uploads
 current_path = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOADS_DEFAULT_DEST'] = os.path.join(current_path, os.path.join('static', 'uploads'))
-app.config['UPLOADS_DEFAULT_URL'] = '/static/uploads/'
+app.config['UPLOADS_DEFAULT_URL'] = 'http://literable.co/static/uploads/'
 
 book_upload_set = uploads.UploadSet('books', extensions=app.config['EBOOK_EXTENSIONS'], default_dest=lambda x: app.config['LIBRARY_PATH'])
 cover_upload_set = uploads.UploadSet('covers', uploads.IMAGES)

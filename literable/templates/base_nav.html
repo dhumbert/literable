@@ -1,30 +1,43 @@
 {% extends "base.html" %}
 
 {%block top %}
-<div class="navbar navbar-inverse navbar-static-top">
+<div class="navbar navbar navbar-static-top">
     <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="{{ url_for('recent') }}">literable</a>
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
 
-            <ul class="nav">
-                <li><a href="{{ url_for('list_genres') }}">Genres</a></li>
-                <li><a href="{{ url_for('list_tags') }}">Tags</a></li>
-                <li><a href="{{ url_for('list_series') }}">Series</a></li>
-                <li><a href="{{ url_for('list_authors') }}">Authors</a></li>
-                <li><a href="{{ url_for('add_book') }}">Add Book</a></li>
-            </ul>
+            <a class="brand" href="{{ url_for('recent') }}">Literable</a>
 
-            <ul class="nav pull-right">
-                <li><a href="{{ url_for('reading_list') }}"><i class="icon-list icon-white"></i> Reading List</a></li>
-                <li>
-                    <form class="navbar-search pull-left" action="{{ url_for('search') }}">
-                        <input type="text" class="span2 search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">
-                    </form>
-                </li>
-                <li>
-                    <a href="{{ url_for('logout') }}">Log Out</a>
-                </li>
-            </uk>
+            <div class="nav-collapse collapse">
+                <ul class="nav pull-right">
+                    <li><a href="{{ url_for('reading_list') }}">My List</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                          Browse
+                          <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('list_genres') }}">by Genre</a></li>
+                            <li><a href="{{ url_for('list_tags') }}">by Tag</a></li>
+                            <li><a href="{{ url_for('list_series') }}">by Series</a></li>
+                            <li><a href="{{ url_for('list_authors') }}">by Author</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ url_for('add_book') }}">Add Book</a></li>
+                    <li>
+                        <form class="navbar-search pull-left" action="{{ url_for('search') }}">
+                            <input type="text" class="span2 search-query" placeholder="Search" name="q" value="{{ request.args.get('q', '') }}" autocomplete="off">
+                        </form>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('logout') }}">Log Out</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

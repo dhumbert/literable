@@ -11,10 +11,3 @@ def slugify(text, delim=u'-'):
         if word:
             result.append(word)
     return unicode(delim.join(result))
-
-
-def create_thumbnail(file):
-    image = Image.open(cover_upload_set.path(file))
-    image.thumbnail((70, 100), Image.ANTIALIAS)
-    new_filename = "thumb-%s" % file
-    image.save(cover_upload_set.path(new_filename))

@@ -4,14 +4,6 @@
             <a href="{{ url_for('recent', page=books.prev_num) }}">&larr; Prev</a>
         </li>
         
-        {%- for page in books.iter_pages() %}
-            {% if page %}
-                <li{% if page == books.page %} class="active"{% endif %}>
-                    <a href="{{ url_for('recent', page=page) }}">{{ page }}</a>
-                </li>
-            {% endif %}
-        {%- endfor %}
-        
         <li{% if not books.has_next %} class="disabled"{% endif %}>
             <a href="{{ url_for('recent', page=books.next_num) }}">Next &rarr;</a>
         </li>

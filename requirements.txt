@@ -1,6 +1,6 @@
 Fabric==1.5.3
 Flask==0.9
--e git+https://github.com/tobiasandtobias/flask-alembic.git@d0f4d3523e115d6376aeba3b0b0cbba3af888add#egg=Flask_Alembic-dev
+-e git+https://github.com/tobiasandtobias/flask-alembic.git@d0f4d3523e115d6376aeba3b0b0cbba3af888add#egg=Flask_Alembic-master
 Flask-Login==0.2.7
 Flask-Markdown==0.3
 Flask-SQLAlchemy==0.16
@@ -14,8 +14,11 @@ PIL==1.1.7
 SQLAlchemy==0.8.0b2
 Werkzeug==0.8.3
 alembic==0.4.2
+elasticutils==0.10.1
 lxml==3.1.0
 paramiko==1.9.0
 psycopg2==2.4.6
 pycrypto==2.6
+six==1.8.0
+urllib3==1.9.1
 wsgiref==0.1.2

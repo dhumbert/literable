@@ -95,9 +95,9 @@ class Book(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=db.backref('books'))
 
-    def get_thumb_url(self):
+    def get_cover_url(self):
         if self.cover:
-            return cover_upload_set.url('thumb-' + self.cover)
+            return cover_upload_set.url(self.cover)
         else:
             return url_for('static', filename='img/default.png')
 
@@ -142,7 +142,6 @@ class Book(db.Model):
                         pass  # can't delete old cover. not the end of the world.
 
                 self.cover = cover
-                utils.create_thumbnail(cover)
         except:
             pass  # couldn't upload cover. maybe blank upload?
 
