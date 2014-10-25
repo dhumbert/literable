@@ -82,6 +82,10 @@
     margin-left: 0.35em;
 }
 
+.row-library .cell-info .description ul {
+    list-style-type: square;
+}
+
 .book-tags {
     list-style-type: none;
     margin-left: 0;
