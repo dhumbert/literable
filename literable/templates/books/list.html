@@ -42,10 +42,6 @@
     </ul>
 
     {% if hasattr(books, 'items') %}
-        {% if books.pages > 1 %}
-            {% include pagination %}
-        {% endif %}
-
         <div id="book-list">
             {% for book in books.items %}
                 {% include 'books/list_inner.html' %}
@@ -68,20 +64,4 @@
 {% endblock %}
 
 {% block footer_scripts %}
-
-<script>
-(function(){
-    $('.description').on('show', function(e){
-        var $parent = $(this).closest('.description');
-        $parent.find('.description-summary').css('color', '#efefef');
-        $parent.find('.collapse-description').text('less');
-    });
-
-    $('.description').on('hidden', function(e){
-        var $parent = $(this).closest('.description');
-        $parent.find('.description-summary').css('color', 'inherit');
-        $parent.find('.collapse-description').text('more');
-    });
-})();
-</script>
 {% endblock %}

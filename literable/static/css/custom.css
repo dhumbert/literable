@@ -1,3 +1,9 @@
+
+
+.brand {
+    letter-spacing: 0.1em;
+}
+
 #content {
     margin-top: 1em;
 }
@@ -25,12 +31,23 @@
     text-align: center;
 }
 
-.row-library .cell-actions {
-    text-align: right;
+@media (max-width: 768px) {
+    .row-library .cell-actions {
+        margin-top: 2em;
+    }
+
+    .row-library .cell-actions .btn {
+        padding: 1em;
+    }
 }
 
 .row-library .cell-actions a {
     min-width: 5em;
+    text-align: left;
+}
+
+.row-library .cell-actions a i {
+    padding-right: 0.5em;
 }
 
 .row-library .cell-actions .rating {
@@ -38,8 +55,8 @@
     margin-right: 0.75em;
 }
 
-.row-library .cell-info {
-    padding-left: 2em;
+.row-library .cell-actions .btn {
+    display: block;
 }
 
 .row-library .cell-info h3 {

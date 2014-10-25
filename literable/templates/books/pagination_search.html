@@ -3,15 +3,7 @@
         <li{% if not books.has_prev %} class="disabled"{% endif %}>
             <a href="{{ url_for('search', page=books.prev_num) }}">&larr; Prev</a>
         </li>
-        
-        {%- for page in books.iter_pages() %}
-            {% if page %}
-                <li{% if page == books.page %} class="active"{% endif %}>
-                    <a href="{{ url_for('search', page=page, q=search) }}">{{ page }}</a>
-                </li>
-            {% endif %}
-        {%- endfor %}
-        
+
         <li{% if not books.has_next %} class="disabled"{% endif %}>
             <a href="{{ url_for('search', page=books.next_num, q=search) }}">Next &rarr;</a>
         </li>
