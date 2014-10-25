@@ -10,19 +10,17 @@ Create Date: 2014-09-25 20:45:35.331963
 revision = '229aa0654b75'
 down_revision = 'ad9fe8cc23f'
 
-from alembic import op
-import sqlalchemy as sa
 from elasticutils import get_es
-from literable import config
+from literable import app
 
 
 def upgrade():
-    es = get_es(urls=config.ELASTICSEARCH_NODES)
-    es.indices.create(index=config.ELASTICSEARCH_INDEX)
-    es.indices.put_mapping(index=config.ELASTICSEARCH_INDEX,
-                           doc_type=config.ELASTICSEARCH_DOC_TYPE,
+    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+    es.indices.create(index=app.config['ELASTICSEARCH_INDEX'])
+    es.indices.put_mapping(index=app.config['ELASTICSEARCH_INDEX'],
+                           doc_type=app.config['ELASTICSEARCH_DOC_TYPE'],
                            body={
-                               config.ELASTICSEARCH_DOC_TYPE: {
+                               app.config['ELASTICSEARCH_DOC_TYPE']: {
                                    'properties': {
                                        'id': {'type': 'integer'},
                                        'title': {'type': 'string', 'analyzer': 'snowball'},
@@ -35,5 +33,5 @@ def upgrade():
                            })
 
 def downgrade():
-    es = get_es(urls=config.ELASTICSEARCH_NODES)
-    es.indices.delete(index=config.ELASTICSEARCH_INDEX)
+    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+    es.indices.delete(index=app.config['ELASTICSEARCH_INDEX'])
