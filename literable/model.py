@@ -51,6 +51,13 @@ def get_recent_books(page):
 
 
 def search_books(q):
+    if app.config['ELASTICSEARCH_ENABLED']:
+        _search_books_elasticsearch(q)
+    else:
+        return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc')
+
+
+def _search_books_elasticsearch(q):
     searcher = S()\
         .es(urls=app.config['ELASTICSEARCH_NODES'])\
         .indexes(app.config['ELASTICSEARCH_INDEX'])\
@@ -95,7 +102,6 @@ def search_books(q):
     # todo privilege filter
     return books
 
-    #return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_books_by_tag(slug, page):
@@ -185,28 +191,30 @@ def add_book(form, files):
 
 
 def book_to_elasticsearch(book):
-    es_doc = {'title': book.title,
-              'description': book.description,
-              'id': book.id,
-              }
-    if book.series:
-        es_doc['series'] = book.series.title
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es_doc = {'title': book.title,
+                  'description': book.description,
+                  'id': book.id,
+                  }
+        if book.series:
+            es_doc['series'] = book.series.title
 
-    if book.author:
-        es_doc['author'] = book.author.name
+        if book.author:
+            es_doc['author'] = book.author.name
 
-    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-    es.index(app.config['ELASTICSEARCH_INDEX'],
-             app.config['ELASTICSEARCH_DOC_TYPE'],
-             body=es_doc,
-             id=book.id)
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.index(app.config['ELASTICSEARCH_INDEX'],
+                 app.config['ELASTICSEARCH_DOC_TYPE'],
+                 body=es_doc,
+                 id=book.id)
 
 
 def delete_from_elasticsearch(book):
-    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-    es.delete(app.config['ELASTICSEARCH_INDEX'],
-             app.config['ELASTICSEARCH_DOC_TYPE'],
-             id=book.id)
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.delete(app.config['ELASTICSEARCH_INDEX'],
+                 app.config['ELASTICSEARCH_DOC_TYPE'],
+                 id=book.id)
 
 
 def edit_book(id, form, files):
