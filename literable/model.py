@@ -6,7 +6,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
 from literable import db, app
-from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList, Publisher
+from literable.orm import Book, User, ReadingList, Taxonomy
 
 
 def _get_page(page):
@@ -103,58 +103,22 @@ def _search_books_elasticsearch(q):
     return books
 
 
-
-def get_books_by_tag(slug, page):
+def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 
-    tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.tags.any(Tag.id == tag.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
+    books = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
-    return (books, tag)
+    return (books, tax)
 
 
-def get_books_by_genre(slug, page):
-    page = max(1, _get_page(page))
-
-    genre = Genre.query.filter_by(slug=slug).first_or_404()
-
-    g_ids = [genre.id] + [x.id for x in genre.children]
-
-    books = Book.query.filter(and_(Book.genre_id.in_(g_ids), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, genre)
+def get_taxonomy_terms(ttype):
+    return Taxonomy.query.filter_by(type=ttype).order_by(Taxonomy.name)
 
 
-def get_books_by_series(slug, page):
-    page = max(1, _get_page(page))
-
-    sery = Series.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.series_id==sery.id, _privilege_filter())).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, sery)
-
-
-def get_books_by_author(slug, page):
-    page = max(1, _get_page(page))
-
-    author = Author.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.author_id==author.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, author)
-
-
-def get_books_by_publisher(slug, page):
-    page = max(1, _get_page(page))
-
-    publisher = Publisher.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.publisher_id==publisher.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, publisher)
+def get_taxonomy_terms_and_counts(ttype, order=None):
+    return Taxonomy.get_grouped_counts(ttype, order)
 
 
 def add_book(form, files):
@@ -306,101 +270,52 @@ def delete_book(id):
     delete_from_elasticsearch(book)
 
 
-def get_tags():
-    return Tag.query.order_by(Tag.name).all()
-
-
-def get_genres():
-    return Genre.query.order_by(Genre.name).all()
-
-
-def get_series():
-    return Series.query.order_by(Series.name).all()
-
-
-def get_authors():
-    return Author.query.order_by(Author.name).all()
-
-
-def get_authors_and_counts(order):
-    return _get_tax_grouped_count(Author, order=order)
-
-
-def get_publishers_and_counts():
-    return _get_tax_grouped_count(Publisher)
-
-
-def get_tags_and_counts():
-    return _get_tax_grouped_count(Tag)
-
-
-def get_series_and_counts():
-    return _get_tax_grouped_count(Series)
-
-
-def _get_tax_grouped_count(tax, order=None):
-    q = db.session.query(tax.name,
-                            tax.slug,
-                            tax.id,
-                            db.func.count(Book.id).label('count_books'))\
-        .outerjoin(Book).group_by(tax.name, tax.slug,
-                                  tax.id)
-
-    if not order or order == 'name':
-        q = q.order_by(tax.name.asc())
-    elif order == 'count':
-        q = q.order_by(db.desc('count_books'))
-
-    return q.all()
-
-
-def get_publishers():
-    return Publisher.query.order_by(Publisher.name).all()
-
-
 def get_toplevel_genres():
-    return Genre.query.filter_by(parent_id=None).order_by(Genre.name).all()
+    return Taxonomy.query.filter_by(parent_id=None, type='genre').order_by(Taxonomy.name).all()
 
 
 def add_genre(name, parent=None):
-    genre = Genre()
-    genre.name = name
-    genre.slug = genre.generate_slug()
-    genre.parent_id = parent if parent else None
-    db.session.add(genre)
-    db.session.commit()
-    return genre.id
+    pass
+    # genre = Genre()
+    # genre.name = name
+    # genre.slug = genre.generate_slug()
+    # genre.parent_id = parent if parent else None
+    # db.session.add(genre)
+    # db.session.commit()
+    # return genre.id
 
 
 def delete_tax_if_possible(tax, id):
-    obj = {
-        'genre': Genre,
-        'tag': Tag,
-        'series': Series,
-        'author': Author,
-        'publisher': Publisher,
-    }[tax]
-
-    instance = obj.query.get(int(id))
-    if instance:
-        if len(instance.books) == 0:  # no books left, so we can delete
-            delete_tax(tax, [id])
+    pass
+    # obj = {
+    #     'genre': Genre,
+    #     'tag': Tag,
+    #     'series': Series,
+    #     'author': Author,
+    #     'publisher': Publisher,
+    # }[tax]
+    #
+    # instance = obj.query.get(int(id))
+    # if instance:
+    #     if len(instance.books) == 0:  # no books left, so we can delete
+    #         delete_tax(tax, [id])
 
 
 def delete_tax(tax, ids):
-    obj = {
-        'genre': Genre,
-        'tag': Tag,
-        'series': Series,
-        'author': Author,
-        'publisher': Publisher,
-    }[tax]
-
-    for id in ids:
-        t = obj.query.get(int(id))
-        db.session.delete(t)
-
-    db.session.commit()
+    pass
+    # obj = {
+    #     'genre': Genre,
+    #     'tag': Tag,
+    #     'series': Series,
+    #     'author': Author,
+    #     'publisher': Publisher,
+    # }[tax]
+    #
+    # for id in ids:
+    #     t = obj.query.get(int(id))
+    #     db.session.delete(t)
+    #
+    # db.session.commit()
 
 
 def add_user(username, password):

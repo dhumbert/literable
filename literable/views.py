@@ -55,6 +55,7 @@ def download_book(id):
 @login_required
 def edit_book(id):
     book = model.get_book(id)
+
     if book:
         if not model.user_can_modify_book(book, current_user):
             abort(403)
@@ -92,87 +93,6 @@ def write_book_meta(id):
     flash('Saved file metadata', 'success')
     return redirect(url_for('edit_book', id=id))
 
-@app.route("/tags", methods=["GET", "POST"])
-@login_required
-def list_tags():
-    if request.method == 'POST':
-        model.delete_tax('tag', request.form.getlist('delete'))
-        flash('Deleted tag(s)', 'success')
-        return redirect(url_for('list_tags'))
-
-    tags = model.get_tags_and_counts()
-    return render_template('tags/list.html', tags=tags)
-
-
-@app.route("/tags/<tag>")
-@login_required
-def tag(tag):
-    books, tag = model.get_books_by_tag(tag, request.args.get('page'))
-    return render_template('books/list.html', books=books, tag=tag, pagination='tags/pagination.html')
-
-
-@app.route("/genres", methods=["GET", "POST"])
-@login_required
-def list_genres():
-    if request.method == 'POST':
-        model.delete_tax('genre', request.form.getlist('delete'))
-        flash('Deleted genre(s)', 'success')
-        return redirect(url_for('list_genres'))
-    genre_list = model.generate_genre_tree_list
-    return render_template('genres/list.html', genre_list=genre_list)
-
-
-@app.route("/genre/<genre>")
-@login_required
-def genre(genre):
-    books, genre = model.get_books_by_genre(genre, request.args.get('page'))
-    return render_template('books/list.html', books=books, genre=genre, pagination='genres/pagination.html')
-
-
-@app.route("/series", methods=["GET", "POST"])
-@login_required
-def list_series():
-    if request.method == 'POST':
-        model.delete_tax('series', request.form.getlist('delete'))
-        flash('Deleted series', 'success')
-        return redirect(url_for('list_series'))
-
-    series = model.get_series_and_counts()
-    return render_template('series/list.html', series=series)
-
-
-@app.route("/series/<series>")
-@login_required
-def series(series):
-    books, series = model.get_books_by_series(series, request.args.get('page'))
-    return render_template('books/list.html', books=books, series=series, pagination='series/pagination.html')
-
-
-@app.route("/author/<author>")
-@login_required
-def author(author):
-    books, author = model.get_books_by_author(author, request.args.get('page'))
-    return render_template('books/list.html', books=books, author=author, pagination='authors/pagination.html')
-
-
-@app.route("/publisher/<publisher>")
-@login_required
-def publisher(publisher):
-    books, publisher = model.get_books_by_publisher(publisher, request.args.get('page'))
-    return render_template('books/list.html', books=books, publisher=publisher, pagination='publishers/pagination.html')
-
-
-@app.route("/publishers", methods=["GET", "POST"])
-@login_required
-def list_publishers():
-    if request.method == 'POST':
-        model.delete_tax('publisher', request.form.getlist('delete'))
-        flash('Deleted publisher(s)', 'success')
-        return redirect(url_for('list_publishers'))
-
-    publishers = model.get_publishers_and_counts()
-    return render_template('publishers/list.html', publishers=publishers)
-
 
 @app.route("/reading-list")
 @login_required
@@ -181,18 +101,25 @@ def reading_list():
     return render_template('books/list.html', books=books, reading_list=True)
 
 
-@app.route("/authors", methods=["GET", "POST"])
+@app.route("/t/<ttype>/<slug>")
 @login_required
-def list_authors():
+def taxonomy(ttype, slug):
+    books, tax = model.get_taxonomy_books(ttype, slug, page=request.args.get('page'))
+    return render_template('books/list.html', books=books, taxonomy=tax, pagination='taxonomies/pagination.html')
+
+
+@app.route("/t/<ttype>", methods=["GET", "POST"])
+@login_required
+def taxonomy_terms(ttype):
     if request.method == 'POST':
-        model.delete_tax('author', request.form.getlist('delete'))
-        flash('Deleted author(s)', 'success')
-        return redirect(url_for('list_authors'))
+        #model.delete_tax('author', request.form.getlist('delete'))
+        flash('Deleted {}(s)'.format(ttype), 'success')
+        return redirect(url_for('taxonomy_terms', ttype=ttype))
 
     order = request.args.get('order')
 
-    authors = model.get_authors_and_counts(order)
-    return render_template('authors/list.html', authors=authors, order=order)
+    terms = model.get_taxonomy_terms_and_counts(ttype, order)
+    return render_template('taxonomies/list.html', ttype=ttype, terms=terms, order=order)
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -225,6 +152,14 @@ def search():
     return render_template('books/list.html', books=books, search=term)
 
 
+@app.route("/ajax/taxonomy/<ttype>")
+@content_type("application/json")
+@login_required
+def ajax_taxonomy(ttype):
+    terms = model.get_taxonomy_terms(ttype)
+    names = [term.name for term in terms]
+    return json.dumps(names)
+
 @app.route("/ajax/tags")
 @content_type("application/json")
 @login_required
@@ -239,7 +174,7 @@ def ajax_tags():
 @login_required
 def ajax_series():
     series = model.get_series()
-    titles = [sery.title for sery in series]
+    titles = [sery.name for sery in series]
     return json.dumps(titles)
 
 

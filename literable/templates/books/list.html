@@ -3,6 +3,12 @@
 {% block content %}
     <ul class="breadcrumb">
         <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
+
+        {% if taxonomy %}
+            <li><a href="{{ url_for('taxonomy_terms', ttype=taxonomy.type) }}">{{ taxonomy.type | title }}</a><span class="divider">/</span></li>
+            <li class="active">{{ taxonomy.name }}</li>
+        {% endif %}
+
         {% if tag %}
             <li><a href="{{ url_for('list_tags') }}">Tags</a><span class="divider">/</span></li>
             <li class="active">{{ tag.name }}</li>
@@ -20,7 +26,7 @@
 
         {% if series %}
             <li><a href="{{ url_for('list_series') }}">Series</a><span class="divider">/</span></li>
-            <li class="active">{{ series.title }}</li>
+            <li class="active">{{ series.name }}</li>
         {% endif %}
 
         {% if author %}

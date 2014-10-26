@@ -12,8 +12,8 @@
         <h3>{{ book.title | safe }}</h3>
         {% if book.series %}
             <div class="book-series">
-                <a href="{{ url_for('series', series=book.series.slug) }}">
-                    <span class="label label-info">{{ book.series.title }}</span></a>
+                <a href="{{ url_for('taxonomy', ttype='series', slug=book.series[0].slug) }}">
+                    <span class="label label-info">{{ book.series[0].name }}</span></a>
                 {% if book.series_seq %}
                     <span class="seq label">Book {{ book.series_seq }}</span>
                 {% endif %}
@@ -21,8 +21,8 @@
         {% endif %}
 
         <h4 class="author">
-            <a href="{{ url_for('author', author=book.author.slug) }}">
-                {{ book.author.name }}
+            <a href="{{ url_for('taxonomy', ttype='author', slug=book.authors[0].slug) }}">
+                {{ book.authors[0].name }}
             </a>
         </h4>
 
@@ -32,32 +32,32 @@
             </div>
         {% endif %}
 
-        {% if book.publisher %}
+        {% for publisher in book.publishers %}
             <div class="book-publisher">
                 <i class="icon-book"></i>
-                <a href="{{ url_for('publisher', publisher=book.publisher.slug) }}">
-                    {{ book.publisher.name }}
+                <a href="{{ url_for('taxonomy', ttype='publisher', slug=publisher.slug) }}">
+                    {{ publisher.name }}
                 </a>
             </div>
-        {% endif %}
+        {% endfor %}
 
-        {% if book.genre %}
+        {% for genre in book.genres %}
             <div class="book-genre">
                 <i class="icon-folder-open"></i>
-                {% for genre in book.genre.get_parents() %}
-                    <a href="{{ url_for('genre', genre=genre.slug) }}">{{ genre.name }}</a>
+                {% for parent in genre.get_parents() %}
+                    <a href="{{ url_for('taxonomy', ttype='genre', slug=parent.slug) }}">{{ parent.name }}</a>
                     <i class="icon-chevron-right"></i>
                 {% endfor %}
-                <a href="{{ url_for('genre', genre=book.genre.slug) }}">{{ book.genre.name }}</a>
+                <a href="{{ url_for('taxonomy', ttype='genre', slug=genre.slug) }}">{{ genre.name }}</a>
             </div>
-        {% endif %}
+        {% endfor %}
 
         {% if book.tags %}
             <ul class="book-tags">
                 <li><i class="icon-tags"></i></li>
                 {% for tag in book.tags %}
                     <li>
-                        <a href="{{ url_for('tag', tag=tag.slug) }}">{{ tag.name }}</a>
+                        <a href="{{ url_for('taxonomy', ttype='tag', slug=tag.slug) }}">{{ tag.name }}</a>
                     </li>
                 {% endfor %}
             </ul>
