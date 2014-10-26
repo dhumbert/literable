@@ -4,6 +4,7 @@
     <ul class="breadcrumb">
         <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
         <li class="active">Authors</li>
+        {% include 'tax_list_sort.html' %}
     </ul>
 
     {% include 'tax_edit_btn.html' %}
@@ -17,6 +18,7 @@
                     <li>
                         <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ author.id }}"></span>
                         <a href="{{ url_for('author', author=author.slug) }}">{{ author.name }}</a>
+                        <span class="tax-count">{{ author.count_books }}</span>
                     </li>
                 {% endfor %}
             </ul>

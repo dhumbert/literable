@@ -34,15 +34,15 @@ class Tag(db.Model):
 class Series(db.Model):
     __tablename__ = 'series'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
+    name = db.Column(db.String)
     slug = db.Column(db.String)
     description = db.Column(db.Text)
 
     def generate_slug(self, depth=0):
-        search_for = utils.slugify(self.title)
+        search_for = utils.slugify(self.name)
 
         if depth > 0:
-            search_for = utils.slugify("%s-%d" % (self.title, depth))
+            search_for = utils.slugify("%s-%d" % (self.name, depth))
 
         result = Series.query.filter_by(slug=search_for).first()
         if result is None:
@@ -191,10 +191,10 @@ class Book(db.Model):
 
     def update_series(self, series, seq):
         if series:
-            books_series = Series.query.filter_by(title=series).first()
+            books_series = Series.query.filter_by(name=series).first()
             if not books_series:
                 books_series = Series()
-                books_series.title = series
+                books_series.name = series
                 books_series.slug = books_series.generate_slug()
                 db.session.add(books_series)
             self.series = books_series
@@ -242,7 +242,7 @@ class Book(db.Model):
             cover = None
 
         if self.series:
-            series = self.series.title
+            series = self.series.name
         else:
             series = None
 
@@ -267,7 +267,7 @@ class Book(db.Model):
         title = self.title
         if app.config['ADD_SERIES_TO_META_TITLE']:
             if self.series:
-                prepend_title = self.series.title
+                prepend_title = self.series.name
                 if self.series_seq:
                     prepend_title = "%s %d - " % (prepend_title, self.series_seq)
 

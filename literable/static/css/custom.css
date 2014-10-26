@@ -160,3 +160,8 @@
     font-weight: bold;
     color: darkorange;
 }
+
+.tax-count {
+    font-size: 0.75em;
+    color: #ccc;
+}

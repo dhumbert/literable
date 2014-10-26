@@ -100,7 +100,7 @@ def list_tags():
         flash('Deleted tag(s)', 'success')
         return redirect(url_for('list_tags'))
 
-    tags = model.get_tags()
+    tags = model.get_tags_and_counts()
     return render_template('tags/list.html', tags=tags)
 
 
@@ -137,7 +137,7 @@ def list_series():
         flash('Deleted series', 'success')
         return redirect(url_for('list_series'))
 
-    series = model.get_series()
+    series = model.get_series_and_counts()
     return render_template('series/list.html', series=series)
 
 
@@ -170,7 +170,7 @@ def list_publishers():
         flash('Deleted publisher(s)', 'success')
         return redirect(url_for('list_publishers'))
 
-    publishers = model.get_publishers()
+    publishers = model.get_publishers_and_counts()
     return render_template('publishers/list.html', publishers=publishers)
 
 
@@ -189,8 +189,10 @@ def list_authors():
         flash('Deleted author(s)', 'success')
         return redirect(url_for('list_authors'))
 
-    authors = model.get_authors()
-    return render_template('authors/list.html', authors=authors)
+    order = request.args.get('order')
+
+    authors = model.get_authors_and_counts(order)
+    return render_template('authors/list.html', authors=authors, order=order)
 
 
 @app.route("/login", methods=['GET', 'POST'])
