@@ -55,8 +55,7 @@
 }
 
 .row-library .cell-actions .rating {
-    float: right;
-    margin-right: 0.75em;
+    margin: 0 auto 1em auto;
 }
 
 .row-library .cell-actions .btn {
