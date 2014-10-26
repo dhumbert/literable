@@ -6,6 +6,9 @@
     <label for="author">Author</label>
     <input type="text" name="author" id="author" value="{{ book.author.name | none2blank }}" class="span9" autocomplete="off">
 
+    <label for="publisher">Publisher</label>
+    <input type="text" name="publisher" id="publisher" value="{{ book.publisher.name | none2blank }}" class="span9" autocomplete="off">
+
     <label for="description">Description</label>
     <textarea name="description" id="description" class="span9" rows="10">{{ book.description | none2blank }}</textarea>
 
@@ -83,6 +86,14 @@
         $('#author').typeahead({
             source: function(query, process) {
                 return $.get('{{ url_for("ajax_author") }}', {query: query}, function(data){
+                    return process(data);
+                });
+            }
+        });
+
+        $('#publisher').typeahead({
+            source: function(query, process) {
+                return $.get('{{ url_for("ajax_publisher") }}', {query: query}, function(data){
                     return process(data);
                 });
             }

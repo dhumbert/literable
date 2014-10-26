@@ -28,6 +28,11 @@
             <li class="active">{{ author.name }}</li>
         {% endif %}
 
+        {% if publisher %}
+            <li><a href="{{ url_for('list_publishers') }}">Publishers</a><span class="divider">/</span></li>
+            <li class="active">{{ publisher.name }}</li>
+        {% endif %}
+
         {% if recent %}
             <li class="active">Recent Books</li>
         {% endif %}

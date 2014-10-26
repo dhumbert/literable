@@ -69,6 +69,24 @@ class Author(db.Model):
         else:
             return self.generate_slug(depth + 1)
 
+class Publisher(db.Model):
+    __tablename__ = 'publishers'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    slug = db.Column(db.String)
+
+    def generate_slug(self, depth=0):
+        search_for = utils.slugify(self.name)
+
+        if depth > 0:
+            search_for = utils.slugify("%s-%d" % (self.name, depth))
+
+        result = Publisher.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
+
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -91,6 +109,9 @@ class Book(db.Model):
 
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
     author = db.relationship('Author', backref=db.backref('books'))
+
+    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.id'))
+    publisher = db.relationship('Publisher', backref=db.backref('books'))
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=db.backref('books'))
@@ -194,6 +215,16 @@ class Book(db.Model):
                 book_author.slug = book_author.generate_slug()
                 db.session.add(book_author)
             self.author = book_author
+
+    def update_publisher(self, name):
+        if name:
+            book_publisher = Publisher.query.filter_by(name=name).first()
+            if not book_publisher:
+                book_publisher = Publisher()
+                book_publisher.name = name
+                book_publisher.slug = book_publisher.generate_slug()
+                db.session.add(book_publisher)
+            self.publisher = book_publisher
 
     def write_meta(self):
         if self.filename:

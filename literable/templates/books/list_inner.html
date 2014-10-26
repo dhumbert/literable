@@ -32,6 +32,15 @@
             </div>
         {% endif %}
 
+        {% if book.publisher %}
+            <div class="book-publisher">
+                <i class="icon-book"></i>
+                <a href="{{ url_for('publisher', publisher=book.publisher.slug) }}">
+                    {{ book.publisher.name }}
+                </a>
+            </div>
+        {% endif %}
+
         {% if book.genre %}
             <div class="book-genre">
                 <i class="icon-folder-open"></i>

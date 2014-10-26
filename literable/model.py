@@ -6,7 +6,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
 from literable import db, app
-from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList
+from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList, Publisher
 
 
 def _get_page(page):
@@ -147,6 +147,16 @@ def get_books_by_author(slug, page):
     return (books, author)
 
 
+def get_books_by_publisher(slug, page):
+    page = max(1, _get_page(page))
+
+    publisher = Publisher.query.filter_by(slug=slug).first_or_404()
+    books = Book.query.filter(and_(Book.publisher_id==publisher.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = None if len(books.items) == 0 else books
+
+    return (books, publisher)
+
+
 def add_book(form, files):
     if 'title' not in form or not form['title'].strip():
         raise ValueError("Title must not be blank")
@@ -164,6 +174,7 @@ def add_book(form, files):
     book.description = form['description']
     book.genre_id = genre_id
     book.update_author(form['author'])
+    book.update_publisher(form['publisher'])
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
 
@@ -225,6 +236,7 @@ def edit_book(id, form, files):
 
         old_genre_id = book.genre_id
         old_author_id = book.author_id
+        old_publisher_id = book.publisher_id
         old_series_id = book.series_id
 
         # user is adding a new genre
@@ -240,6 +252,7 @@ def edit_book(id, form, files):
         book.description = form['description']
         book.genre_id = genre_id
         book.update_author(form['author'])
+        book.update_publisher(form['publisher'])
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.update_series(form['series'], form['series_seq'])
@@ -261,6 +274,8 @@ def edit_book(id, form, files):
             delete_tax_if_possible('author', old_author_id)
         if old_series_id:
             delete_tax_if_possible('series', old_series_id)
+        if old_publisher_id:
+            delete_tax_if_possible('publisher', old_publisher_id)
 
         book_to_elasticsearch(book)
 
@@ -307,6 +322,10 @@ def get_authors():
     return Author.query.order_by(Author.name).all()
 
 
+def get_publishers():
+    return Publisher.query.order_by(Publisher.name).all()
+
+
 def get_toplevel_genres():
     return Genre.query.filter_by(parent_id=None).order_by(Genre.name).all()
 
@@ -326,12 +345,13 @@ def delete_tax_if_possible(tax, id):
         'genre': Genre,
         'tag': Tag,
         'series': Series,
-        'author': Author
+        'author': Author,
+        'publisher': Publisher,
     }[tax]
 
     instance = obj.query.get(int(id))
     if instance:
-        if len(instance.books) == 0: # no books left, so we can delete
+        if len(instance.books) == 0:  # no books left, so we can delete
             delete_tax(tax, [id])
 
 
@@ -340,7 +360,8 @@ def delete_tax(tax, ids):
         'genre': Genre,
         'tag': Tag,
         'series': Series,
-        'author': Author
+        'author': Author,
+        'publisher': Publisher,
     }[tax]
 
     for id in ids:
