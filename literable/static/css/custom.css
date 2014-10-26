@@ -29,6 +29,10 @@
 
 .row-library .cell-cover {
     text-align: center;
+    margin-top: 1em;
+    -webkit-box-shadow: 0 10px 20px 1px #ccc;
+   -moz-box-shadow: 0 10px 20px 1px #ccc;
+        box-shadow: 0 10px 20px 1px #ccc;
 }
 
 @media (max-width: 768px) {
@@ -51,8 +55,7 @@
 }
 
 .row-library .cell-actions .rating {
-    float: right;
-    margin-right: 0.75em;
+    margin: 0 auto 1em auto;
 }
 
 .row-library .cell-actions .btn {
@@ -63,8 +66,9 @@
     margin: 0;
 }
 
-.row-library .cell-info .book-series {
-    margin: 0 0 0.5em 0;
+.row-library .cell-info h4 {
+    margin-top: 0;
+    margin-bottom: 1em;
 }
 
 .row-library .cell-info h4 a {
@@ -73,12 +77,18 @@
     margin-top: 0;
 }
 
-.row-library .cell-info .book-genre {
+.row-library .cell-info .book-series {
+    margin: 0 0 0.5em 0;
+}
+
+.row-library .cell-info .book-genre,
+.row-library .cell-info .book-publisher {
     font-size: 90%;
     color: #666;
 }
 
-.row-library .cell-info .book-genre a {
+.row-library .cell-info .book-genre a,
+.row-library .cell-info .book-publisher a {
     margin-left: 0.35em;
 }
 

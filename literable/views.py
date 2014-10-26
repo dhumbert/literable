@@ -155,6 +155,25 @@ def author(author):
     return render_template('books/list.html', books=books, author=author, pagination='authors/pagination.html')
 
 
+@app.route("/publisher/<publisher>")
+@login_required
+def publisher(publisher):
+    books, publisher = model.get_books_by_publisher(publisher, request.args.get('page'))
+    return render_template('books/list.html', books=books, publisher=publisher, pagination='publishers/pagination.html')
+
+
+@app.route("/publishers", methods=["GET", "POST"])
+@login_required
+def list_publishers():
+    if request.method == 'POST':
+        model.delete_tax('publisher', request.form.getlist('delete'))
+        flash('Deleted publisher(s)', 'success')
+        return redirect(url_for('list_publishers'))
+
+    publishers = model.get_publishers()
+    return render_template('publishers/list.html', publishers=publishers)
+
+
 @app.route("/reading-list")
 @login_required
 def reading_list():
@@ -228,6 +247,15 @@ def ajax_series():
 def ajax_author():
     authors = model.get_authors()
     names = [author.name for author in authors]
+    return json.dumps(names)
+
+
+@app.route("/ajax/publisher")
+@content_type("application/json")
+@login_required
+def ajax_publisher():
+    publishers = model.get_publishers()
+    names = [publisher.name for publisher in publishers]
     return json.dumps(names)
 
 

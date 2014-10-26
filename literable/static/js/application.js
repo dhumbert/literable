@@ -32,6 +32,7 @@ $(document).ready(function(){
             $('.rating').raty({
                 path: '/static/img',
                 number: 4,
+                size: 28,
                 hints: ['Poor', 'Average', 'Good', 'Excellent'],
                 score: function() {
                     return $(this).attr('data-score');
