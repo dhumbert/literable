@@ -17,6 +17,7 @@
                     <li>
                         <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ publisher.id }}"></span>
                         <a href="{{ url_for('publisher', publisher=publisher.slug) }}">{{ publisher.name }}</a>
+                        <span class="tax-count">{{ publisher.count_books }}</span>
                     </li>
                 {% endfor %}
             </ul>

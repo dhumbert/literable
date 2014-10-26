@@ -52,7 +52,7 @@ def get_recent_books(page):
 
 def search_books(q):
     if app.config['ELASTICSEARCH_ENABLED']:
-        _search_books_elasticsearch(q)
+        return _search_books_elasticsearch(q)
     else:
         return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc')
 
@@ -208,7 +208,7 @@ def book_to_elasticsearch(book):
                   'id': book.id,
                   }
         if book.series:
-            es_doc['series'] = book.series.title
+            es_doc['series'] = book.series.name
 
         if book.author:
             es_doc['author'] = book.author.name
@@ -315,11 +315,43 @@ def get_genres():
 
 
 def get_series():
-    return Series.query.order_by(Series.title).all()
+    return Series.query.order_by(Series.name).all()
 
 
 def get_authors():
     return Author.query.order_by(Author.name).all()
+
+
+def get_authors_and_counts(order):
+    return _get_tax_grouped_count(Author, order=order)
+
+
+def get_publishers_and_counts():
+    return _get_tax_grouped_count(Publisher)
+
+
+def get_tags_and_counts():
+    return _get_tax_grouped_count(Tag)
+
+
+def get_series_and_counts():
+    return _get_tax_grouped_count(Series)
+
+
+def _get_tax_grouped_count(tax, order=None):
+    q = db.session.query(tax.name,
+                            tax.slug,
+                            tax.id,
+                            db.func.count(Book.id).label('count_books'))\
+        .outerjoin(Book).group_by(tax.name, tax.slug,
+                                  tax.id)
+
+    if not order or order == 'name':
+        q = q.order_by(tax.name.asc())
+    elif order == 'count':
+        q = q.order_by(db.desc('count_books'))
+
+    return q.all()
 
 
 def get_publishers():
