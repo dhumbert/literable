@@ -164,7 +164,7 @@ def add_book(form, files):
     # user is adding a new genre
     if 'new-genre-name' in form and form['new-genre-name'].strip() != '':
         genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-    elif 'genre' in form:
+    elif 'genre' in form and form['genre']:
         genre_id = form['genre']
     else:
         genre_id = None
