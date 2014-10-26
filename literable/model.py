@@ -52,7 +52,7 @@ def get_recent_books(page):
 
 def search_books(q):
     if app.config['ELASTICSEARCH_ENABLED']:
-        _search_books_elasticsearch(q)
+        return _search_books_elasticsearch(q)
     else:
         return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc')
 
