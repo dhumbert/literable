@@ -1,3 +1,13 @@
+function basic_html_to_markdown(html) {
+    return html.replace(/<p>/g, "")
+        .replace(/<\/p>/g, "\n\n")
+        .replace(/<br ?\/?>/g, "\n")
+        .replace(/<\/?strong>/g, "**")
+        .replace(/<\/?b>/g, "**")
+        .replace(/<\/?em>/g, "*")
+        .replace(/<\/?i>/g, "*");
+}
+
 $(document).ready(function(){
     $('#base-modal').modal({
         show: false
@@ -83,7 +93,6 @@ $(document).ready(function(){
     }
 
     if ($('#book-file').length) {
-
         $('#use-meta').on('click', function(){
             if ($('#use-title').is(':checked')) {
                 $('#title').val($('#meta-title').text());
@@ -98,7 +107,7 @@ $(document).ready(function(){
             }
 
             if ($('#use-description').is(':checked')) {
-                $('#description').val($('#meta-description').text().trim());
+                $('#description').val(basic_html_to_markdown($('#meta-description').html().trim()));
             }
 
             $('#meta-modal').modal('hide');
@@ -121,7 +130,7 @@ $(document).ready(function(){
                         $('#meta-title').text(meta.title);
                         $('#meta-author').text(meta.author);
                         $('#meta-publisher').text(meta.publisher);
-                        $('#meta-description').text(meta.description);
+                        $('#meta-description').html(meta.description);
 
                         $('#meta-modal').modal();
                     }
