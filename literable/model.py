@@ -191,48 +191,25 @@ def edit_book(id, form, files):
         if not user_can_modify_book(book, current_user):
             return False
 
-        old_genre_id = book.genre_id
-        old_author_id = book.author_id
-        old_publisher_id = book.publisher_id
-        old_series_id = book.series_id
-
-        # user is adding a new genre
-        if form['new-genre-name'] or form['genre']:
-            if form['new-genre-name']:
-                genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-            elif form['genre']:
-                genre_id = form['genre']
-        else:
-            genre_id = None
-
         book.title = form['title']
         book.description = form['description']
-        book.genre_id = genre_id
-        book.update_author(form['author'])
-        book.update_publisher(form['publisher'])
         book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
-        book.update_series(form['series'], form['series_seq'])
+        book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
 
-        if 'tags' in form:
-            book.update_tags(form['tags'])
-        else:
-            book.empty_tags()
+        book.update_taxonomies({
+            'author': [form['author']],
+            'publisher': [form['publisher']],
+            'series': [form['series']],
+            'genre': [form['genre']],
+            'tag': form['tags'].split(','),
+        })
 
         db.session.commit()
 
         if app.config['WRITE_META_ON_SAVE']:
             book.write_meta()
-
-        if old_genre_id:
-            delete_tax_if_possible('genre', old_genre_id)
-        if old_author_id:
-            delete_tax_if_possible('author', old_author_id)
-        if old_series_id:
-            delete_tax_if_possible('series', old_series_id)
-        if old_publisher_id:
-            delete_tax_if_possible('publisher', old_publisher_id)
 
         book_to_elasticsearch(book)
 

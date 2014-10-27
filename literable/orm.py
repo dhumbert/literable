@@ -156,6 +156,7 @@ class Book(db.Model):
         return ', '.join(tags)
 
     def update_taxonomies(self, tax_map):
+        self.taxonomies = []
         for tax_slug, terms in tax_map.iteritems():
             for term_name in terms:
                 if term_name.strip():
