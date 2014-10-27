@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
-from literable import app, model
+from literable import app, model, epub
 
 
 manager = Manager(app)
@@ -20,6 +20,13 @@ def write_meta():
     for book in model.get_all_books():
         print "Writing meta for %s" % book.title
         book.write_meta()
+
+
+@manager.command
+def read_epub_meta(book_path):
+    """Read metadata for an ePub file"""
+    e = epub.Epub(book_path)
+    print e.metadata
 
 
 @manager.command
