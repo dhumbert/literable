@@ -196,9 +196,14 @@ class Book(db.Model):
         else:
             tags = []
 
+        if self.authors:
+            author = self.authors[0].name
+        else:
+            author = None
+
         subjects = genre + tags
 
-        epub.write_epub_meta(epub_file, title, self.author.name,
+        epub.write_epub_meta(epub_file, title, author,
             description=self.description,
             cover=cover,
             subjects=subjects)

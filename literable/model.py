@@ -197,10 +197,10 @@ def book_to_elasticsearch(book):
                   'id': book.id,
                   }
         if book.series:
-            es_doc['series'] = book.series.name
+            es_doc['series'] = book.series[0].name
 
-        if book.author:
-            es_doc['author'] = book.author.name
+        if book.authors:
+            es_doc['author'] = book.authors[0].name
 
         es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
         es.index(app.config['ELASTICSEARCH_INDEX'],
@@ -212,9 +212,12 @@ def book_to_elasticsearch(book):
 def delete_from_elasticsearch(book):
     if app.config['ELASTICSEARCH_ENABLED']:
         es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-        es.delete(app.config['ELASTICSEARCH_INDEX'],
-                 app.config['ELASTICSEARCH_DOC_TYPE'],
-                 id=book.id)
+        try:
+            es.delete(app.config['ELASTICSEARCH_INDEX'],
+                     app.config['ELASTICSEARCH_DOC_TYPE'],
+                     id=book.id)
+        except Exception as e:
+            app.logger.warning("Unable to delete book from ES: {}".format(e.message))
 
 
 def delete_book(id):

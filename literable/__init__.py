@@ -1,4 +1,5 @@
 import os
+import logging
 from functools import wraps
 from flask import Flask, make_response
 from flaskext import uploads
@@ -11,6 +12,13 @@ from literable.filters import nl2br, none2blank
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('literable.config')
 app.config.from_pyfile('application.cfg')
+
+# Log only in production mode.
+
+if not app.debug:
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.ERROR)
+    app.logger.addHandler(stream_handler)
 
 db = SQLAlchemy(app)
 
