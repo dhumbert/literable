@@ -82,6 +82,24 @@ $(document).ready(function(){
         });
     }
 
+    if ($('#book-file').length) {
+        $.getScript('/static/js/uploadify/jquery.uploadify.min.js', function(){
+            $('#book-file').uploadify({
+                swf: '/static/js/uploadify/uploadify.swf',
+                uploader: '/books/upload',
+                buttonText: 'Select Book File',
+                uploadLimit: 1,
+                removeCompleted: false,
+                onUploadSuccess: function(file, data, response) {
+                    json = $.parseJSON(data);
+
+                    $('#file').val(json.filename);
+                    console.log(json);
+                }
+            });
+        });
+    }
+
     if ($('.add-to-reading-list').length) {
         $('.add-to-reading-list').on('click', function(e) {
             var elem = $(this);

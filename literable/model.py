@@ -5,7 +5,7 @@ from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
-from literable import db, app
+from literable import db, app, book_staging_upload_set
 from literable.orm import Book, User, ReadingList, Taxonomy
 
 
@@ -141,11 +141,10 @@ def add_book(form, files):
         'tag': form['tags'].split(','),
     })
 
-    if 'file' in files:
-        book.attempt_to_update_file(files['file'])
-
     if 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
+
+    book.move_file_from_staging(form['file'])
 
     db.session.add(book)
     db.session.commit()
@@ -166,7 +165,6 @@ def edit_book(id, form, files):
 
         book.title = form['title']
         book.description = form['description']
-        book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
@@ -179,6 +177,8 @@ def edit_book(id, form, files):
             'tag': form['tags'].split(','),
         })
 
+        book.move_file_from_staging(form['file'])
+
         db.session.commit()
 
         if app.config['WRITE_META_ON_SAVE']:
@@ -188,6 +188,14 @@ def edit_book(id, form, files):
 
         return True
     return False
+
+
+def upload_book(file):
+    filename = book_staging_upload_set.save(file)
+    if filename:
+        return filename
+    else:
+        return None
 
 
 def book_to_elasticsearch(book):

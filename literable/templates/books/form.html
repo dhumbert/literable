@@ -1,4 +1,12 @@
 <form method="post" class="form-horizontal book-form" enctype="multipart/form-data">
+    <input type="file" id="book-file" />
+    <input type="hidden" name="file" id="file" value="{{ book.filename }}">
+
+    {% if book.filename %}
+        <span class="help-block">Don't click if you want to keep the current file.</span>
+    {% endif %}
+
+
     <label for="title">Title</label>
     <input type="text" name="title" id="title" value="{{ book.title | none2blank }}" class="span9">
     <button type="button" class="btn" id="lookupTitle"><i class="icon-search"></i></button>
@@ -15,7 +23,7 @@
     <label for="tags">Tags</label>
     <input type="text" id="tags" name="fakeTags" class="input-small" autocomplete="off">
 
-    
+
     <label for="series">Series</label>
     <input type="text" name="series" id="series" value="{{ book.series[0].name if book.series else None | none2blank }}" class="span7" autocomplete="off">
 
@@ -23,7 +31,7 @@
         <span class="add-on">#</span>
         <input class="span1" type="number" name="series_seq" id="series_seq" value="{{ book.series_seq | none2blank }}">
     </span>
-    
+
 
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span7">
@@ -49,12 +57,6 @@
             <span class="help-block">If the new genre name is not blank, the new genre will override any genre selected above.</span>
         </div>
     </div>
-
-    <label for="file">File</label>
-    {% if book.filename %}
-        <span class="help-block">Leave blank to keep current file.</span>
-    {% endif %}
-    <input type="file" name="file" id="file" />
 
 
     <label for="cover">Cover Image</label>

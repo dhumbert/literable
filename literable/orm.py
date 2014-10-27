@@ -1,8 +1,11 @@
-import os, hashlib
+import os
+import os.path
+import hashlib
+import shutil
 from flask import url_for
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
-from literable import db, book_upload_set, cover_upload_set, utils, epub, app
+from literable import db, book_upload_set, book_staging_upload_set, cover_upload_set, utils, epub, app
 
 
 books_taxonomies = db.Table('books_taxonomies',
@@ -116,25 +119,27 @@ class Book(db.Model):
     def remove_file(self):
         if self.filename:
             os.remove(book_upload_set.path(self.filename))
+            self.filename = None
 
     def remove_cover(self):
         if self.cover:
             os.remove(cover_upload_set.path(self.cover))
+            self.cover = None
 
-    def attempt_to_update_file(self, file):
-        try:
-            filename = book_upload_set.save(file)
-            if filename:
-                if self.filename:
-                    # remove current file if user uploaded new one
-                    try:
-                        self.remove_file()
-                    except:
-                        pass  # can't delete old book. not the end of the world.
+    def move_file_from_staging(self, filename):
+        if self.filename:
+            self.remove_file()
 
-                self.filename = filename
-        except:
-            pass  # couldn't upload book. maybe blank upload?
+        if filename:
+            self.filename = filename
+            src = book_staging_upload_set.path(self.filename)
+            dest_path = app.config['LIBRARY_PATH']
+
+            if os.path.exists(os.path.join(dest_path, self.filename)):
+                self.filename = book_upload_set.resolve_conflict(dest_path, self.filename)
+
+            shutil.move(src, book_upload_set.path(self.filename))
+
 
     def attempt_to_update_cover(self, file):
         try:

@@ -108,6 +108,10 @@
     font-size: 90%;
 }
 
+#book-file {
+    margin-top: 2em;
+}
+
 .book-edit-meta {
     text-align: center;
     padding: 1em;
