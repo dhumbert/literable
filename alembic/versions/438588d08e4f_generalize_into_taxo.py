@@ -12,7 +12,6 @@ down_revision = 'cf8ae85b6a1'
 
 from alembic import op
 import sqlalchemy as sa
-from literable.orm import Tag
 
 
 def upgrade():
