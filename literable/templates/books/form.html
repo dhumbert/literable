@@ -6,7 +6,6 @@
         <span class="help-block">Don't click if you want to keep the current file.</span>
     {% endif %}
 
-
     <label for="title">Title</label>
     <input type="text" name="title" id="title" value="{{ book.title | none2blank }}" class="span9">
     <button type="button" class="btn" id="lookupTitle"><i class="icon-search"></i></button>
@@ -79,6 +78,45 @@
       <a href="{{ url_for('recent') }}" class="btn">Cancel</a>
     </div>
 </form>
+
+<div id="meta-modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Found Metadata</h3>
+    </div>
+    <div class="modal-body">
+        <p>There was some metadata in that file. Want to use any of it?</p>
+
+        <table class="table">
+            <tr>
+                <th scope="row">Title</th>
+                <td><span id="meta-title"></span></td>
+                <td><input type="checkbox" id="use-title" checked="checked"></td>
+            </tr>
+            <tr>
+                <th scope="row">Author</th>
+                <td><span id="meta-author"></span></td>
+                <td><input type="checkbox" id="use-author" checked="checked"></td>
+            </tr>
+            <tr>
+                <th scope="row">Publisher</th>
+                <td><span id="meta-publisher"></span></td>
+                <td><input type="checkbox" id="use-publisher" checked="checked"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="field"><strong>Description</strong></div>
+                    <div id="meta-description"></div>
+                </td>
+                <td><input type="checkbox" id="use-description" checked="checked"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" id="use-meta" class="btn btn-primary">Use Checked Fields</a>
+    </div>
+</div>
 
 {% block footer_scripts %}
 <link rel="stylesheet" href="{{ url_for('static', filename='js/tagmanager/bootstrap-tagmanager.css') }}">
