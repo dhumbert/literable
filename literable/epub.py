@@ -99,7 +99,7 @@ class Epub:
         metadata = self.metadata_element
         if metadata is not None:
             # repackage the data
-            for s in ['title', 'creator', 'description', 'subject', 'identifier', 'language']:
+            for s in ['title', 'creator', 'description', 'subject', 'identifier', 'language', 'publisher']:
                 item = metadata.xpath('dc:%s/text()' % (s), namespaces=ns)
                 if item:
                     if len(item) > 1:

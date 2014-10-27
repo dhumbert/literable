@@ -1,11 +1,12 @@
 from datetime import datetime
 import hashlib
+import os
 from flask import url_for, flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
-from literable import db, app, book_staging_upload_set
+from literable import db, app, book_staging_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy
 
 
@@ -193,7 +194,17 @@ def edit_book(id, form, files):
 def upload_book(file):
     filename = book_staging_upload_set.save(file)
     if filename:
-        return filename
+        extension = os.path.splitext(filename)[1][1:]
+        if extension == 'epub':
+            e = epub.Epub(book_staging_upload_set.path(filename))
+            if e:
+                meta = e.metadata
+            else:
+                meta = None
+        else:
+            meta = None
+
+        return filename, meta
     else:
         return None
 

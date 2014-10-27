@@ -38,7 +38,7 @@ def add_book_post():
 @content_type("application/json")
 def upload_book():
     try:
-        filename = model.upload_book(request.files['Filedata'])
+        filename, meta = model.upload_book(request.files['Filedata'])
         if not filename:
             raise Exception("Unable to upload book")
     except Exception as e:
@@ -47,6 +47,7 @@ def upload_book():
 
     results = {
         'filename': filename,
+        'meta': meta,
     }
 
     return json.dumps(results)
