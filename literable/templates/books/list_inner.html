@@ -1,6 +1,10 @@
 <div class="row row-library" data-book-id="{{ book.id }}">
-    <div class="span2 cell-cover hidden-phone {% if reading_list %}reading-list-reposition" title="Click and drag to reorder" {% endif %}>
+    <div class="span2 cell-cover hidden-phone">
+        {% if reading_list %}
+            <div class="reading-list-reposition" title="Click and drag to reorder">
+        {% endif %}
         <img src="{{ book.get_cover_url() }}" />
+        {% if reading_list %}</div>{% endif %}
     </div>
 
     <div class="span8 cell-info">
