@@ -160,41 +160,6 @@ def ajax_taxonomy(ttype):
     names = [term.name for term in terms]
     return json.dumps(names)
 
-@app.route("/ajax/tags")
-@content_type("application/json")
-@login_required
-def ajax_tags():
-    tags = model.get_tags()
-    names = [tag.name for tag in tags]
-    return json.dumps(names)
-
-
-@app.route("/ajax/series")
-@content_type("application/json")
-@login_required
-def ajax_series():
-    series = model.get_series()
-    titles = [sery.name for sery in series]
-    return json.dumps(titles)
-
-
-@app.route("/ajax/author")
-@content_type("application/json")
-@login_required
-def ajax_author():
-    authors = model.get_authors()
-    names = [author.name for author in authors]
-    return json.dumps(names)
-
-
-@app.route("/ajax/publisher")
-@content_type("application/json")
-@login_required
-def ajax_publisher():
-    publishers = model.get_publishers()
-    names = [publisher.name for publisher in publishers]
-    return json.dumps(names)
-
 
 @app.route("/ajax/rate", methods=['POST'])
 @login_required
