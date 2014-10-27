@@ -1,11 +1,12 @@
+
 <div class="pagination pagination-large pagination-centered">
     <ul>
         <li{% if not books.has_prev %} class="disabled"{% endif %}>
-            <a href="{{ url_for('publisher', publisher=publisher.slug, page=books.prev_num) }}">&larr; Prev</a>
+            <a href="{{ url_for('taxonomy', ttype=taxonomy.type, slug=taxonomy.slug, page=books.prev_num) }}">&larr; Prev</a>
         </li>
         
         <li{% if not books.has_next %} class="disabled"{% endif %}>
-            <a href="{{ url_for('publisher', publisher=publisher.slug, page=books.next_num) }}">Next &rarr;</a>
+            <a href="{{ url_for('taxonomy', ttype=taxonomy.type, slug=taxonomy.slug, page=books.next_num) }}">Next &rarr;</a>
         </li>
     </ul>
 </div>

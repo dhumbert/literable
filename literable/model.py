@@ -6,7 +6,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
 from literable import db, app
-from literable.orm import Book, Genre, Tag, Series, Author, User, ReadingList, Publisher
+from literable.orm import Book, User, ReadingList, Taxonomy
 
 
 def _get_page(page):
@@ -103,86 +103,43 @@ def _search_books_elasticsearch(q):
     return books
 
 
-
-def get_books_by_tag(slug, page):
+def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 
-    tag = Tag.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.tags.any(Tag.id == tag.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
+    books = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
-    return (books, tag)
+    return (books, tax)
 
 
-def get_books_by_genre(slug, page):
-    page = max(1, _get_page(page))
-
-    genre = Genre.query.filter_by(slug=slug).first_or_404()
-
-    g_ids = [genre.id] + [x.id for x in genre.children]
-
-    books = Book.query.filter(and_(Book.genre_id.in_(g_ids), _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, genre)
+def get_taxonomy_terms(ttype):
+    return Taxonomy.query.filter_by(type=ttype).order_by(Taxonomy.name)
 
 
-def get_books_by_series(slug, page):
-    page = max(1, _get_page(page))
-
-    sery = Series.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.series_id==sery.id, _privilege_filter())).order_by(Book.series_seq).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, sery)
-
-
-def get_books_by_author(slug, page):
-    page = max(1, _get_page(page))
-
-    author = Author.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.author_id==author.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, author)
-
-
-def get_books_by_publisher(slug, page):
-    page = max(1, _get_page(page))
-
-    publisher = Publisher.query.filter_by(slug=slug).first_or_404()
-    books = Book.query.filter(and_(Book.publisher_id==publisher.id, _privilege_filter())).order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
-    books = None if len(books.items) == 0 else books
-
-    return (books, publisher)
+def get_taxonomy_terms_and_counts(ttype, order=None):
+    return Taxonomy.get_grouped_counts(ttype, order)
 
 
 def add_book(form, files):
     if 'title' not in form or not form['title'].strip():
         raise ValueError("Title must not be blank")
 
-    # user is adding a new genre
-    if 'new-genre-name' in form and form['new-genre-name'].strip() != '':
-        genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-    elif 'genre' in form and form['genre']:
-        genre_id = form['genre']
-    else:
-        genre_id = None
-
     book = Book()
     book.title = form['title']
     book.description = form['description']
-    book.genre_id = genre_id
-    book.update_author(form['author'])
-    book.update_publisher(form['publisher'])
+    book.series_seq = int(form['series_seq']) if form['series_seq'] else None
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
-
-    if 'tags' in form:
-        book.update_tags(form['tags'])
-
-    book.update_series(form['series'], form['series_seq'])
     book.created_at = datetime.now()
+
+    book.update_taxonomies({
+        'author': [form['author']],
+        'publisher': [form['publisher']],
+        'series': [form['series']],
+        'genre': [form['genre']],
+        'tag': form['tags'].split(','),
+    })
 
     if 'file' in files:
         book.attempt_to_update_file(files['file'])
@@ -199,6 +156,38 @@ def add_book(form, files):
     book_to_elasticsearch(book)
 
     return True
+
+
+def edit_book(id, form, files):
+    book = get_book(id)
+    if book:
+        if not user_can_modify_book(book, current_user):
+            return False
+
+        book.title = form['title']
+        book.description = form['description']
+        book.attempt_to_update_file(files['file'])
+        book.attempt_to_update_cover(files['cover'])
+        book.series_seq = int(form['series_seq']) if form['series_seq'] else None
+        book.public = True if form['privacy'] == 'public' else False
+
+        book.update_taxonomies({
+            'author': [form['author']],
+            'publisher': [form['publisher']],
+            'series': [form['series']],
+            'genre': [form['genre']],
+            'tag': form['tags'].split(','),
+        })
+
+        db.session.commit()
+
+        if app.config['WRITE_META_ON_SAVE']:
+            book.write_meta()
+
+        book_to_elasticsearch(book)
+
+        return True
+    return False
 
 
 def book_to_elasticsearch(book):
@@ -228,61 +217,6 @@ def delete_from_elasticsearch(book):
                  id=book.id)
 
 
-def edit_book(id, form, files):
-    book = get_book(id)
-    if book:
-        if not user_can_modify_book(book, current_user):
-            return False
-
-        old_genre_id = book.genre_id
-        old_author_id = book.author_id
-        old_publisher_id = book.publisher_id
-        old_series_id = book.series_id
-
-        # user is adding a new genre
-        if form['new-genre-name'] or form['genre']:
-            if form['new-genre-name']:
-                genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-            elif form['genre']:
-                genre_id = form['genre']
-        else:
-            genre_id = None
-
-        book.title = form['title']
-        book.description = form['description']
-        book.genre_id = genre_id
-        book.update_author(form['author'])
-        book.update_publisher(form['publisher'])
-        book.attempt_to_update_file(files['file'])
-        book.attempt_to_update_cover(files['cover'])
-        book.update_series(form['series'], form['series_seq'])
-        book.public = True if form['privacy'] == 'public' else False
-
-        if 'tags' in form:
-            book.update_tags(form['tags'])
-        else:
-            book.empty_tags()
-
-        db.session.commit()
-
-        if app.config['WRITE_META_ON_SAVE']:
-            book.write_meta()
-
-        if old_genre_id:
-            delete_tax_if_possible('genre', old_genre_id)
-        if old_author_id:
-            delete_tax_if_possible('author', old_author_id)
-        if old_series_id:
-            delete_tax_if_possible('series', old_series_id)
-        if old_publisher_id:
-            delete_tax_if_possible('publisher', old_publisher_id)
-
-        book_to_elasticsearch(book)
-
-        return True
-    return False
-
-
 def delete_book(id):
     book = get_book(id)
 
@@ -306,101 +240,52 @@ def delete_book(id):
     delete_from_elasticsearch(book)
 
 
-def get_tags():
-    return Tag.query.order_by(Tag.name).all()
-
-
-def get_genres():
-    return Genre.query.order_by(Genre.name).all()
-
-
-def get_series():
-    return Series.query.order_by(Series.name).all()
-
-
-def get_authors():
-    return Author.query.order_by(Author.name).all()
-
-
-def get_authors_and_counts(order):
-    return _get_tax_grouped_count(Author, order=order)
-
-
-def get_publishers_and_counts():
-    return _get_tax_grouped_count(Publisher)
-
-
-def get_tags_and_counts():
-    return _get_tax_grouped_count(Tag)
-
-
-def get_series_and_counts():
-    return _get_tax_grouped_count(Series)
-
-
-def _get_tax_grouped_count(tax, order=None):
-    q = db.session.query(tax.name,
-                            tax.slug,
-                            tax.id,
-                            db.func.count(Book.id).label('count_books'))\
-        .outerjoin(Book).group_by(tax.name, tax.slug,
-                                  tax.id)
-
-    if not order or order == 'name':
-        q = q.order_by(tax.name.asc())
-    elif order == 'count':
-        q = q.order_by(db.desc('count_books'))
-
-    return q.all()
-
-
-def get_publishers():
-    return Publisher.query.order_by(Publisher.name).all()
-
-
 def get_toplevel_genres():
-    return Genre.query.filter_by(parent_id=None).order_by(Genre.name).all()
+    return Taxonomy.query.filter_by(parent_id=None, type='genre').order_by(Taxonomy.name).all()
 
 
-def add_genre(name, parent=None):
-    genre = Genre()
-    genre.name = name
-    genre.slug = genre.generate_slug()
-    genre.parent_id = parent if parent else None
-    db.session.add(genre)
+def add_taxonomy(name, ttype, parent=None):
+    tax = Taxonomy()
+    tax.name = name
+    tax.slug = tax.generate_slug()
+    tax.type = ttype
+    tax.parent_id = parent if parent else None
+    db.session.add(tax)
     db.session.commit()
-    return genre.id
+    return tax.id
 
 
 def delete_tax_if_possible(tax, id):
-    obj = {
-        'genre': Genre,
-        'tag': Tag,
-        'series': Series,
-        'author': Author,
-        'publisher': Publisher,
-    }[tax]
-
-    instance = obj.query.get(int(id))
-    if instance:
-        if len(instance.books) == 0:  # no books left, so we can delete
-            delete_tax(tax, [id])
+    pass
+    # obj = {
+    #     'genre': Genre,
+    #     'tag': Tag,
+    #     'series': Series,
+    #     'author': Author,
+    #     'publisher': Publisher,
+    # }[tax]
+    #
+    # instance = obj.query.get(int(id))
+    # if instance:
+    #     if len(instance.books) == 0:  # no books left, so we can delete
+    #         delete_tax(tax, [id])
 
 
 def delete_tax(tax, ids):
-    obj = {
-        'genre': Genre,
-        'tag': Tag,
-        'series': Series,
-        'author': Author,
-        'publisher': Publisher,
-    }[tax]
-
-    for id in ids:
-        t = obj.query.get(int(id))
-        db.session.delete(t)
-
-    db.session.commit()
+    pass
+    # obj = {
+    #     'genre': Genre,
+    #     'tag': Tag,
+    #     'series': Series,
+    #     'author': Author,
+    #     'publisher': Publisher,
+    # }[tax]
+    #
+    # for id in ids:
+    #     t = obj.query.get(int(id))
+    #     db.session.delete(t)
+    #
+    # db.session.commit()
 
 
 def add_user(username, password):
@@ -466,9 +351,9 @@ def generate_genre_tree_select_options(selected=None):
 def _recurse_select_level(parent, depth=0, selected=None):
     name = ("&mdash;" * depth) + " " + parent.name
 
-    selected_string = """ selected="selected" """ if selected == parent.id else ""
+    selected_string = """ selected="selected" """ if selected == parent.name else ""
 
-    output = """<option value="%s"%s>%s</option>""" % (parent.id, selected_string, name)
+    output = """<option value="%s"%s>%s</option>""" % (parent.name, selected_string, name)
 
     if parent.children:
         for child in parent.children:

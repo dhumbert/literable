@@ -5,18 +5,30 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from literable import db, book_upload_set, cover_upload_set, utils, epub, app
 
 
-books_tags = db.Table('books_tags',
-    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id')),
+books_taxonomies = db.Table('books_taxonomies',
+    db.Column('taxonomy_id', db.Integer, db.ForeignKey('taxonomies.id')),
     db.Column('book_id', db.Integer, db.ForeignKey('books.id'))
 )
 
 
-class Tag(db.Model):
-    __tablename__ = 'tags'
-
+class Taxonomy(db.Model):
+    __tablename__ = 'taxonomies'
     id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('taxonomies.id'))
+    parent = db.relationship('Taxonomy', backref=db.backref('children'), remote_side=[id])
     name = db.Column(db.String)
+    type = db.Column(db.String)
     slug = db.Column(db.String)
+
+    def get_parents(self):
+        parents = []
+        if self.parent_id:
+            parent = Taxonomy.query.get(self.parent_id)
+            if parent:
+                parents.append(parent)
+                parents = parent.get_parents() + parents
+
+        return parents
 
     def generate_slug(self, depth=0):
         search_for = utils.slugify(self.name)
@@ -24,68 +36,28 @@ class Tag(db.Model):
         if depth > 0:
             search_for = utils.slugify("%s-%d" % (self.name, depth))
 
-        result = Tag.query.filter_by(slug=search_for).first()
+        result = Taxonomy.query.filter_by(slug=search_for).first()
         if result is None:
             return search_for
         else:
             return self.generate_slug(depth + 1)
 
+    @classmethod
+    def get_grouped_counts(cls, ttype, order):
+        q = db.session.query(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type,
+                         db.func.count(books_taxonomies.c.book_id).label('count_books'))\
+        .filter_by(type=ttype)\
+        .outerjoin(books_taxonomies).group_by(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type)
 
-class Series(db.Model):
-    __tablename__ = 'series'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    slug = db.Column(db.String)
-    description = db.Column(db.Text)
+        if not order or order == 'name':
+            q = q.order_by(Taxonomy.name.asc())
+        elif order == 'count':
+            q = q.order_by(db.desc('count_books'))
 
-    def generate_slug(self, depth=0):
-        search_for = utils.slugify(self.name)
+        return q.all()
 
-        if depth > 0:
-            search_for = utils.slugify("%s-%d" % (self.name, depth))
-
-        result = Series.query.filter_by(slug=search_for).first()
-        if result is None:
-            return search_for
-        else:
-            return self.generate_slug(depth + 1)
-
-
-class Author(db.Model):
-    __tablename__ = 'authors'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    slug = db.Column(db.String)
-
-    def generate_slug(self, depth=0):
-        search_for = utils.slugify(self.name)
-
-        if depth > 0:
-            search_for = utils.slugify("%s-%d" % (self.name, depth))
-
-        result = Author.query.filter_by(slug=search_for).first()
-        if result is None:
-            return search_for
-        else:
-            return self.generate_slug(depth + 1)
-
-class Publisher(db.Model):
-    __tablename__ = 'publishers'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    slug = db.Column(db.String)
-
-    def generate_slug(self, depth=0):
-        search_for = utils.slugify(self.name)
-
-        if depth > 0:
-            search_for = utils.slugify("%s-%d" % (self.name, depth))
-
-        result = Publisher.query.filter_by(slug=search_for).first()
-        if result is None:
-            return search_for
-        else:
-            return self.generate_slug(depth + 1)
+    def __repr__(self):
+        return self.name
 
 
 class Book(db.Model):
@@ -99,28 +71,41 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime())
     rating = db.Column(db.Integer())
     public = db.Column(db.Boolean())
-
-    tags = db.relationship('Tag', secondary=books_tags, backref=db.backref('books'), order_by=[Tag.name])
-    genre_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
-
-    series_id = db.Column(db.Integer, db.ForeignKey('series.id'))
-    series = db.relationship('Series', backref=db.backref('books'))
     series_seq = db.Column(db.Integer)
 
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
-    author = db.relationship('Author', backref=db.backref('books'))
-
-    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.id'))
-    publisher = db.relationship('Publisher', backref=db.backref('books'))
+    taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=db.backref('books'))
+
+    @property
+    def authors(self):
+        return self._get_tax_by_type('author')
+
+    @property
+    def publishers(self):
+        return self._get_tax_by_type('publisher')
+
+    @property
+    def genres(self):
+        return self._get_tax_by_type('genre')
+
+    @property
+    def tags(self):
+        return self._get_tax_by_type('tag')
+
+    @property
+    def series(self):
+        return self._get_tax_by_type('series')
+
+    def _get_tax_by_type(self, type):
+        return filter(lambda t: t.type == type, self.taxonomies)
 
     def get_cover_url(self):
         if self.cover:
             return cover_upload_set.url(self.cover)
         else:
-            return url_for('static', filename='img/default.png')
+            return url_for('static', filename='img/default.jpg')
 
     def get_format(self):
         if self.filename:
@@ -170,61 +155,21 @@ class Book(db.Model):
         tags = [tag.name for tag in self.tags]
         return ', '.join(tags)
 
-    def empty_tags(self):
-        self.tags[:] = []
-        db.session.flush()
+    def update_taxonomies(self, tax_map):
+        self.taxonomies = []
+        for tax_slug, terms in tax_map.iteritems():
+            for term_name in terms:
+                if term_name.strip():
+                    tax = Taxonomy.query.filter_by(type=tax_slug, name=term_name.strip()).first()
+                    if not tax:
+                        tax = Taxonomy()
+                        tax.type = tax_slug
+                        tax.name = term_name.strip()
+                        tax.slug = tax.generate_slug()
+                        db.session.add(tax)
 
-    def update_tags(self, tag_string):
-        self.empty_tags()
-
-        for tag in tag_string.split(','):
-            name = tag.strip().lower()
-            if len(name) > 0:
-                # check for existing tag
-                t = Tag.query.filter_by(name=name).first()
-                if t is None:
-                    t = Tag()
-                    t.name = name
-                    t.slug = t.generate_slug()
-
-                self.tags.append(t)
-
-    def update_series(self, series, seq):
-        if series:
-            books_series = Series.query.filter_by(name=series).first()
-            if not books_series:
-                books_series = Series()
-                books_series.name = series
-                books_series.slug = books_series.generate_slug()
-                db.session.add(books_series)
-            self.series = books_series
-        else:
-            self.series = None
-
-        if seq:
-            self.series_seq = seq
-        else:
-            self.series_seq = None
-
-    def update_author(self, name):
-        if name:
-            book_author = Author.query.filter_by(name=name).first()
-            if not book_author:
-                book_author = Author()
-                book_author.name = name
-                book_author.slug = book_author.generate_slug()
-                db.session.add(book_author)
-            self.author = book_author
-
-    def update_publisher(self, name):
-        if name:
-            book_publisher = Publisher.query.filter_by(name=name).first()
-            if not book_publisher:
-                book_publisher = Publisher()
-                book_publisher.name = name
-                book_publisher.slug = book_publisher.generate_slug()
-                db.session.add(book_publisher)
-            self.publisher = book_publisher
+                    if tax not in self.taxonomies:
+                        self.taxonomies.append(tax)
 
     def write_meta(self):
         if self.filename:
@@ -241,13 +186,8 @@ class Book(db.Model):
         else:
             cover = None
 
-        if self.series:
-            series = self.series.name
-        else:
-            series = None
-
-        if self.genre:
-            genre = [self.genre.name]
+        if self.genres:
+            genre = [genre.name for genre in self.genres]
         else:
             genre = []
 
@@ -267,7 +207,7 @@ class Book(db.Model):
         title = self.title
         if app.config['ADD_SERIES_TO_META_TITLE']:
             if self.series:
-                prepend_title = self.series.name
+                prepend_title = self.series[0].name
                 if self.series_seq:
                     prepend_title = "%s %d - " % (prepend_title, self.series_seq)
 
@@ -277,41 +217,6 @@ class Book(db.Model):
     def rate(self, score):
         self.rating = score
         db.session.commit()
-
-
-class Genre(db.Model):
-    __tablename__ = 'genres'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    slug = db.Column(db.String)
-    parent_id = db.Column(db.Integer, db.ForeignKey('genres.id'))
-
-    children = db.relationship("Genre", backref=db.backref("genres", remote_side=id))
-
-    books = db.relationship('Book', backref=db.backref('genre'), order_by=[Book.title])
-
-    def get_parents(self):
-        parents = []
-        if self.parent_id:
-            parent = Genre.query.get(self.parent_id)
-            if parent:
-                parents.append(parent)
-                parents = parent.get_parents() + parents
-
-        return parents
-
-    def generate_slug(self, depth=0):
-        search_for = utils.slugify(self.name)
-
-        if depth > 0:
-            search_for = utils.slugify("%s-%d" % (self.name, depth))
-
-        result = Genre.query.filter_by(slug=search_for).first()
-        if result is None:
-            return search_for
-        else:
-            return self.generate_slug(depth + 1)
 
 
 class ReadingList(db.Model):

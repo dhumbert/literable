@@ -4,10 +4,10 @@
     <button type="button" class="btn" id="lookupTitle"><i class="icon-search"></i></button>
 
     <label for="author">Author</label>
-    <input type="text" name="author" id="author" value="{{ book.author.name | none2blank }}" class="span9" autocomplete="off">
+    <input type="text" name="author" id="author" value="{{ book.authors[0].name if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 
     <label for="publisher">Publisher</label>
-    <input type="text" name="publisher" id="publisher" value="{{ book.publisher.name | none2blank }}" class="span9" autocomplete="off">
+    <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span9" autocomplete="off">
 
     <label for="description">Description</label>
     <textarea name="description" id="description" class="span9" rows="10">{{ book.description | none2blank }}</textarea>
@@ -17,7 +17,7 @@
 
     
     <label for="series">Series</label>
-    <input type="text" name="series" id="series" value="{{ book.series.title | none2blank }}" class="span7" autocomplete="off">
+    <input type="text" name="series" id="series" value="{{ book.series[0].name if book.series else None | none2blank }}" class="span7" autocomplete="off">
 
     <span class="input-prepend">
         <span class="add-on">#</span>
@@ -28,7 +28,7 @@
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span7">
         <option value="">-- None --</option>
-        {{ genre_options(selected=book.genre_id) | safe }}
+        {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
     </select>
 
     <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#new-genre">New Genre</button>
@@ -85,7 +85,7 @@
     (function(){
         $('#author').typeahead({
             source: function(query, process) {
-                return $.get('{{ url_for("ajax_author") }}', {query: query}, function(data){
+                return $.get('{{ url_for("ajax_taxonomy", ttype="author") }}', {query: query}, function(data){
                     return process(data);
                 });
             }
@@ -93,7 +93,7 @@
 
         $('#publisher').typeahead({
             source: function(query, process) {
-                return $.get('{{ url_for("ajax_publisher") }}', {query: query}, function(data){
+                return $.get('{{ url_for("ajax_taxonomy", ttype="publisher") }}', {query: query}, function(data){
                     return process(data);
                 });
             }
@@ -101,7 +101,7 @@
 
         $('#series').typeahead({
             source: function(query, process) {
-                return $.get('{{ url_for("ajax_series") }}', {query: query}, function(data){
+                return $.get('{{ url_for("ajax_taxonomy", ttype="series") }}', {query: query}, function(data){
                     return process(data);
                 });
             }
@@ -109,7 +109,7 @@
 
         $('#tags').typeahead({
             source: function(query, process) {
-                return $.get('{{ url_for("ajax_tags") }}', {query: query}, function(data){
+                return $.get('{{ url_for("ajax_taxonomy", ttype="tag") }}', {query: query}, function(data){
                     return process(data);
                 });
             }
@@ -119,7 +119,7 @@
             hiddenTagListName: 'tags',
             preventSubmitOnEnter: true,
             typeahead: true,
-            typeaheadAjaxSource: '{{ url_for("ajax_tags") }}',
+            typeaheadAjaxSource: '{{ url_for("ajax_taxonomy", ttype="tag") }}',
             prefilled: '{{ book.get_tag_string() }}'
         });
     })();

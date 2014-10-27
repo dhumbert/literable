@@ -53,6 +53,7 @@ $(document).ready(function(){
         $.getScript('/static/js/jquery-ui-1.10.4.custom.min.js', function(){
             $('#book-list').sortable({
                 handle: '.reading-list-reposition',
+                tolerance: 'pointer',
                 stop: function(evt, ui) {
                     var data = {}
                     $('#book-list').find('.row').each(function(i, el) {

@@ -1,0 +1,46 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
+        <li class="active">{{ ttype | title }}</li>
+        <li class="pull-right tax-list-sort">
+            <a href="{{ url_for('taxonomy_terms', ttype=ttype, order='name') }}">
+                {% if order == 'name' or not order %}<strong>{% endif %}
+                    name
+                {% if order == 'name' or not order %}</strong>{% endif %}
+            </a>
+            &bull;
+            <a href="{{ url_for('taxonomy_terms', ttype=ttype, order='count') }}">
+                {% if order == 'count' %}<strong>{% endif %}
+                    count
+                {% if order == 'count' %}</strong>{% endif %}
+            </a>
+        </li>
+    </ul>
+
+    <div class="pull-right">
+        <a class="edit-tax btn btn-primary" href="javascript:void(0)"><i class="icon-pencil icon-white"></i> Edit</a>
+    </div>
+
+    <form method="post">
+        <div class="tax-actions" style="display:none;">
+            <button type="submit" class="btn btn-danger">Delete Checked</button>
+        </div>
+
+        {% if terms %}
+            <ul class="tag-list">
+                {% for term in terms %}
+                    <li>
+                        <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ term.id }}"></span>
+                        <a href="{{ url_for('taxonomy', ttype=term.type, slug=term.slug) }}">{{ term.name }}</a>
+                        <span class="tax-count">{{ term.count_books }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No terms
+        {% endif %}
+    </form>
+
+{% endblock %}
