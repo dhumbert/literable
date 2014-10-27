@@ -17,7 +17,7 @@ app.config.from_pyfile('application.cfg')
 
 if not app.debug:
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.ERROR)
+    stream_handler.setLevel(logging.WARNING)
     app.logger.addHandler(stream_handler)
 
 db = SQLAlchemy(app)
