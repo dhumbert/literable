@@ -4,7 +4,7 @@
     <button type="button" class="btn" id="lookupTitle"><i class="icon-search"></i></button>
 
     <label for="author">Author</label>
-    <input type="text" name="author" id="author" value="{{ book.authors[0].name | none2blank }}" class="span9" autocomplete="off">
+    <input type="text" name="author" id="author" value="{{ book.authors[0].name if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 
     <label for="publisher">Publisher</label>
     <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span9" autocomplete="off">
@@ -28,7 +28,7 @@
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span7">
         <option value="">-- None --</option>
-        {{ genre_options(selected=book.genres[0].id) | safe }}
+        {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
     </select>
 
     <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#new-genre">New Genre</button>

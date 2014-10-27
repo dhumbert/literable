@@ -20,11 +20,13 @@
             </div>
         {% endif %}
 
-        <h4 class="author">
-            <a href="{{ url_for('taxonomy', ttype='author', slug=book.authors[0].slug) }}">
-                {{ book.authors[0].name }}
-            </a>
-        </h4>
+        {% if book.authors %}
+            <h4 class="author">
+                <a href="{{ url_for('taxonomy', ttype='author', slug=book.authors[0].slug) }}">
+                    {{ book.authors[0].name }}
+                </a>
+            </h4>
+        {% endif %}
 
         {% if book.description %}
             <div class="description">

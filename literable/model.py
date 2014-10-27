@@ -125,28 +125,21 @@ def add_book(form, files):
     if 'title' not in form or not form['title'].strip():
         raise ValueError("Title must not be blank")
 
-    # user is adding a new genre
-    if 'new-genre-name' in form and form['new-genre-name'].strip() != '':
-        genre_id = add_genre(form['new-genre-name'], form['new-genre-parent'])
-    elif 'genre' in form and form['genre']:
-        genre_id = form['genre']
-    else:
-        genre_id = None
-
     book = Book()
     book.title = form['title']
     book.description = form['description']
-    book.genre_id = genre_id
-    book.update_author(form['author'])
-    book.update_publisher(form['publisher'])
+    book.series_seq = int(form['series_seq']) if form['series_seq'] else None
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
-
-    if 'tags' in form:
-        book.update_tags(form['tags'])
-
-    book.update_series(form['series'], form['series_seq'])
     book.created_at = datetime.now()
+
+    book.update_taxonomies({
+        'author': [form['author']],
+        'publisher': [form['publisher']],
+        'series': [form['series']],
+        'genre': [form['genre']],
+        'tag': form['tags'].split(','),
+    })
 
     if 'file' in files:
         book.attempt_to_update_file(files['file'])
@@ -274,15 +267,15 @@ def get_toplevel_genres():
     return Taxonomy.query.filter_by(parent_id=None, type='genre').order_by(Taxonomy.name).all()
 
 
-def add_genre(name, parent=None):
-    pass
-    # genre = Genre()
-    # genre.name = name
-    # genre.slug = genre.generate_slug()
-    # genre.parent_id = parent if parent else None
-    # db.session.add(genre)
-    # db.session.commit()
-    # return genre.id
+def add_taxonomy(name, ttype, parent=None):
+    tax = Taxonomy()
+    tax.name = name
+    tax.slug = tax.generate_slug()
+    tax.type = ttype
+    tax.parent_id = parent if parent else None
+    db.session.add(tax)
+    db.session.commit()
+    return tax.id
 
 
 def delete_tax_if_possible(tax, id):
@@ -381,9 +374,9 @@ def generate_genre_tree_select_options(selected=None):
 def _recurse_select_level(parent, depth=0, selected=None):
     name = ("&mdash;" * depth) + " " + parent.name
 
-    selected_string = """ selected="selected" """ if selected == parent.id else ""
+    selected_string = """ selected="selected" """ if selected == parent.name else ""
 
-    output = """<option value="%s"%s>%s</option>""" % (parent.id, selected_string, name)
+    output = """<option value="%s"%s>%s</option>""" % (parent.name, selected_string, name)
 
     if parent.children:
         for child in parent.children:

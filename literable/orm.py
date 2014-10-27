@@ -105,7 +105,7 @@ class Book(db.Model):
         if self.cover:
             return cover_upload_set.url(self.cover)
         else:
-            return url_for('static', filename='img/default.png')
+            return url_for('static', filename='img/default.jpg')
 
     def get_format(self):
         if self.filename:
@@ -155,63 +155,20 @@ class Book(db.Model):
         tags = [tag.name for tag in self.tags]
         return ', '.join(tags)
 
-    def empty_tags(self):
-        # self.tags[:] = []
-        db.session.flush()
+    def update_taxonomies(self, tax_map):
+        for tax_slug, terms in tax_map.iteritems():
+            for term_name in terms:
+                if term_name.strip():
+                    tax = Taxonomy.query.filter_by(type=tax_slug, name=term_name.strip()).first()
+                    if not tax:
+                        tax = Taxonomy()
+                        tax.type = tax_slug
+                        tax.name = term_name.strip()
+                        tax.slug = tax.generate_slug()
+                        db.session.add(tax)
 
-    def update_tags(self, tag_string):
-        self.empty_tags()
-
-        # for tag in tag_string.split(','):
-        #     name = tag.strip().lower()
-        #     if len(name) > 0:
-        #         # check for existing tag
-        #         t = Tag.query.filter_by(name=name).first()
-        #         if t is None:
-        #             t = Tag()
-        #             t.name = name
-        #             t.slug = t.generate_slug()
-        #
-        #         self.tags.append(t)
-
-    def update_series(self, series, seq):
-        # if series:
-        #     books_series = Series.query.filter_by(name=series).first()
-        #     if not books_series:
-        #         books_series = Series()
-        #         books_series.name = series
-        #         books_series.slug = books_series.generate_slug()
-        #         db.session.add(books_series)
-        #     self.series = books_series
-        # else:
-        #     self.series = None
-
-        if seq:
-            self.series_seq = seq
-        else:
-            self.series_seq = None
-
-    def update_author(self, name):
-        pass
-        # if name:
-        #     book_author = Author.query.filter_by(name=name).first()
-        #     if not book_author:
-        #         book_author = Author()
-        #         book_author.name = name
-        #         book_author.slug = book_author.generate_slug()
-        #         db.session.add(book_author)
-        #     self.author = book_author
-
-    def update_publisher(self, name):
-        pass
-        # if name:
-        #     book_publisher = Publisher.query.filter_by(name=name).first()
-        #     if not book_publisher:
-        #         book_publisher = Publisher()
-        #         book_publisher.name = name
-        #         book_publisher.slug = book_publisher.generate_slug()
-        #         db.session.add(book_publisher)
-        #     self.publisher = book_publisher
+                    if tax not in self.taxonomies:
+                        self.taxonomies.append(tax)
 
     def write_meta(self):
         if self.filename:
