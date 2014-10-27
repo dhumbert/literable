@@ -158,33 +158,6 @@ def add_book(form, files):
     return True
 
 
-def book_to_elasticsearch(book):
-    if app.config['ELASTICSEARCH_ENABLED']:
-        es_doc = {'title': book.title,
-                  'description': book.description,
-                  'id': book.id,
-                  }
-        if book.series:
-            es_doc['series'] = book.series.name
-
-        if book.author:
-            es_doc['author'] = book.author.name
-
-        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-        es.index(app.config['ELASTICSEARCH_INDEX'],
-                 app.config['ELASTICSEARCH_DOC_TYPE'],
-                 body=es_doc,
-                 id=book.id)
-
-
-def delete_from_elasticsearch(book):
-    if app.config['ELASTICSEARCH_ENABLED']:
-        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-        es.delete(app.config['ELASTICSEARCH_INDEX'],
-                 app.config['ELASTICSEARCH_DOC_TYPE'],
-                 id=book.id)
-
-
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
@@ -215,6 +188,33 @@ def edit_book(id, form, files):
 
         return True
     return False
+
+
+def book_to_elasticsearch(book):
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es_doc = {'title': book.title,
+                  'description': book.description,
+                  'id': book.id,
+                  }
+        if book.series:
+            es_doc['series'] = book.series.name
+
+        if book.author:
+            es_doc['author'] = book.author.name
+
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.index(app.config['ELASTICSEARCH_INDEX'],
+                 app.config['ELASTICSEARCH_DOC_TYPE'],
+                 body=es_doc,
+                 id=book.id)
+
+
+def delete_from_elasticsearch(book):
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.delete(app.config['ELASTICSEARCH_INDEX'],
+                 app.config['ELASTICSEARCH_DOC_TYPE'],
+                 id=book.id)
 
 
 def delete_book(id):

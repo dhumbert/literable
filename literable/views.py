@@ -80,6 +80,8 @@ def delete_book(id):
     flash('Book deleted', 'success')
     try:
         url = request.args.get('next')
+        if not url:
+            url = url_for('recent')
     except KeyError:
         url = url_for('recent')
     return redirect(url)
