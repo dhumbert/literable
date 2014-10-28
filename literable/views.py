@@ -1,7 +1,7 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response, abort
 from flask.ext.login import login_required, login_user, logout_user, current_user
-from literable import app, model, content_type
+from literable import app, model, content_type, admin_required
 
 
 app.jinja_env.globals['is_book_in_reading_list'] = model.is_book_in_reading_list
@@ -120,6 +120,13 @@ def write_book_meta(id):
 def reading_list():
     books = current_user.reading_list
     return render_template('books/list.html', books=books, reading_list=True)
+
+
+@app.route("/admin/books/incomplete")
+@admin_required
+def admin_books_incomplete():
+    incomplete = model.get_incomplete_books()
+    return render_template('admin/incomplete.html', incomplete=incomplete)
 
 
 @app.route("/t/<ttype>/<slug>")

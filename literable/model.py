@@ -105,6 +105,15 @@ def _search_books_elasticsearch(q):
     return books
 
 
+def get_incomplete_books():
+    books = {
+        'without a cover': Book.query.filter(or_(Book.cover == None, Book.cover == '')).order_by(Book.title).all(),
+        'without a description': Book.query.filter(or_(Book.description == None, Book.description == '')).order_by(Book.title).all(),
+        'without a file': Book.query.filter(or_(Book.filename == None, Book.filename == '')).order_by(Book.title).all(),
+    }
+
+    return books
+
 def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 

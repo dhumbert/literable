@@ -1,10 +1,10 @@
 import os
 import logging
 from functools import wraps
-from flask import Flask, make_response
+from flask import Flask, make_response, abort
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager
+from flask.ext.login import LoginManager, current_user
 from flaskext.markdown import Markdown
 from literable.filters import nl2br, none2blank
 
@@ -25,7 +25,7 @@ db = SQLAlchemy(app)
 Markdown(app)
 
 login = LoginManager()
-login.init_app(app)
+login.init_app(app, add_context_processor=True)
 login.login_view = "login"
 
 app.jinja_env.filters['nl2br'] = nl2br
@@ -57,6 +57,17 @@ def content_type(content_type):
             return response
         return do_output
     return decorator
+
+
+def admin_required(func):
+    """Requires user to be an Admin for a view"""
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if current_user and current_user.admin:
+            return func(*args, **kwargs)
+        else:
+            abort(403)
+    return decorated_view
 
 @login.user_loader
 def load_user(id):
