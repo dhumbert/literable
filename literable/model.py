@@ -227,9 +227,10 @@ def upload_book(file):
                         cover_filename = tmp_cover_upload_set.resolve_conflict(tmp_cover_upload_set.config.destination, cover_filename)
 
                     dest = tmp_cover_upload_set.path(cover_filename)
-                    e.extract_cover(dest)
+                    extracted = e.extract_cover(dest)
 
-                    meta['cover'] = cover_filename
+                    if extracted:
+                        meta['cover'] = cover_filename
             else:
                 meta = None
         else:

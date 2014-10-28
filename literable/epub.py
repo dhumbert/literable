@@ -136,10 +136,16 @@ class Epub:
     def extract_cover(self, dest):
         if self.cover:
             cover_content = self._read_from_epub(os.path.join('OEBPS', self.cover))
+            # try without OEBPS
+            if not cover_content:
+                cover_content = self._read_from_epub(self.cover)
 
             if cover_content:
                 with open(dest, 'wb') as cover_file:
                     cover_file.write(cover_content)
+                return True
+            else:
+                return False
 
     def _remove_deprecated_elements(self):
         deprecated_elements = ['/pkg:package/pkg:guide']
