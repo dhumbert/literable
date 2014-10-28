@@ -119,6 +119,7 @@ $(document).ready(function(){
                 uploader: '/books/upload',
                 buttonText: 'Select Book File',
                 uploadLimit: 1,
+                multi: false,
                 removeCompleted: false,
                 onUploadSuccess: function(file, data, response) {
                     var json = $.parseJSON(data);
