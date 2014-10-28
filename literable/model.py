@@ -1,11 +1,13 @@
 from datetime import datetime
 import hashlib
+import os
+import os.path
 from flask import url_for, flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
-from literable import db, app
+from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy
 
 
@@ -103,6 +105,15 @@ def _search_books_elasticsearch(q):
     return books
 
 
+def get_incomplete_books():
+    books = {
+        'without a cover': Book.query.filter(or_(Book.cover == None, Book.cover == '')).order_by(Book.title).all(),
+        'without a description': Book.query.filter(or_(Book.description == None, Book.description == '')).order_by(Book.title).all(),
+        'without a file': Book.query.filter(or_(Book.filename == None, Book.filename == '')).order_by(Book.title).all(),
+    }
+
+    return books
+
 def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 
@@ -141,11 +152,12 @@ def add_book(form, files):
         'tag': form['tags'].split(','),
     })
 
-    if 'file' in files:
-        book.attempt_to_update_file(files['file'])
-
-    if 'cover' in files:
+    if 'meta-cover' in form:
+        book.move_cover_from_tmp(form['meta-cover'])
+    elif 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
+
+    book.move_file_from_staging(form['file'])
 
     db.session.add(book)
     db.session.commit()
@@ -166,7 +178,6 @@ def edit_book(id, form, files):
 
         book.title = form['title']
         book.description = form['description']
-        book.attempt_to_update_file(files['file'])
         book.attempt_to_update_cover(files['cover'])
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
@@ -179,6 +190,8 @@ def edit_book(id, form, files):
             'tag': form['tags'].split(','),
         })
 
+        book.move_file_from_staging(form['file'])
+
         db.session.commit()
 
         if app.config['WRITE_META_ON_SAVE']:
@@ -188,6 +201,38 @@ def edit_book(id, form, files):
 
         return True
     return False
+
+
+def upload_book(file):
+    filename = book_staging_upload_set.save(file)
+    if filename:
+        extension = os.path.splitext(filename)[1][1:]
+        if extension == 'epub':
+            e = epub.Epub(book_staging_upload_set.path(filename))
+            if e:
+                meta = e.metadata
+                meta['author'] = meta['creator']
+                del meta['creator']
+
+                # if the book has a cover, copy it to tmp directory
+                if e.cover:
+                    cover_filename = os.path.basename(e.cover)
+                    # todo conflicts
+                    if os.path.exists(tmp_cover_upload_set.path(cover_filename)):
+                        cover_filename = tmp_cover_upload_set.resolve_conflict(tmp_cover_upload_set.config.destination, cover_filename)
+
+                    dest = tmp_cover_upload_set.path(cover_filename)
+                    e.extract_cover(dest)
+
+                    meta['cover'] = cover_filename
+            else:
+                meta = None
+        else:
+            meta = None
+
+        return filename, meta
+    else:
+        return None
 
 
 def book_to_elasticsearch(book):

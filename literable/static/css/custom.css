@@ -108,6 +108,10 @@
     font-size: 90%;
 }
 
+#book-file {
+    margin-top: 2em;
+}
+
 .book-edit-meta {
     text-align: center;
     padding: 1em;
@@ -122,6 +126,30 @@
 .book-edit-meta .edit-delete,
 .book-edit-meta .edit-write-meta {
     margin-top: 0.5em;
+}
+
+#meta-modal dt {
+    border-bottom: 1px solid #ccc;
+    color: #999;
+}
+
+#meta-modal dt input[type=checkbox] {
+    float: right;
+}
+
+#meta-modal dd {
+    margin: 0 0 1em 0;
+}
+
+#meta-cover img {
+    -webkit-box-shadow: 0 10px 20px 1px #ccc;
+   -moz-box-shadow: 0 10px 20px 1px #ccc;
+        box-shadow: 0 10px 20px 1px #ccc;
+}
+
+#meta-cover-checkbox {
+    text-align: center;
+    margin-top: 1em;
 }
 
 .book-form label {

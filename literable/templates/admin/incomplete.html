@@ -1,0 +1,18 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+    <h1>Incomplete Books</h1>
+
+    {% for category, books in incomplete.iteritems() %}
+        <h3>Books {{ category }}</h3>
+        {% if books %}
+            <ul class="unstyled">
+                {% for book in books %}
+                    <li><a href="{{ url_for('edit_book', id=book.id) }}" target="_blank">{{ book.title }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            All good!
+        {% endif %}
+    {% endfor %}
+{% endblock %}

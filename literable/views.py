@@ -1,8 +1,7 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response, abort
 from flask.ext.login import login_required, login_user, logout_user, current_user
-from functools import partial
-from literable import app, model, content_type
+from literable import app, model, content_type, admin_required
 
 
 app.jinja_env.globals['is_book_in_reading_list'] = model.is_book_in_reading_list
@@ -32,6 +31,26 @@ def add_book_post():
     except ValueError as e:
         flash(e, 'error')
         return redirect(url_for('add_book'))
+
+
+@app.route("/books/upload", methods=['POST'])
+@login_required
+@content_type("application/json")
+def upload_book():
+    try:
+        filename, meta = model.upload_book(request.files['Filedata'])
+        if not filename:
+            raise Exception("Unable to upload book")
+    except Exception as e:
+        app.logger.exception(e)
+        abort(500)
+
+    results = {
+        'filename': filename,
+        'meta': meta,
+    }
+
+    return json.dumps(results)
 
 
 @app.route("/books/download/<int:id>")
@@ -101,6 +120,13 @@ def write_book_meta(id):
 def reading_list():
     books = current_user.reading_list
     return render_template('books/list.html', books=books, reading_list=True)
+
+
+@app.route("/admin/books/incomplete")
+@admin_required
+def admin_books_incomplete():
+    incomplete = model.get_incomplete_books()
+    return render_template('admin/incomplete.html', incomplete=incomplete)
 
 
 @app.route("/t/<ttype>/<slug>")
