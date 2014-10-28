@@ -77,6 +77,7 @@ class Epub:
         self.manifest = self._read_manifest()
         self.metadata_element = self._read_metadata_element()
         self.metadata = self._read_metadata()
+        self.cover = self._read_cover()
 
     def _read_manifest_filename(self):
         """Read filename of the manifest file"""
@@ -118,6 +119,26 @@ class Epub:
 
             if metadata is not None:
                 return metadata[0]
+
+    def _read_cover(self):
+        try_ids = ['cover-image', 'coverimagestandard']
+        try:
+            for try_id in try_ids:
+
+                cover = self.manifest.xpath("pkg:manifest/pkg:item[@id='{}']".format(try_id), namespaces=ns)
+                if cover:
+                    cover = cover[0]
+                    return cover.attrib['href']
+        except:
+            pass
+        return None
+
+    def extract_cover(self, dest):
+        if self.cover:
+            cover_content = self._read_from_epub(os.path.join('OEBPS', self.cover))
+
+            with open(dest, 'wb') as cover_file:
+                cover_file.write(cover_content)
 
     def _remove_deprecated_elements(self):
         deprecated_elements = ['/pkg:package/pkg:guide']

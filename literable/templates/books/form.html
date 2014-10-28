@@ -62,6 +62,12 @@
     {% if book.cover %}
         <span class="help-block">Leave blank to keep current cover.</span>
     {% endif %}
+
+    <div id="cover-from-meta" class="hide">
+        <input type="hidden" name="meta-cover" id="input-meta-cover">
+        <span class="help-block">Cover taken from meta.</span>
+    </div>
+
     <input type="file" name="cover" id="cover" />
 
     <label class="radio">
@@ -87,33 +93,34 @@
     <div class="modal-body">
         <p>There was some metadata in that file. Want to use any of it?</p>
 
-        <table class="table">
-            <tr>
-                <th scope="row">Title</th>
-                <td><span id="meta-title"></span></td>
-                <td><input type="checkbox" id="use-title" checked="checked"></td>
-            </tr>
-            <tr>
-                <th scope="row">Author</th>
-                <td><span id="meta-author"></span></td>
-                <td><input type="checkbox" id="use-author" checked="checked"></td>
-            </tr>
-            <tr>
-                <th scope="row">Publisher</th>
-                <td><span id="meta-publisher"></span></td>
-                <td><input type="checkbox" id="use-publisher" checked="checked"></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <div class="field"><strong>Description</strong></div>
-                    <div id="meta-description"></div>
-                </td>
-                <td><input type="checkbox" id="use-description" checked="checked"></td>
-            </tr>
-        </table>
+        <div class="row">
+            <div class="span2 meta-cover-container">
+                <div id="meta-cover"><img src="/static/img/default.jpg"></div>
+                <div id="meta-cover-checkbox">
+                    <label class="checkbox">
+                        <input type="checkbox" id="use-cover" checked="checked"> Use Cover
+                    </label>
+                </div>
+            </div>
+            <div class="span3">
+                <dl>
+                    <dt><label>Title <input type="checkbox" id="use-title" checked="checked"></label></dt>
+                    <dd><span id="meta-title"></span></dd>
+                    <dt><label>Author <input type="checkbox" id="use-author" checked="checked"></label></dt>
+                    <dd><span id="meta-author"></span></dd>
+                    <dt><label>Publisher <input type="checkbox" id="use-publisher" checked="checked"></label></dt>
+                    <dd><span id="meta-publisher"></span></dd>
+                </dl>
+            </div>
+        </div>
+
+        <dl>
+            <dt><label>Description <input type="checkbox" id="use-description" checked="checked"></label></dt>
+            <dd><span id="meta-description"></span></dd>
+        </dl>
     </div>
     <div class="modal-footer">
-        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" id="cancel-meta" class="btn" data-dismiss="modal">Cancel</a>
         <a href="#" id="use-meta" class="btn btn-primary">Use Checked Fields</a>
     </div>
 </div>

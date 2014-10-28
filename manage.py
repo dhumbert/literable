@@ -27,6 +27,8 @@ def read_epub_meta(book_path):
     """Read metadata for an ePub file"""
     e = epub.Epub(book_path)
     print e.metadata
+    print e.cover
+    e.extract_cover('/tmp/{}'.format(e.cover))
 
 
 @manager.command

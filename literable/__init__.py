@@ -42,8 +42,9 @@ app.config['UPLOADS_DEFAULT_URL'] = 'http://literable.co/static/uploads/'
 book_staging_upload_set = uploads.UploadSet('bookstaging', extensions=app.config['EBOOK_EXTENSIONS'], default_dest=lambda x: app.config['LIBRARY_STAGING_PATH'])
 book_upload_set = uploads.UploadSet('books', extensions=app.config['EBOOK_EXTENSIONS'], default_dest=lambda x: app.config['LIBRARY_PATH'])
 cover_upload_set = uploads.UploadSet('covers', uploads.IMAGES)
+tmp_cover_upload_set = uploads.UploadSet('tmpcovers', uploads.IMAGES)
 
-uploads.configure_uploads(app, (book_upload_set, cover_upload_set, book_staging_upload_set))
+uploads.configure_uploads(app, (book_upload_set, cover_upload_set, book_staging_upload_set, tmp_cover_upload_set))
 
 
 def content_type(content_type):

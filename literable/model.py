@@ -1,12 +1,13 @@
 from datetime import datetime
 import hashlib
 import os
+import os.path
 from flask import url_for, flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
-from literable import db, app, book_staging_upload_set, epub
+from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy
 
 
@@ -142,7 +143,9 @@ def add_book(form, files):
         'tag': form['tags'].split(','),
     })
 
-    if 'cover' in files:
+    if 'meta-cover' in form:
+        book.move_cover_from_tmp(form['meta-cover'])
+    elif 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
 
     book.move_file_from_staging(form['file'])
@@ -201,6 +204,18 @@ def upload_book(file):
                 meta = e.metadata
                 meta['author'] = meta['creator']
                 del meta['creator']
+
+                # if the book has a cover, copy it to tmp directory
+                if e.cover:
+                    cover_filename = os.path.basename(e.cover)
+                    # todo conflicts
+                    if os.path.exists(tmp_cover_upload_set.path(cover_filename)):
+                        cover_filename = tmp_cover_upload_set.resolve_conflict(tmp_cover_upload_set.config.destination, cover_filename)
+
+                    dest = tmp_cover_upload_set.path(cover_filename)
+                    e.extract_cover(dest)
+
+                    meta['cover'] = cover_filename
             else:
                 meta = None
         else:

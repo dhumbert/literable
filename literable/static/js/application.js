@@ -110,7 +110,26 @@ $(document).ready(function(){
                 $('#description').val(basic_html_to_markdown($('#meta-description').html().trim()));
             }
 
+            if ($('#use-cover').is(':checked')) {
+                $('#input-meta-cover').val($('.book-form').data('meta-cover'));
+                $('#cover-from-meta').show();
+                $('#cover').hide();
+            }
+
             $('#meta-modal').modal('hide');
+        });
+
+        function replace_meta_cover_image(src) {
+            var cover_div = $('#meta-cover');
+            var cover = $('<img>');
+            cover.attr('src', src);
+            cover_div.html('');
+            cover_div.append(cover);
+            $('#use-cover').prop('checked', false);
+        }
+
+        $('#meta-modal').on('hidden', function(){
+            replace_meta_cover_image('/static/img/default.jpg');
         });
 
         $.getScript('/static/js/uploadify/jquery.uploadify.min.js', function(){
@@ -118,7 +137,6 @@ $(document).ready(function(){
                 swf: '/static/js/uploadify/uploadify.swf',
                 uploader: '/books/upload',
                 buttonText: 'Select Book File',
-                uploadLimit: 1,
                 multi: false,
                 removeCompleted: false,
                 onUploadSuccess: function(file, data, response) {
@@ -132,6 +150,12 @@ $(document).ready(function(){
                         $('#meta-author').text(meta.author);
                         $('#meta-publisher').text(meta.publisher);
                         $('#meta-description').html(meta.description);
+
+                        if (meta.cover) {
+                            replace_meta_cover_image('/static/uploads/tmpcovers/' + meta.cover);
+                            $('.book-form').data('meta-cover', meta.cover);
+                            $('#use-cover').prop('checked', true);
+                        }
 
                         $('#meta-modal').modal();
                     }
