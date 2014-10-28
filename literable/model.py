@@ -190,7 +190,8 @@ def edit_book(id, form, files):
             'tag': form['tags'].split(','),
         })
 
-        book.move_file_from_staging(form['file'])
+        if 'file' in form and form['file']:
+            book.move_file_from_staging(form['file'])
 
         db.session.commit()
 
