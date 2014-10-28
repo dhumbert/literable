@@ -152,7 +152,7 @@ def add_book(form, files):
         'tag': form['tags'].split(','),
     })
 
-    if 'meta-cover' in form:
+    if 'meta-cover' in form and form['meta-cover']:
         book.move_cover_from_tmp(form['meta-cover'])
     elif 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
@@ -178,7 +178,6 @@ def edit_book(id, form, files):
 
         book.title = form['title']
         book.description = form['description']
-        book.attempt_to_update_cover(files['cover'])
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
 
@@ -189,6 +188,11 @@ def edit_book(id, form, files):
             'genre': [form['genre']],
             'tag': form['tags'].split(','),
         })
+
+        if 'meta-cover' in form and form['meta-cover']:
+            book.move_cover_from_tmp(form['meta-cover'])
+        elif 'cover' in files and files['cover']:
+            book.attempt_to_update_cover(files['cover'])
 
         if 'file' in form and form['file']:
             book.move_file_from_staging(form['file'])
