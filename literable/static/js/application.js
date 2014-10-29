@@ -59,6 +59,24 @@ $(document).ready(function(){
         });
     }
 
+    if ($('.hierarchical-tax-list').length) {
+        $.getScript('/static/js/bonsai/jquery.bonsai.js', function(){
+            $('.hierarchical-tax-list').bonsai();
+        });
+    }
+
+    if ($('.tax-list').length) {
+        $('.tax-list a').on('click', function(e){
+            var elem = $(e.target);
+
+            $('#tax-id').val(elem.data('tax-id'));
+            $('#tax-name').val(elem.data('tax-name'));
+            $('#tax-parent').val(elem.data('tax-parent'));
+
+            $('#taxonomy-edit-modal').modal();
+        });
+    }
+
     if ($('.reading-list-reposition').length) {
         $.getScript('/static/js/jquery-ui-1.10.4.custom.min.js', function(){
             $('#book-list').sortable({

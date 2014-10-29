@@ -1,6 +1,6 @@
 <form method="post" class="form-horizontal book-form" enctype="multipart/form-data">
     <input type="file" id="book-file" />
-    <input type="hidden" name="file" id="file" value="{{ book.filename }}">
+    <input type="hidden" name="file" id="file">
 
     {% if book.filename %}
         <span class="help-block">Don't click if you want to keep the current file.</span>
