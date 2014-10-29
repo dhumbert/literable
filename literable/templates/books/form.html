@@ -13,6 +13,9 @@
     <label for="author">Author</label>
     <input type="text" name="author" id="author" value="{{ book.authors[0].name if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 
+    <label for="author_sort">Author Sort</label>
+    <input type="text" name="author_sort" id="author_sort" value="{{ book.authors[0].name_sort if book.authors else None | none2blank }}" class="span9" autocomplete="off">
+
     <label for="publisher">Publisher</label>
     <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span9" autocomplete="off">
 

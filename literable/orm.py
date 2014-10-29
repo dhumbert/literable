@@ -209,17 +209,22 @@ class Book(db.Model):
         self.taxonomies = []
         for tax_slug, terms in tax_map.iteritems():
             for term_name in terms:
-                if term_name.strip():
-                    tax = Taxonomy.query.filter_by(type=tax_slug, name=term_name.strip()).first()
-                    if not tax:
-                        name_sort = term_name.strip()
+                if isinstance(term_name, tuple):
+                    n = term_name[0].strip()
+                    name_sort = term_name[1].strip()
+                else:
+                    n = term_name.strip()
+                    name_sort = n
 
-                        if tax_slug == 'author':
-                            name_sort = utils.authorify(name_sort)
-
+                if n:
+                    tax = Taxonomy.query.filter_by(type=tax_slug, name=n).first()
+                    if tax:
+                        tax.name_sort = name_sort
+                        db.session.commit()
+                    else:
                         tax = Taxonomy()
                         tax.type = tax_slug
-                        tax.name = term_name.strip()
+                        tax.name = n
                         tax.name_sort = name_sort
                         tax.slug = tax.generate_slug()
 
