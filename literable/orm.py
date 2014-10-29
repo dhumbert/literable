@@ -140,13 +140,21 @@ class Book(db.Model):
 
     def remove_file(self):
         if self.filename:
-            os.remove(book_upload_set.path(self.filename))
-            self.filename = None
+            try:
+                os.remove(book_upload_set.path(self.filename))
+                self.filename = None
+            except Exception as e:
+                app.logger.error("Unable to delete file: {}".format(e.message))
+                pass  # oh, well
 
     def remove_cover(self):
         if self.cover:
-            os.remove(cover_upload_set.path(self.cover))
-            self.cover = None
+            try:
+                os.remove(cover_upload_set.path(self.cover))
+                self.cover = None
+            except Exception as e:
+                app.logger.error("Unable to delete cover: {}".format(e.message))
+                pass  # oh, well
 
     def move_cover_from_tmp(self, filename):
         if self.cover:

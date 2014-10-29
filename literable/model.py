@@ -112,6 +112,7 @@ def get_incomplete_books():
         'without a file': [],
         'without an author': [],
         'without a genre': [],
+        'without a publisher': [],
     }
 
     for book in get_all_books():
@@ -193,7 +194,7 @@ def add_book(form, files):
         'tag': form['tags'].split(','),
     })
 
-    if 'meta-cover' in form:
+    if 'meta-cover' in form and form['meta-cover']:
         book.move_cover_from_tmp(form['meta-cover'])
     elif 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
@@ -220,7 +221,6 @@ def edit_book(id, form, files):
 
         book.title = form['title']
         book.description = form['description']
-        book.attempt_to_update_cover(files['cover'])
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
 
@@ -232,7 +232,13 @@ def edit_book(id, form, files):
             'tag': form['tags'].split(','),
         })
 
-        book.move_file_from_staging(form['file'])
+        if 'meta-cover' in form and form['meta-cover']:
+            book.move_cover_from_tmp(form['meta-cover'])
+        elif 'cover' in files and files['cover']:
+            book.attempt_to_update_cover(files['cover'])
+
+        if 'file' in form and form['file']:
+            book.move_file_from_staging(form['file'])
 
         db.session.commit()
 
@@ -264,9 +270,10 @@ def upload_book(file):
                         cover_filename = tmp_cover_upload_set.resolve_conflict(tmp_cover_upload_set.config.destination, cover_filename)
 
                     dest = tmp_cover_upload_set.path(cover_filename)
-                    e.extract_cover(dest)
+                    extracted = e.extract_cover(dest)
 
-                    meta['cover'] = cover_filename
+                    if extracted:
+                        meta['cover'] = cover_filename
             else:
                 meta = None
         else:
