@@ -132,6 +132,31 @@ def get_taxonomy_terms_and_counts(ttype, order=None):
     return Taxonomy.get_grouped_counts(ttype, order)
 
 
+def get_taxonomy_types():
+    return Taxonomy.get_types()
+
+
+def get_taxonomies_and_terms():
+    taxonomies = {}
+    for ttype, hierarchical in get_taxonomy_types().iteritems():
+        terms = get_taxonomy_terms_and_counts(ttype)
+
+        taxonomies[ttype] = {
+            'hierarchical': hierarchical,
+            'terms': terms
+        }
+    # for tax in Taxonomy.query.order_by(Taxonomy.name).all():
+    #     if tax.type not in taxonomies:
+    #         taxonomies[tax.type] = {'hierarchical': False, 'terms': []}
+    #
+    #     taxonomies[tax.type]['terms'].append(tax)
+    #
+    #     if tax.parent_id and not taxonomies[tax.type]['hierarchical']:
+    #         taxonomies[tax.type]['hierarchical'] = True
+
+    return taxonomies
+
+
 def add_book(form, files):
     if 'title' not in form or not form['title'].strip():
         raise ValueError("Title must not be blank")
@@ -157,7 +182,8 @@ def add_book(form, files):
     elif 'cover' in files:
         book.attempt_to_update_cover(files['cover'])
 
-    book.move_file_from_staging(form['file'])
+    if 'file' in form and form['file']:
+        book.move_file_from_staging(form['file'])
 
     db.session.add(book)
     db.session.commit()
@@ -288,8 +314,8 @@ def delete_book(id):
     delete_from_elasticsearch(book)
 
 
-def get_toplevel_genres():
-    return Taxonomy.query.filter_by(parent_id=None, type='genre').order_by(Taxonomy.name).all()
+def get_taxonomy_terms_without_parent(ttype):
+    return Taxonomy.query.filter_by(parent_id=None, type=ttype).order_by(Taxonomy.name).all()
 
 
 def add_taxonomy(name, ttype, parent=None):
@@ -301,6 +327,40 @@ def add_taxonomy(name, ttype, parent=None):
     db.session.add(tax)
     db.session.commit()
     return tax.id
+
+
+def edit_taxonomy(data):
+    if 'id' not in data:
+        return False
+
+    tax = Taxonomy.query.get(data['id'])
+    if not tax:
+        return False
+
+    tax.name = data['name']
+    tax.slug = tax.generate_slug()
+
+    if 'parent' in data and data['parent']:
+        tax.parent_id = int(data['parent'])
+    else:
+        tax.parent_id = None
+
+    db.session.commit()
+
+    return True
+
+
+def delete_taxonomy(data):
+    if 'id' not in data:
+        return False
+
+    tax = Taxonomy.query.get(data['id'])
+    if not tax:
+        return False
+
+    db.session.delete(tax)
+    db.session.commit()
+    return True
 
 
 def delete_tax_if_possible(tax, id):
@@ -387,25 +447,26 @@ def remove_from_reading_list(user, book_id):
     db.session.commit()
 
 
-def generate_genre_tree_select_options(selected=None):
+def generate_genre_tree_select_options(selected=None, value_id=False):
     output = ""
 
-    for parent in get_toplevel_genres():
-        output = output + _recurse_select_level(parent, selected=selected)
+    for parent in get_taxonomy_terms_without_parent('genre'):
+        output += _recurse_select_level(parent, selected=selected, value_id=value_id)
 
     return output
 
 
-def _recurse_select_level(parent, depth=0, selected=None):
+def _recurse_select_level(parent, depth=0, selected=None, value_id=False):
     name = ("&mdash;" * depth) + " " + parent.name
+    value = parent.id if value_id else parent.name
 
     selected_string = """ selected="selected" """ if selected == parent.name else ""
 
-    output = """<option value="%s"%s>%s</option>""" % (parent.name, selected_string, name)
+    output = """<option value="%s"%s>%s</option>""" % (value, selected_string, name)
 
     if parent.children:
         for child in parent.children:
-            output = output + _recurse_select_level(child, depth=depth + 1, selected=selected)
+            output += _recurse_select_level(child, depth=depth + 1, selected=selected, value_id=value_id)
 
     return output
 
@@ -413,16 +474,20 @@ def _recurse_select_level(parent, depth=0, selected=None):
 def generate_genre_tree_list():
     output = ""
 
-    for parent in get_toplevel_genres():
-        output = output + _recurse_list_level(parent)
+    for parent in get_taxonomy_terms_without_parent('genre'):
+        output += _recurse_list_level(parent)
 
     return output
 
 
 def _recurse_list_level(parent):
     output = "<li>"
-    output = output + """<span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="%d"></span>""" % parent.id
-    output = output + """<a href="%s">%s</a>""" % (url_for('genre', genre=parent.slug), parent.name)
+    output += """<a href="#" data-tax-id="{}" data-tax-slug="{}"
+                             data-tax-name="{}" data-tax-type="{}"
+                             data-tax-parent="{}">{}</a>""".format(
+        parent.id, parent.slug, parent.name, parent.type, parent.parent_id, parent.name)
+
+    output += """ <span class="tax-count">{}</span>""".format(len(parent.books))
 
     if parent.children:
         output = output + "<ul>"
