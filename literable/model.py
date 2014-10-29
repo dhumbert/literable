@@ -112,6 +112,7 @@ def get_incomplete_books():
         'without a file': [],
         'without an author': [],
         'without a genre': [],
+        'without a publisher': [],
     }
 
     for book in get_all_books():
