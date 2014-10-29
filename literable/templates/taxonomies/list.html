@@ -19,28 +19,17 @@
         </li>
     </ul>
 
-    <div class="pull-right">
-        <a class="edit-tax btn btn-primary" href="javascript:void(0)"><i class="icon-pencil icon-white"></i> Edit</a>
-    </div>
-
-    <form method="post">
-        <div class="tax-actions" style="display:none;">
-            <button type="submit" class="btn btn-danger">Delete Checked</button>
-        </div>
-
-        {% if terms %}
-            <ul class="nonhierarchical-tax-list">
-                {% for term in terms %}
-                    <li>
-                        <span class="delete-checkbox" style="display:none;"><input type="checkbox" name="delete" value="{{ term.id }}"></span>
-                        <a href="{{ url_for('taxonomy', ttype=term.type, slug=term.slug) }}">{{ term.name }}</a>
-                        <span class="tax-count">{{ term.count_books }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            No terms
-        {% endif %}
-    </form>
+    {% if terms %}
+        <ul class="nonhierarchical-tax-list">
+            {% for term in terms %}
+                <li>
+                    <a href="{{ url_for('taxonomy', ttype=term.type, slug=term.slug) }}">{{ term.name }}</a>
+                    <span class="tax-count">{{ term.count_books }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        No terms
+    {% endif %}
 
 {% endblock %}

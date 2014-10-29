@@ -21,6 +21,7 @@ class Taxonomy(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('taxonomies.id'))
     parent = db.relationship('Taxonomy', backref=db.backref('children'), remote_side=[id])
     name = db.Column(db.String)
+    name_sort = db.Column(db.String)
     type = db.Column(db.String)
     slug = db.Column(db.String)
 
@@ -48,14 +49,14 @@ class Taxonomy(db.Model):
 
     @classmethod
     def get_grouped_counts(cls, ttype, order):
-        q = db.session.query(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type,
+        q = db.session.query(Taxonomy.name_sort.label('name'), Taxonomy.slug, Taxonomy.id, Taxonomy.type,
                              Taxonomy.parent_id,
                          db.func.count(books_taxonomies.c.book_id).label('count_books'))\
         .filter_by(type=ttype)\
-        .outerjoin(books_taxonomies).group_by(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type, Taxonomy.parent_id)
+        .outerjoin(books_taxonomies).group_by(Taxonomy.name_sort, Taxonomy.slug, Taxonomy.id, Taxonomy.type, Taxonomy.parent_id)
 
         if not order or order == 'name':
-            q = q.order_by(Taxonomy.name.asc())
+            q = q.order_by(Taxonomy.name_sort.asc())
         elif order == 'count':
             q = q.order_by(db.desc('count_books'))
 
@@ -211,10 +212,17 @@ class Book(db.Model):
                 if term_name.strip():
                     tax = Taxonomy.query.filter_by(type=tax_slug, name=term_name.strip()).first()
                     if not tax:
+                        name_sort = term_name.strip()
+
+                        if tax_slug == 'author':
+                            name_sort = utils.authorify(name_sort)
+
                         tax = Taxonomy()
                         tax.type = tax_slug
                         tax.name = term_name.strip()
+                        tax.name_sort = name_sort
                         tax.slug = tax.generate_slug()
+
                         db.session.add(tax)
 
                     if tax not in self.taxonomies:
