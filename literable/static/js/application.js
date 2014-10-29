@@ -103,6 +103,26 @@ $(document).ready(function(){
         });
     }
 
+    function authorify(name) {
+        var first = name.split(' ').slice(0, -1).join(' ');
+        var last = name.split(' ').slice(-1).join(' ');
+        var final = last;
+        if (first) {
+            final += ', ' + first;
+        }
+
+        return final;
+    }
+
+    if ($('.book-form').length) {
+        $('#author').on('blur', function(e) {
+            var author = $(e.target).val();
+            if (author) {
+                 $('#author_sort').val(authorify(author));
+            }
+        });
+    }
+
     if ($('#book-file').length) {
         $('#use-meta').on('click', function(){
             if ($('#use-title').is(':checked')) {
@@ -111,6 +131,7 @@ $(document).ready(function(){
 
             if ($('#use-author').is(':checked')) {
                 $('#author').val($('#meta-author').text());
+                $('#author_sort').val(authorify($('#meta-author').text()));
             }
 
             if ($('#use-publisher').is(':checked')) {

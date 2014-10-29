@@ -187,7 +187,7 @@ def add_book(form, files):
     book.created_at = datetime.now()
 
     book.update_taxonomies({
-        'author': [form['author']],
+        'author':  [(form['author'], form['author_sort'])],
         'publisher': [form['publisher']],
         'series': [form['series']],
         'genre': [form['genre']],
@@ -225,7 +225,7 @@ def edit_book(id, form, files):
         book.public = True if form['privacy'] == 'public' else False
 
         book.update_taxonomies({
-            'author': [form['author']],
+            'author': [(form['author'], form['author_sort'])],
             'publisher': [form['publisher']],
             'series': [form['series']],
             'genre': [form['genre']],
