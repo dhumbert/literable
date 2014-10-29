@@ -129,6 +129,34 @@ def admin_books_incomplete():
     return render_template('admin/incomplete.html', incomplete=incomplete)
 
 
+@app.route("/admin/taxonomies")
+@admin_required
+def admin_taxonomies():
+    taxonomies = model.get_taxonomies_and_terms()
+    return render_template('admin/taxonomies.html', taxonomies=taxonomies, generate_hierarchical_list=model.generate_genre_tree_list, hierarchical_select=model.generate_genre_tree_select_options(value_id=True))
+
+
+@app.route("/admin/taxonomies/edit", methods=['POST'])
+@admin_required
+def admin_taxonomy_edit():
+    action = request.form['action']
+    result = None
+
+    if action == 'Save Term':
+        result = model.edit_taxonomy(request.form)
+    elif action == 'Delete Term':
+        result = model.delete_taxonomy(request.form)
+    else:
+        abort(400)
+
+    if result:
+        flash('Updated term', 'success')
+    else:
+        flash('Unable to update term', 'error')
+
+    return redirect(url_for('admin_taxonomies'))
+
+
 @app.route("/t/<ttype>/<slug>")
 @login_required
 def taxonomy(ttype, slug):

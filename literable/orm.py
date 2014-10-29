@@ -3,6 +3,7 @@ import os.path
 import hashlib
 import shutil
 from flask import url_for
+from sqlalchemy.sql import expression
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
 from literable import db, book_upload_set, book_staging_upload_set, cover_upload_set, tmp_cover_upload_set, utils, epub, app
@@ -48,9 +49,10 @@ class Taxonomy(db.Model):
     @classmethod
     def get_grouped_counts(cls, ttype, order):
         q = db.session.query(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type,
+                             Taxonomy.parent_id,
                          db.func.count(books_taxonomies.c.book_id).label('count_books'))\
         .filter_by(type=ttype)\
-        .outerjoin(books_taxonomies).group_by(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type)
+        .outerjoin(books_taxonomies).group_by(Taxonomy.name, Taxonomy.slug, Taxonomy.id, Taxonomy.type, Taxonomy.parent_id)
 
         if not order or order == 'name':
             q = q.order_by(Taxonomy.name.asc())
@@ -58,6 +60,26 @@ class Taxonomy(db.Model):
             q = q.order_by(db.desc('count_books'))
 
         return q.all()
+
+    @classmethod
+    def get_types(cls):
+        """
+        Returns a dict of type: hierarchical, e.g. genre: True, tag: False
+        """
+        types = {}
+        results = db.session.query(db.distinct(Taxonomy.type), expression.case([(Taxonomy.parent_id == None, 0)], else_=1)).order_by(Taxonomy.type.asc()).all()
+        for row in results:
+            name = row[0]
+            hierarchical = bool(row[1])
+
+            if name not in types:
+                types[name] = hierarchical
+            else:
+                if hierarchical and not types[name]:
+                    types[name] = hierarchical
+
+        return types
+
 
     def __repr__(self):
         return self.name

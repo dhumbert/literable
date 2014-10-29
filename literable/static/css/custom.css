@@ -156,8 +156,26 @@
     margin-top: 1em;
 }
 
-.tag-list {
+.nonhierarchical-tax-list {
     -webkit-column-count: 4;
+}
+
+@media (max-width: 980px) {
+    .nonhierarchical-tax-list {
+        -webkit-column-count: 3;
+    }
+}
+
+@media (max-width: 768px) {
+    .nonhierarchical-tax-list {
+        -webkit-column-count: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .nonhierarchical-tax-list {
+        -webkit-column-count: 1;
+    }
 }
 
 #new-genre .well {

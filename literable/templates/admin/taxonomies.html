@@ -1,0 +1,75 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+    <h1>Taxonomies</h1>
+
+    {% set vars = {'first': True} %}
+    <div class=accordion" id="genre-accordion">
+        {% for taxonomy, details in taxonomies.iteritems() %}
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#genre-accordion" href="#collapse{{taxonomy}}">
+                        {{ taxonomy }}
+                    </a>
+                </div>
+
+                <div id="collapse{{ taxonomy }}" class="accordion-body collapse {% if vars.first %}in{% endif %}">
+                    <div class="accordion-inner">
+                        {% if details['hierarchical'] %}
+                            <ul class="tax-list hierarchical-tax-list">
+                                {{ generate_hierarchical_list() | safe }}
+                            </ul>
+                        {% else %}
+                            <ul class="tax-list nonhierarchical-tax-list">
+                                {% for term in details['terms'] %}
+                                    <li>
+                                        <a data-tax-id="{{ term.id }}" data-tax-slug="{{ term.slug }}"
+                                           data-tax-name="{{ term.name }}" data-tax-parent="{{ term.parent_id }}"
+                                           data-tax-type="{{ term.type }}"
+                                           href="#">
+                                            {{ term.name }}
+                                        </a>
+                                        <span class="tax-count">{{ term.count_books }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if vars.update({'first': False}) %}{% endif %}
+        {% endfor %}
+    </div>
+
+    <div id="taxonomy-edit-modal" class="modal hide fade">
+        <form class="form-horizontal" method="POST" action="{{ url_for('admin_taxonomy_edit') }}">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Edit Taxonomy Term</h3>
+            </div>
+            <div class="modal-body">
+                    <input type="hidden" name="id" id="tax-id">
+                    <div class="control-group">
+                        <label class="control-label" for="tax-name">Name</label>
+                        <div class="controls">
+                            <input type="text" id="tax-name" name="name">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="tax-parent">Parent</label>
+                        <div class="controls">
+                            <select id="tax-parent" name="parent">
+                                <option value="">None</option>
+                                {{ hierarchical_select | safe }}
+                            </select>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <input type="submit" name="action" id="delete-taxonomy" class="btn btn-danger" value="Delete Term">
+                <a href="#" id="cancel-edit-taxonomy" class="btn" data-dismiss="modal">Cancel</a>
+                <input type="submit" name="action" id="save-edit-taxonomy" class="btn btn-primary" value="Save Term">
+            </div>
+        </form>
+    </div>
+{% endblock %}
