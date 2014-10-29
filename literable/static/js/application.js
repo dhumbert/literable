@@ -30,13 +30,6 @@ $(document).ready(function(){
         });
     }
 
-    if ($('.edit-tax').length) {
-        $('.edit-tax').on('click', function(e){
-            $('.tax-actions').slideToggle();
-            $('.delete-checkbox').toggle();
-        });
-    }
-
     if ($('.rating').length) {
         $.getScript('/static/js/raty/jquery.raty.min.js', function(){
             $('.rating').raty({
