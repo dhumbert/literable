@@ -107,10 +107,26 @@ def _search_books_elasticsearch(q):
 
 def get_incomplete_books():
     books = {
-        'without a cover': Book.query.filter(or_(Book.cover == None, Book.cover == '')).order_by(Book.title).all(),
-        'without a description': Book.query.filter(or_(Book.description == None, Book.description == '')).order_by(Book.title).all(),
-        'without a file': Book.query.filter(or_(Book.filename == None, Book.filename == '')).order_by(Book.title).all(),
+        'without a cover': [],
+        'without a description': [],
+        'without a file': [],
+        'without an author': [],
+        'without a genre': [],
     }
+
+    for book in get_all_books():
+        if not book.authors:
+            books['without an author'].append(book)
+        if not book.cover:
+            books['without a cover'].append(book)
+        if not book.filename:
+            books['without a file'].append(book)
+        if not book.description:
+            books['without a description'].append(book)
+        if not book.genres:
+            books['without a genre'].append(book)
+        if not book.publishers:
+            books['without a publisher'].append(book)
 
     return books
 
