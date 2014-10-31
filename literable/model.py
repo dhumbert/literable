@@ -134,10 +134,16 @@ def get_incomplete_books():
 def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 
-    order = Book.series_seq if tax_type == 'series' else Book.title
 
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    books = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter())).order_by(order).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter()))
+
+    if tax_type == 'series':
+        q = q.order_by(Book.series_seq, Book.title)
+    else:
+        q = q.order_by(Book.title)
+
+    books = q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
 
     return (books, tax)
