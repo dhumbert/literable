@@ -121,6 +121,20 @@ $(document).ready(function(){
                  $('#author_sort').val(authorify(author));
             }
         });
+
+        $('.alt-save').on('click', function(e) {
+            var $btn = $(e.target);
+            var action = $btn.attr('id');
+            var $hidden_elem = $('#post-submit-action');
+
+            if (action == 'save-and-add-another') {
+                $hidden_elem.val('add_another');
+                $('.book-form').submit();
+            } else if (action == 'save-and-add-next-in-series') {
+                $hidden_elem.val('add_next_in_series');
+                $('.book-form').submit();
+            }
+        });
     }
 
     if ($('#book-file').length) {

@@ -19,7 +19,12 @@ def recent():
 @login_required
 def add_book():
     book = model.get_book(None)  # blank book obj for form
-    return render_template('books/add.html', book=book, new=True, genre_options=model.generate_genre_tree_select_options)
+
+    return render_template('books/add.html', book=book, new=True,
+                           series=request.args.get('series'),
+                           series_seq=request.args.get('series_seq'),
+                           genre=request.args.get('genre'),
+                           genre_options=model.generate_genre_tree_select_options)
 
 
 @app.route("/books/add", methods=['POST'])
@@ -27,6 +32,17 @@ def add_book():
 def add_book_post():
     try:
         model.add_book(request.form, request.files)
+        flash('Added book', 'success')
+
+        if 'post-submit-action' in request.form and request.form['post-submit-action']:
+            if request.form['post-submit-action'] == 'add_another':
+                return redirect(url_for('add_book'))
+            elif request.form['post-submit-action'] == 'add_next_in_series':
+                if request.form['series_seq']:
+                    seq = int(request.form['series_seq']) + 1
+                else:
+                    seq = None
+                return redirect(url_for('add_book', series=request.form['series'], series_seq=seq, genre=request.form['genre']))
         return redirect(url_for('recent'))
     except ValueError as e:
         flash(e, 'error')
