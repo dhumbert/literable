@@ -27,18 +27,22 @@
 
 
     <label for="series">Series</label>
-    <input type="text" name="series" id="series" value="{{ book.series[0].name if book.series else None | none2blank }}" class="span7" autocomplete="off">
+    <input type="text" name="series" id="series" value="{% if series %}{{ series | none2blank }}{% else %}{{ book.series[0].name if book.series else None | none2blank }}{% endif %}" class="span7" autocomplete="off">
 
     <span class="input-prepend">
         <span class="add-on">#</span>
-        <input class="span1" type="number" name="series_seq" id="series_seq" value="{{ book.series_seq | none2blank }}">
+        <input class="span1" type="number" name="series_seq" id="series_seq" value="{% if series_seq %}{{ series_seq | none2blank }}{% else %}{{ book.series_seq | none2blank }}{% endif %}">
     </span>
 
 
     <label for="genre">Genre</label>
     <select name="genre" id="genre" class="span7">
         <option value="">-- None --</option>
-        {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
+        {% if genre %}
+            {{ genre_options(selected=genre) | safe }}
+        {% else %}
+            {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
+        {% endif %}
     </select>
 
     <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#new-genre">New Genre</button>
@@ -83,8 +87,23 @@
     </label>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{{ url_for('recent') }}" class="btn">Cancel</a>
+        <input type="hidden" name="post-submit-action" id="post-submit-action" value="">
+        <button type="submit" class="btn btn-primary">Save</button>
+
+        <div class="btn-group">
+        <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">
+            Save and...
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="javascript:void(0);" class="alt-save" id="save-and-add-another">add another</a>
+            </li>
+            <li>
+                <a href="javascript:void(0);" class="alt-save" id="save-and-add-next-in-series">add next in a series</a>
+            </li>
+        </ul>
+        </div>
     </div>
 </form>
 
