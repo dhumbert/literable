@@ -513,7 +513,7 @@ def _recurse_list_level(parent):
 
     if parent.children:
         output = output + "<ul>"
-        for child in parent.children:
+        for child in sorted(parent.children, key=lambda x: x.name):
             output = output + _recurse_list_level(child)
 
         output = output + "</ul>"
