@@ -65,8 +65,16 @@ $(document).ready(function(){
             $('#tax-id').val(elem.data('tax-id'));
             $('#tax-name').val(elem.data('tax-name'));
             $('#tax-parent').val(elem.data('tax-parent'));
+            $('#type-group').hide();
 
             $('#taxonomy-edit-modal').modal();
+        });
+
+        $('#taxonomy-edit-modal').on('hidden', function(){
+            $('#tax-id').val('');
+            $('#tax-name').val('');
+            $('#tax-parent').val('');
+            $('#type-group').show();
         });
     }
 
