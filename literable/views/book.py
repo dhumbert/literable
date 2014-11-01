@@ -13,6 +13,11 @@ def recent():
     return render_template('books/list.html', books=books, recent=True, pagination='books/pagination_recent.html')
 
 
+@app.route("/rated")
+def rated():
+    books = current_user.rated_books
+    return render_template('books/list.html', books=books, rated=True, pagination='books/pagination_recent.html')
+
 @app.route("/books/add")
 @login_required
 def add_book():
@@ -134,6 +139,6 @@ def write_book_meta(id):
 def ajax_rate():
     score = request.form['score']
     book_id = request.form['book_id']
-    book = model.get_book(book_id)
-    book.rate(score)
+
+    model.rate_book(book_id, score)
     return json.dumps(True)

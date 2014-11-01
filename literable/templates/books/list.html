@@ -43,6 +43,10 @@
             <li class="active">Recent Books</li>
         {% endif %}
 
+        {% if rated %}
+            <li class="active">My Rated Books</li>
+        {% endif %}
+
         {% if search %}
             <li class="active">Search Results for "{{ search }}"</li>
         {% endif %}
