@@ -361,20 +361,28 @@ def add_taxonomy(name, ttype, parent=None):
 
 
 def edit_taxonomy(data):
-    if 'id' not in data:
-        return False
+    new = False
+    if 'id' in data and data['id']:
+        tax = Taxonomy.query.get(data['id'])
+    else:
+        new = True
+        tax = Taxonomy()
+        tax.type = data['type']
 
-    tax = Taxonomy.query.get(data['id'])
     if not tax:
         return False
 
     tax.name = data['name']
+    tax.name_sort = data['name']
     tax.slug = tax.generate_slug()
 
     if 'parent' in data and data['parent']:
         tax.parent_id = int(data['parent'])
     else:
         tax.parent_id = None
+
+    if new:
+        db.session.add(tax)
 
     db.session.commit()
 
@@ -408,23 +416,6 @@ def delete_tax_if_possible(tax, id):
     # if instance:
     #     if len(instance.books) == 0:  # no books left, so we can delete
     #         delete_tax(tax, [id])
-
-
-def delete_tax(tax, ids):
-    pass
-    # obj = {
-    #     'genre': Genre,
-    #     'tag': Tag,
-    #     'series': Series,
-    #     'author': Author,
-    #     'publisher': Publisher,
-    # }[tax]
-    #
-    # for id in ids:
-    #     t = obj.query.get(int(id))
-    #     db.session.delete(t)
-    #
-    # db.session.commit()
 
 
 def add_user(username, password):

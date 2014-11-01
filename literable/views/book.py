@@ -1,10 +1,8 @@
 import json
 from flask import render_template, request, redirect, url_for, flash, Response, abort
-from flask.ext.login import login_required, login_user, logout_user, current_user
-from literable import app, model, content_type, admin_required
+from flask.ext.login import login_required, current_user
+from literable import app, model, content_type
 
-
-app.jinja_env.globals['is_book_in_reading_list'] = model.is_book_in_reading_list
 
 @app.route("/")
 @app.route("/books")
@@ -131,108 +129,6 @@ def write_book_meta(id):
     return redirect(url_for('edit_book', id=id))
 
 
-@app.route("/reading-list")
-@login_required
-def reading_list():
-    books = current_user.reading_list
-    return render_template('books/list.html', books=books, reading_list=True)
-
-
-@app.route("/admin/books/incomplete")
-@admin_required
-def admin_books_incomplete():
-    incomplete = model.get_incomplete_books()
-    return render_template('admin/incomplete.html', incomplete=incomplete)
-
-
-@app.route("/admin/taxonomies")
-@admin_required
-def admin_taxonomies():
-    taxonomies = model.get_taxonomies_and_terms()
-    return render_template('admin/taxonomies.html', taxonomies=taxonomies, generate_hierarchical_list=model.generate_genre_tree_list, hierarchical_select=model.generate_genre_tree_select_options(value_id=True))
-
-
-@app.route("/admin/taxonomies/edit", methods=['POST'])
-@admin_required
-def admin_taxonomy_edit():
-    action = request.form['action']
-    result = None
-
-    if action == 'Save Term':
-        result = model.edit_taxonomy(request.form)
-    elif action == 'Delete Term':
-        result = model.delete_taxonomy(request.form)
-    else:
-        abort(400)
-
-    if result:
-        flash('Updated term', 'success')
-    else:
-        flash('Unable to update term', 'error')
-
-    return redirect(url_for('admin_taxonomies'))
-
-
-@app.route("/t/<ttype>/<slug>")
-@login_required
-def taxonomy(ttype, slug):
-    books, tax = model.get_taxonomy_books(ttype, slug, page=request.args.get('page'))
-    return render_template('books/list.html', books=books, taxonomy=tax, pagination='taxonomies/pagination.html')
-
-
-@app.route("/t/<ttype>", methods=["GET", "POST"])
-@login_required
-def taxonomy_terms(ttype):
-    if request.method == 'POST':
-        #model.delete_tax('author', request.form.getlist('delete'))
-        flash('Deleted {}(s)'.format(ttype), 'success')
-        return redirect(url_for('taxonomy_terms', ttype=ttype))
-
-    order = request.args.get('order')
-
-    terms = model.get_taxonomy_terms_and_counts(ttype, order)
-    return render_template('taxonomies/list.html', ttype=ttype, terms=terms, order=order)
-
-
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        user = model.authenticate(request.form['username'], request.form['password'])
-        if user:
-            login_user(user, remember=True)
-            url = request.form['next'] if 'next' in request.form else '/'
-            return redirect(url)
-        else:
-            flash('Invalid login', 'error')
-            return redirect('/login')
-    return render_template('users/login.html', next=request.args.get('next'))
-
-
-@app.route("/logout")
-def logout():
-    logout_user()
-    return redirect('/login')
-
-
-@app.route("/search")
-@login_required
-def search():
-    term = request.args.get('q')
-    if not term:
-        term = ""
-    books = model.search_books(term)
-    return render_template('books/list.html', books=books, search=term)
-
-
-@app.route("/ajax/taxonomy/<ttype>")
-@content_type("application/json")
-@login_required
-def ajax_taxonomy(ttype):
-    terms = model.get_taxonomy_terms(ttype)
-    names = [term.name for term in terms]
-    return json.dumps(names)
-
-
 @app.route("/ajax/rate", methods=['POST'])
 @login_required
 def ajax_rate():
@@ -240,25 +136,4 @@ def ajax_rate():
     book_id = request.form['book_id']
     book = model.get_book(book_id)
     book.rate(score)
-    return json.dumps(True)
-
-
-@app.route("/ajax/order_reading_list", methods=['POST'])
-@login_required
-def order_reading_list():
-    model.update_reading_list_order(current_user, json.loads(request.form['data']))
-    return json.dumps(True)
-
-
-@app.route("/ajax/add_to_reading_list", methods=['POST'])
-@login_required
-def add_to_reading_list():
-    model.add_to_reading_list(current_user, request.form['book_id'])
-    return json.dumps(True)
-
-
-@app.route("/ajax/remove_from_reading_list", methods=['POST'])
-@login_required
-def remove_from_reading_list():
-    model.remove_from_reading_list(current_user, request.form['book_id'])
     return json.dumps(True)

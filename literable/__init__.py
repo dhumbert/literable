@@ -74,4 +74,4 @@ def load_user(id):
     from literable.orm import User
     return User.query.get(int(id))
 
-import literable.views
+import literable.base

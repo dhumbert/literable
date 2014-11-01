@@ -36,7 +36,7 @@
 
 
     <label for="genre">Genre</label>
-    <select name="genre" id="genre" class="span7">
+    <select name="genre" id="genre" class="span9">
         <option value="">-- None --</option>
         {% if genre %}
             {{ genre_options(selected=genre) | safe }}
@@ -44,25 +44,6 @@
             {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
         {% endif %}
     </select>
-
-    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#new-genre">New Genre</button>
-
-    <div class="collapsible collapse" id="new-genre">
-        <div class="well">
-            <h5>New Genre</h5>
-
-            <label for="new-genre-name">Name</label>
-            <input type="text" name="new-genre-name" id="new-genre-name" class="span8">
-
-            <label for="new-genre-parent">Parent</label>
-            <select name="new-genre-parent" id="new-genre-parent" class="span8">
-                <option value="">-- None --</option>
-                {{ genre_options() | safe }}
-            </select>
-
-            <span class="help-block">If the new genre name is not blank, the new genre will override any genre selected above.</span>
-        </div>
-    </div>
 
 
     <label for="cover">Cover Image</label>
