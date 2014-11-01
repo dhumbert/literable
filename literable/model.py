@@ -8,7 +8,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
-from literable.orm import Book, User, ReadingList, Taxonomy
+from literable.orm import Book, User, ReadingList, Taxonomy, Rating
 
 
 def _get_page(page):
@@ -290,6 +290,20 @@ def upload_book(file):
         return filename, meta
     else:
         return None
+
+
+def rate_book(book_id, score):
+    rating = Rating.query.filter_by(book_id=book_id, user_id=current_user.id).first()
+    if rating:
+        rating.rating = score
+    else:
+        rating = Rating()
+        rating.user_id = current_user.id
+        rating.book_id = book_id
+        rating.rating = score
+        db.session.add(rating)
+
+    db.session.commit()
 
 
 def book_to_elasticsearch(book):

@@ -95,7 +95,6 @@ class Book(db.Model):
     cover = db.Column(db.String)
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime())
-    rating = db.Column(db.Integer())
     public = db.Column(db.Boolean())
     series_seq = db.Column(db.Integer)
 
@@ -295,6 +294,15 @@ class ReadingList(db.Model):
     book = db.relationship(Book)
 
 
+class Rating(db.Model):
+    __tablename__ = 'ratings'
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    rating = db.Column(db.Integer)
+
+    book = db.relationship(Book)
+
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -305,6 +313,18 @@ class User(db.Model):
     _reading_list = db.relationship(ReadingList, order_by=[ReadingList.position],
                                     collection_class=ordering_list('position'))
     reading_list = association_proxy('_reading_list', 'book')
+
+    ratings = db.relationship(Rating, order_by=[Rating.rating.desc()],
+                                    collection_class=ordering_list('rating'))
+
+    rated_books = association_proxy('ratings', 'book')
+
+    def get_rating(self, book_id):
+        for rating in self.ratings:
+            if rating.book_id == book_id:
+                return rating.rating
+
+        return None
 
     def is_authenticated(self):
         return True
