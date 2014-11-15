@@ -20,7 +20,12 @@
                           <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('reading_list') }}">Reading List</a></li>
+                            {% for rlist in current_user.reading_lists %}
+                                <li><a href="{{ url_for('reading_lists', rlist=rlist.slug) }}">{{ rlist.name }}</a></li>
+                            {% endfor %}
+                            <li class="divider"></li>
+                            <li><a href="#new-list-modal" data-toggle="modal">+ New List</a></li>
+                            <li class="divider"></li>
                             <li><a href="{{ url_for('rated') }}">Rated Books</a></li>
                         </ul>
                     </li>
@@ -70,5 +75,22 @@
             This is a demo. The library will be deleted and recreated every hour.
         </div>
     {% endif %}
+</div>
+
+<div id="new-list-modal" class="modal hide fade">
+    <form method="post" action="{{ url_for('reading_lists') }}">
+        <input type="hidden" name="next" value="{{ request.url }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>New Reading List</h3>
+        </div>
+        <div class="modal-body">
+            <input type="text" name="name" class="span5" placeholder="List Name..." required="required">
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+            <button type="submit" id="save-reading-list" class="btn btn-primary">Save</button>
+        </div>
+    </form>
 </div>
 {% endblock %}

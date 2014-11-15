@@ -84,13 +84,14 @@ $(document).ready(function(){
                 handle: '.reading-list-reposition',
                 tolerance: 'pointer',
                 stop: function(evt, ui) {
-                    var data = {}
+                    var list_id = $('#reading-list-id').val();
+                    var data = {};
                     $('#book-list').find('.row').each(function(i, el) {
                         var book_id = $(this).data('book-id');
                         data[book_id] = i;
                     });
 
-                    $.post('/ajax/order_reading_list', {'data': JSON.stringify(data)});
+                    $.post('/ajax/order_reading_list', {'list_id': list_id, 'data': JSON.stringify(data)});
                 }
             });
         });
@@ -218,22 +219,29 @@ $(document).ready(function(){
         });
     }
 
-    if ($('.add-to-reading-list').length) {
-        $('.add-to-reading-list').on('click', function(e) {
+    if ($('.add-to-reading-list').length || $('.remove-from-reading-list').length) {
+        $(document).on('click', '.add-to-reading-list', function(e) {
             var elem = $(this);
             var book_id = elem.data('book-id');
-            $.post('/ajax/add_to_reading_list', {'book_id': book_id}, function(){
-                elem.addClass('btn-success');
-                elem.find('i').removeClass('icon-list').addClass('icon-ok').addClass('icon-white');
+            var list_id = elem.data('list-id');
+            $.post('/ajax/add_to_reading_list', {'book_id': book_id, 'list_id': list_id}, function(){
+                elem.find('i').toggleClass('icon-check icon-empty');
+                elem.toggleClass('add-to-reading-list remove-from-reading-list');
             });
+            e.stopPropagation();
         });
-    }
 
-    if ($('.remove-from-reading-list').length) {
-        $('.remove-from-reading-list').on('click', function(e) {
-            var book_id = $(this).data('book-id');
-            $(this).closest('.row').fadeOut();
-            $.post('/ajax/remove_from_reading_list', {'book_id': book_id});
+        $(document).on('click', '.remove-from-reading-list', function(e) {
+            var elem = $(this);
+            var book_id = elem.data('book-id');
+            var list_id = elem.data('list-id');
+
+            //elem.closest('.row').fadeOut();
+            $.post('/ajax/remove_from_reading_list', {'book_id': book_id, 'list_id': list_id}, function(){
+                elem.find('i').toggleClass('icon-check icon-empty');
+                elem.toggleClass('add-to-reading-list remove-from-reading-list');
+            });
+            e.stopPropagation();
         });
     }
 });

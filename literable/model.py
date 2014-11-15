@@ -8,7 +8,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from elasticutils import S, get_es
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
-from literable.orm import Book, User, ReadingList, Taxonomy, Rating
+from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
 
 
 def _get_page(page):
@@ -452,33 +452,36 @@ def delete_user(username):
     db.session.commit()
 
 
-def update_reading_list_order(user, ordering):
-    print ordering
-    for r in ReadingList.query.filter_by(user_id=user.id).all():
-        r.position = ordering[unicode(r.book_id)]
+def new_reading_list(name):
+    rlist = ReadingList()
+    rlist.user_id = current_user.id
+    rlist.name = name
+    rlist.slug = rlist.generate_slug()
+
+    db.session.add(rlist)
+    db.session.commit()
+
+
+def update_reading_list_order(list_id, ordering):
+    rlist = ReadingList.query.filter_by(id=list_id).first()
+    for rbook in rlist._books:
+        rbook.position = ordering[unicode(rbook.book_id)]
 
     db.session.commit()
 
 
-def add_to_reading_list(user, book_id):
-    r = ReadingList()
-    r.user_id = user.id
+def add_to_reading_list(list_id, book_id):
+    r = ReadingListBookAssociation()
     r.book_id = book_id
+    r.reading_list_id = list_id
     r.position = 999
 
-    try:
-        db.session.add(r)
-        db.session.commit()
-    except IntegrityError:
-        pass
+    db.session.add(r)
+    db.session.commit()
 
 
-def is_book_in_reading_list(book_id):
-    return ReadingList.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-
-
-def remove_from_reading_list(user, book_id):
-    r = ReadingList.query.filter_by(user_id=user.id, book_id=book_id).first()
+def remove_from_reading_list(list_id, book_id):
+    r = ReadingListBookAssociation.query.filter_by(reading_list_id=list_id, book_id=book_id).first()
     db.session.delete(r)
     db.session.commit()
 
