@@ -3,6 +3,7 @@ import os.path
 import hashlib
 import shutil
 from flask import url_for
+from sqlalchemy import event
 from sqlalchemy.sql import expression
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -285,13 +286,36 @@ class Book(db.Model):
         db.session.commit()
 
 
-class ReadingList(db.Model):
-    __tablename__ = 'reading_list'
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+class ReadingListBookAssociation(db.Model):
+    __tablename__ = 'reading_list_books'
+    reading_list_id = db.Column(db.Integer, db.ForeignKey('reading_lists.id', onupdate='cascade', ondelete='cascade'), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id', onupdate='cascade', ondelete='cascade'), primary_key=True)
     position = db.Column(db.Integer)
 
-    book = db.relationship(Book)
+    book = db.relationship('Book', passive_deletes=True)
+
+
+class ReadingList(db.Model):
+    __tablename__ = 'reading_lists'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    name = db.Column(db.String)
+    slug = db.Column(db.String)
+    _books = db.relationship('ReadingListBookAssociation', order_by=[ReadingListBookAssociation.position],
+                                    collection_class=ordering_list('position'), passive_deletes=True)
+    books = association_proxy('_books', 'book')
+
+    def generate_slug(self, depth=0):
+        search_for = utils.slugify(self.name)
+
+        if depth > 0:
+            search_for = utils.slugify("%s-%d" % (self.name, depth))
+
+        result = ReadingList.query.filter_by(slug=search_for).first()
+        if result is None:
+            return search_for
+        else:
+            return self.generate_slug(depth + 1)
 
 
 class Rating(db.Model):
@@ -310,14 +334,26 @@ class User(db.Model):
     password = db.Column(db.String)
     admin = db.Column(db.Boolean)
 
-    _reading_list = db.relationship(ReadingList, order_by=[ReadingList.position],
-                                    collection_class=ordering_list('position'))
-    reading_list = association_proxy('_reading_list', 'book')
+    reading_lists = db.relationship(ReadingList, order_by=[ReadingList.name], backref=db.backref('user'))
 
     ratings = db.relationship(Rating, order_by=[Rating.rating.desc()],
                                     collection_class=ordering_list('rating'))
 
     rated_books = association_proxy('ratings', 'book')
+
+    def get_reading_list(self, slug):
+        for rlist in self.reading_lists:
+            if rlist.slug == slug:
+                return rlist
+
+    def get_reading_list_by_id(self, id):
+        for rlist in self.reading_lists:
+            if rlist.id == id:
+                return rlist
+
+    def book_is_in_reading_list(self, reading_list_id, book_id):
+        list = self.get_reading_list_by_id(reading_list_id)
+        return book_id in [book.id for book in list.books]
 
     def get_rating(self, book_id):
         for rating in self.ratings:

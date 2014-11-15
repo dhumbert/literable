@@ -12,7 +12,7 @@
                 </div>
             {% endif %}
             {% include "messages.html" %}
-            {% if next: %}
+            {% if next %}
                 <input type="hidden" name="next" value="{{ next }}">
             {% endif %}
             <input class="span3" placeholder="Username" type="text" name="username">

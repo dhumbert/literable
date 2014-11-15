@@ -52,7 +52,13 @@
         {% endif %}
 
         {% if reading_list %}
-            <li class="active">My Reading List</li>
+            <input type="hidden" id="reading-list-id" value="{{ reading_list.id }}">
+            <li class="active">Reading Lists<span class="divider">/</span></li>
+            <li class="active">{{ reading_list.name }}</li>
+
+            <li class="pull-right">
+                <a href="{{ url_for('delete_reading_list', list_id=reading_list.id) }}">Delete This Reading List</a>
+            </li>
         {% endif %}
     </ul>
 
