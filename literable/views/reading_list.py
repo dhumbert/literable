@@ -1,5 +1,5 @@
 import json
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, abort
 from flask.ext.login import login_required, current_user
 from literable import app, model
 
@@ -27,6 +27,20 @@ def new_reading_list():
         return redirect(next_page)
     else:
         return redirect(url_for('recent'))
+
+
+@app.route("/delete-reading-list/<list_id>")
+def delete_reading_list(list_id):
+    try:
+        model.delete_reading_list(list_id)
+    except Exception as e:
+        print e
+        abort(403)
+
+    flash('Deleted reading list', 'success')
+    return redirect(url_for('recent'))
+
+
 
 
 @app.route("/ajax/order_reading_list", methods=['POST'])

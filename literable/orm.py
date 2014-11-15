@@ -3,6 +3,7 @@ import os.path
 import hashlib
 import shutil
 from flask import url_for
+from sqlalchemy import event
 from sqlalchemy.sql import expression
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -287,11 +288,11 @@ class Book(db.Model):
 
 class ReadingListBookAssociation(db.Model):
     __tablename__ = 'reading_list_books'
-    reading_list_id = db.Column(db.Integer, db.ForeignKey('reading_lists.id'), primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    reading_list_id = db.Column(db.Integer, db.ForeignKey('reading_lists.id', onupdate='cascade', ondelete='cascade'), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id', onupdate='cascade', ondelete='cascade'), primary_key=True)
     position = db.Column(db.Integer)
 
-    book = db.relationship('Book')
+    book = db.relationship('Book', passive_deletes=True)
 
 
 class ReadingList(db.Model):
@@ -301,7 +302,7 @@ class ReadingList(db.Model):
     name = db.Column(db.String)
     slug = db.Column(db.String)
     _books = db.relationship('ReadingListBookAssociation', order_by=[ReadingListBookAssociation.position],
-                                    collection_class=ordering_list('position'))
+                                    collection_class=ordering_list('position'), passive_deletes=True)
     books = association_proxy('_books', 'book')
 
     def generate_slug(self, depth=0):

@@ -452,6 +452,18 @@ def delete_user(username):
     db.session.commit()
 
 
+def delete_reading_list(list_id):
+    rlist = ReadingList.query.filter_by(id=list_id).first()
+    if rlist:
+        if rlist.user_id == current_user.id:
+            db.session.delete(rlist)
+            db.session.commit()
+        else:
+            raise
+    else:
+        raise
+
+
 def new_reading_list(name):
     rlist = ReadingList()
     rlist.user_id = current_user.id
