@@ -267,8 +267,9 @@ def upload_book(file):
             e = epub.Epub(book_staging_upload_set.path(filename))
             if e:
                 meta = e.metadata
-                meta['author'] = meta['creator']
-                del meta['creator']
+                if 'creator' in meta:
+                    meta['author'] = meta['creator']
+                    del meta['creator']
 
                 # if the book has a cover, copy it to tmp directory
                 if e.cover:
