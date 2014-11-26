@@ -89,6 +89,6 @@
             </div>
         </p>
 
-        <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.path) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
+        <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.url) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
     </div>
 </div>
