@@ -113,9 +113,17 @@ def get_incomplete_books():
         'without an author': [],
         'without a genre': [],
         'without a publisher': [],
+        'that are duplicate': []
     }
 
+    book_titles = set()
+
     for book in get_all_books():
+        if book.title in book_titles:
+            books['that are duplicate'].append(book)
+        else:
+            book_titles.add(book.title)
+
         if not book.authors:
             books['without an author'].append(book)
         if not book.cover:
