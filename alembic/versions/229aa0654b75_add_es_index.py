@@ -15,23 +15,25 @@ from literable import app
 
 
 def upgrade():
-    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-    es.indices.create(index=app.config['ELASTICSEARCH_INDEX'])
-    es.indices.put_mapping(index=app.config['ELASTICSEARCH_INDEX'],
-                           doc_type=app.config['ELASTICSEARCH_DOC_TYPE'],
-                           body={
-                               app.config['ELASTICSEARCH_DOC_TYPE']: {
-                                   'properties': {
-                                       'id': {'type': 'integer'},
-                                       'title': {'type': 'string', 'analyzer': 'snowball'},
-                                       'author': {'type': 'string', 'analyzer': 'snowball'},
-                                       'series': {'type': 'string', 'analyzer': 'snowball'},
-                                       'description': {'type': 'string', 'analyzer': 'snowball'},
-                                       'content': {'type': 'string'},
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.indices.create(index=app.config['ELASTICSEARCH_INDEX'])
+        es.indices.put_mapping(index=app.config['ELASTICSEARCH_INDEX'],
+                               doc_type=app.config['ELASTICSEARCH_DOC_TYPE'],
+                               body={
+                                   app.config['ELASTICSEARCH_DOC_TYPE']: {
+                                       'properties': {
+                                           'id': {'type': 'integer'},
+                                           'title': {'type': 'string', 'analyzer': 'snowball'},
+                                           'author': {'type': 'string', 'analyzer': 'snowball'},
+                                           'series': {'type': 'string', 'analyzer': 'snowball'},
+                                           'description': {'type': 'string', 'analyzer': 'snowball'},
+                                           'content': {'type': 'string'},
+                                       }
                                    }
-                               }
-                           })
+                               })
 
 def downgrade():
-    es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-    es.indices.delete(index=app.config['ELASTICSEARCH_INDEX'])
+    if app.config['ELASTICSEARCH_ENABLED']:
+        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
+        es.indices.delete(index=app.config['ELASTICSEARCH_INDEX'])

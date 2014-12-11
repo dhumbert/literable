@@ -6,8 +6,8 @@ local_backup_dir = '/Users/dhumbert/Dropbox/Books/literableBackup/'
 
 
 def deploy(demo=False):
-    path = '/srv/literable' if not demo else '/srv/literable_demo'
-    app = 'literable' if not demo else 'literable_demo'
+    path = '/srv/literable' if not demo else '/srv/demo'
+    app = 'literable' if not demo else 'demo'
 
     sudo("stop {0}".format(app))
     with cd(path):
