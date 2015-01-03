@@ -2,6 +2,12 @@ from flask import render_template, request, redirect, url_for, flash, abort
 from literable import app, model, admin_required
 
 
+@app.route("/admin/books/all")
+@admin_required
+def admin_books_all():
+    books = model.get_all_books()
+    return render_template('admin/all.html', books=books, num_books=len(books))
+
 @app.route("/admin/books/incomplete")
 @admin_required
 def admin_books_incomplete():
