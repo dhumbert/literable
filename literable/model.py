@@ -2,10 +2,9 @@ from datetime import datetime
 import hashlib
 import os
 import os.path
-from flask import url_for, flash
+from flask import flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
-from sqlalchemy.exc import IntegrityError
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
 
@@ -19,7 +18,7 @@ def _get_page(page):
 
 
 def _privilege_filter():
-    return or_(current_user.admin, Book.user_id == current_user.id, Book.public)
+    return or_(Book.user_id == current_user.id, Book.public)
 
 
 def user_can_modify_book(book, user):
@@ -48,11 +47,26 @@ def get_book(id):
 
 def get_recent_books(page):
     page = max(1, _get_page(page))
-    return Book.query.filter(_privilege_filter()).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+
+    f = or_() if current_user.admin else _privilege_filter()
+
+    return Book.query.filter(f).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q):
-        return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc')
+
+    f = or_(
+        Book.title.ilike('%'+q+'%'),
+        Book.description.ilike('%'+q+'%'),
+        Taxonomy.name.ilike('%'+q+'%'),
+    )
+
+    if not current_user.admin:
+        f = and_(f, _privilege_filter())
+
+    query = Book.query.join(Book.taxonomies).filter(f)
+    return query.order_by('title asc')
+
 
 
 def get_incomplete_books():
@@ -92,9 +106,9 @@ def get_incomplete_books():
 def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))
 
-
+    f = or_() if current_user.admin else _privilege_filter()
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter()))
+    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title)
