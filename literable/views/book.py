@@ -9,25 +9,31 @@ from literable import app, model, content_type
 @app.route("/recent")
 @login_required
 def recent():
-    books = model.get_recent_books(request.args.get('page'))
-    return render_template('books/list.html', books=books, recent=True, pagination='books/pagination_recent.html')
+    page = request.args.get('page')
+    title = 'Recent Books | Page {}'.format(max(page, 1))
+    books = model.get_recent_books(page)
+    return render_template('books/list.html', books=books, recent=True,
+                           title=title, pagination='books/pagination_recent.html')
 
 
 @app.route("/rated")
 def rated():
+    title = 'Rated Books'
     books = current_user.rated_books
-    return render_template('books/list.html', books=books, rated=True, pagination='books/pagination_recent.html')
+    return render_template('books/list.html', books=books, rated=True, title=title)
 
 @app.route("/books/add")
 @login_required
 def add_book():
+    title = 'Add Book'
     book = model.get_book(None)  # blank book obj for form
 
     return render_template('books/add.html', book=book, new=True,
                            series=request.args.get('series'),
                            series_seq=request.args.get('series_seq'),
                            genre=request.args.get('genre'),
-                           genre_options=model.generate_genre_tree_select_options)
+                           genre_options=model.generate_genre_tree_select_options,
+                           title=title)
 
 
 @app.route("/books/add", methods=['POST'])
@@ -97,7 +103,10 @@ def edit_book(id):
     if book:
         if not model.user_can_modify_book(book, current_user):
             abort(403)
-        return render_template('books/edit.html', book=book, new=False, genre_options=model.generate_genre_tree_select_options)
+        title = '{} | Edit'.format(book.title)
+        return render_template('books/edit.html', book=book, new=False,
+                               genre_options=model.generate_genre_tree_select_options,
+                               title=title)
 
 
 @app.route("/books/edit/<int:id>", methods=['POST'])

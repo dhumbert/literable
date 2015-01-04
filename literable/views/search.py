@@ -10,4 +10,6 @@ def search():
     if not term:
         term = ""
     books = model.search_books(term)
-    return render_template('books/list.html', books=books, search=term)
+    title = '"{}" | Search'.format(term)
+    return render_template('books/list.html', books=books, search=term,
+                           title=title)

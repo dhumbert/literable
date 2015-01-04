@@ -6,20 +6,28 @@ from literable import app, model, admin_required
 @admin_required
 def admin_books_all():
     books = model.get_all_books()
-    return render_template('admin/all.html', books=books, num_books=len(books))
+    title = 'All Books | Admin'
+    return render_template('admin/all.html', books=books, num_books=len(books),
+                           title=title)
 
 @app.route("/admin/books/incomplete")
 @admin_required
 def admin_books_incomplete():
     incomplete = model.get_incomplete_books()
-    return render_template('admin/incomplete.html', incomplete=incomplete)
+    title = 'Incomplete Books | Admin'
+    return render_template('admin/incomplete.html', incomplete=incomplete,
+                           title=title)
 
 
 @app.route("/admin/taxonomies")
 @admin_required
 def admin_taxonomies():
     taxonomies = model.get_taxonomies_and_terms()
-    return render_template('admin/taxonomies.html', taxonomies=taxonomies, generate_hierarchical_list=model.generate_genre_tree_list, hierarchical_select=model.generate_genre_tree_select_options(value_id=True))
+    title = 'Taxonomies | Admin'
+    return render_template('admin/taxonomies.html', taxonomies=taxonomies,
+                           generate_hierarchical_list=model.generate_genre_tree_list,
+                           hierarchical_select=model.generate_genre_tree_select_options(value_id=True),
+                           title=title)
 
 
 @app.route("/admin/taxonomies/edit", methods=['POST'])

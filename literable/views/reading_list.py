@@ -10,8 +10,11 @@ from literable import app, model
 def reading_lists(rlist='Default List'):
     current_list = current_user.get_reading_list(rlist)
 
+    title = '{} | Reading Lists'.format(current_list.name)
+
     return render_template('books/list.html',
-                           reading_list=current_list, books=current_list.books)
+                           reading_list=current_list, books=current_list.books,
+                           title=title)
 
 
 @app.route("/reading-lists", methods=['POST'])
