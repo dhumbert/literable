@@ -8,7 +8,7 @@ from literable import app, model, content_type
 @login_required
 def taxonomy(ttype, slug):
     books, tax = model.get_taxonomy_books(ttype, slug, page=request.args.get('page'))
-    title = '{} | {} | Taxonomies'.format(tax.name, tax.type.title())
+    title = u'{} | {} | Taxonomies'.format(tax.name, tax.type.title())
     return render_template('books/list.html', books=books, taxonomy=tax,
                            pagination='taxonomies/pagination.html',
                            title=title)
@@ -25,7 +25,7 @@ def taxonomy_terms(ttype):
     order = request.args.get('order')
 
     terms = model.get_taxonomy_terms_and_counts(ttype, order)
-    title = '{} | Taxonomies'.format(ttype.title())
+    title = u'{} | Taxonomies'.format(ttype.title())
     return render_template('taxonomies/list.html', ttype=ttype, terms=terms,
                            order=order,
                            title=title)

@@ -103,7 +103,7 @@ def edit_book(id):
     if book:
         if not model.user_can_modify_book(book, current_user):
             abort(403)
-        title = '{} | Edit'.format(book.title)
+        title = u'{} | Edit'.format(book.title)
         return render_template('books/edit.html', book=book, new=False,
                                genre_options=model.generate_genre_tree_select_options,
                                title=title)
