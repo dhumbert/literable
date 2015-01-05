@@ -34,17 +34,7 @@
         <input class="span1" type="number" name="series_seq" id="series_seq" value="{% if series_seq %}{{ series_seq | none2blank }}{% else %}{{ book.series_seq | none2blank }}{% endif %}">
     </span>
 
-
-    <label for="genre">Genre</label>
-    <select name="genre" id="genre" class="span9">
-        <option value="">-- None --</option>
-        {% if genre %}
-            {{ genre_options(selected=genre) | safe }}
-        {% else %}
-            {{ genre_options(selected=book.genres[0].name if book.genres else None) | safe }}
-        {% endif %}
-    </select>
-
+    {{ genre_options | safe }}
 
     <label for="cover">Cover Image</label>
     {% if book.cover %}

@@ -1,4 +1,5 @@
 import json
+from functools import partial
 from flask import render_template, request, redirect, url_for, flash, Response, abort
 from flask.ext.login import login_required, current_user
 from literable import app, model, content_type
@@ -28,11 +29,14 @@ def add_book():
     title = 'Add Book'
     book = model.get_book(None)  # blank book obj for form
 
+    genre_options = model.generate_hierarchical_taxonomy_list('genre',
+                                                              selected=[request.args.get('genre')],
+                                                              css_class='hierarchical_tax_checkboxes')
+
     return render_template('books/add.html', book=book, new=True,
                            series=request.args.get('series'),
                            series_seq=request.args.get('series_seq'),
-                           genre=request.args.get('genre'),
-                           genre_options=model.generate_genre_tree_select_options,
+                           genre_options=genre_options,
                            title=title)
 
 
@@ -104,8 +108,14 @@ def edit_book(id):
         if not model.user_can_modify_book(book, current_user):
             abort(403)
         title = u'{} | Edit'.format(book.title)
+
+        genre_options = model.generate_hierarchical_taxonomy_list(
+                                'genre',
+                                selected=[g.id for g in book.genres],
+                                css_class='hierarchical_tax_checkboxes')
+
         return render_template('books/edit.html', book=book, new=False,
-                               genre_options=model.generate_genre_tree_select_options,
+                               genre_options=genre_options,
                                title=title)
 
 

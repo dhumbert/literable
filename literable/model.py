@@ -169,8 +169,8 @@ def add_book(form, files):
     book.update_taxonomies({
         'author':  [(form['author'], form['author_sort'])],
         'publisher': [form['publisher']],
+        'genre': map(int, form.getlist('hierarchical_tax_genre')),
         'series': [form['series']],
-        'genre': [form['genre']],
         'tag': form['tags'].split(','),
     })
 
@@ -206,7 +206,7 @@ def edit_book(id, form, files):
             'author': [(form['author'], form['author_sort'])],
             'publisher': [form['publisher']],
             'series': [form['series']],
-            'genre': [form['genre']],
+            'genre': map(int, form.getlist('hierarchical_tax_genre')),
             'tag': form['tags'].split(','),
         })
 
@@ -433,6 +433,35 @@ def remove_from_reading_list(list_id, book_id):
     r = ReadingListBookAssociation.query.filter_by(reading_list_id=list_id, book_id=book_id).first()
     db.session.delete(r)
     db.session.commit()
+
+
+def generate_hierarchical_taxonomy_list(tax, selected=None, css_class=None):
+    output = '<ul'
+    output += ' class="{}"'.format(css_class) if css_class else ''
+    output += ' data-name="hierarchical_tax_{}"'.format(tax)
+    output += '>'
+
+    for parent in get_taxonomy_terms_without_parent(tax):
+        output += _recurse_hierarchical_list_level(parent, selected=selected)
+
+    return output + "</ul>"
+
+
+def _recurse_hierarchical_list_level(parent, depth=0, selected=None):
+    output = '<li data-value="{}"'.format(parent.id)
+    if selected and parent.id in selected:
+        output += ' data-checked="1"'
+    output += '>'
+
+    output += parent.name
+
+    if parent.children:
+        output += "<ul>"
+        for child in parent.children:
+            output += _recurse_hierarchical_list_level(child, depth=depth+1, selected=selected)
+        output += "</ul>"
+
+    return output + "</li>"
 
 
 def generate_genre_tree_select_options(selected=None, value_id=False):
