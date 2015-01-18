@@ -78,7 +78,8 @@ def search_books(q):
             score += 75
 
         for field in [result.description.replace("'s", "")] + result.taxonomies:
-            score += len(filter(lambda x: q.lower() == x.lower(), unicode(field).split()))
+            score += 4 * len(filter(lambda x: q.lower() == x.lower(), unicode(field).split()))  # rank whole-word higher
+            score += len(filter(lambda x: q.lower() == x.lower(), unicode(field)))
 
 
         scores[result.id] = (score, result,)
