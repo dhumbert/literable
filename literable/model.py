@@ -5,7 +5,8 @@ import os.path
 from flask import flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_
-from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
+from PIL import Image
+from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
 
 
@@ -122,6 +123,24 @@ def get_incomplete_books():
             books['without a publisher'].append(book)
 
     return books
+
+
+def get_book_covers():
+    covers = []
+    for book in get_all_books():
+        if book.cover:
+            f = cover_upload_set.path(book.cover)
+            if os.path.exists(f):
+                filesize = os.stat(f).st_size
+                i = Image.open(f)
+                covers.append({
+                    'book': book,
+                    'dimensions': '{0}x{1}'.format(*i.size),
+                    'size': filesize / 1000
+                })
+
+    return sorted(covers, lambda x: x['size'], reverse=True)
+
 
 def get_taxonomy_books(tax_type, tax_slug, page=None):
     page = max(1, _get_page(page))

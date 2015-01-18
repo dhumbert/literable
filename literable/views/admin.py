@@ -19,6 +19,15 @@ def admin_books_incomplete():
                            title=title)
 
 
+@app.route("/admin/books/covers")
+@admin_required
+def admin_covers():
+    covers = model.get_book_covers()
+    title = 'Book Covers | Admin'
+    return render_template('admin/covers.html', covers=covers,
+                           title=title)
+
+
 @app.route("/admin/taxonomies")
 @admin_required
 def admin_taxonomies():
