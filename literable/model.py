@@ -65,7 +65,26 @@ def search_books(q):
         f = and_(f, _privilege_filter())
 
     query = Book.query.join(Book.taxonomies).filter(f)
-    return query.order_by('title asc')
+
+    scores = {}
+
+    # super-naive scoring method
+    for result in query.all():
+        score = 0
+        lower_title = result.title.lower().replace("'s", "")
+        if q.lower() in lower_title.split(): # whole words
+            score += 100 * len(filter(lambda x: q.lower() == x.lower(), unicode(lower_title).split()))
+        elif q.lower() in lower_title:
+            score += 75
+
+        for field in [result.description.replace("'s", "")] + result.taxonomies:
+            score += len(filter(lambda x: q.lower() == x.lower(), unicode(field).split()))
+
+
+        scores[result.id] = (score, result,)
+
+    num_results = 25
+    return map(lambda y: y[1][1], sorted(scores.iteritems(), key=lambda x: x[1][0], reverse=True))[0:num_results]
 
 
 
