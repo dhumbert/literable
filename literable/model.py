@@ -139,7 +139,7 @@ def get_book_covers():
                     'size': filesize / 1000
                 })
 
-    return sorted(covers, lambda x: x['size'], reverse=True)
+    return sorted(covers, key=lambda x: x['size'], reverse=True)
 
 
 def get_taxonomy_books(tax_type, tax_slug, page=None):
