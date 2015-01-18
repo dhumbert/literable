@@ -10,7 +10,10 @@ Jinja2==2.6
 Mako==0.7.3
 Markdown==2.3.1
 MarkupSafe==0.15
+Pillow==2.7.0
 SQLAlchemy==0.9.8
+SQLAlchemy-Searchable==0.8.0
+SQLAlchemy-Utils==0.29.2
 Werkzeug==0.8.3
 alembic==0.4.2
 decorator==3.4.0
@@ -18,6 +21,7 @@ lxml==3.1.0
 paramiko==1.9.0
 psycopg2==2.4.6
 pycrypto==2.6
+pyparsing==2.0.3
 six==1.9.0
 urllib3==1.9.1
 validators==0.7
