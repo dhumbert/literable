@@ -7,9 +7,14 @@ from literable import app, model, content_type
 @app.route("/t/<ttype>/<slug>")
 @login_required
 def taxonomy(ttype, slug):
-    books, tax = model.get_taxonomy_books(ttype, slug, page=request.args.get('page'))
+    page = request.args.get('page')
+    sort = request.args.get('sort', 'created')
+    sort_dir = request.args.get('dir', 'desc')
+
+    books, tax = model.get_taxonomy_books(ttype, slug, page=page, sort=sort, sort_dir=sort_dir)
     title = u'{} | {} | Taxonomies'.format(tax.name, tax.type.title())
     return render_template('books/list.html', books=books, taxonomy=tax,
+                           sort=sort, dir=sort_dir,
                            pagination='taxonomies/pagination.html',
                            title=title)
 

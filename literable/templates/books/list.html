@@ -57,9 +57,18 @@
             <li class="active">{{ reading_list.name }}</li>
 
             <li class="pull-right">
-                <a href="{{ url_for('delete_reading_list', list_id=reading_list.id) }}">Delete This Reading List</a>
+                &nbsp;<a href="{{ url_for('delete_reading_list', list_id=reading_list.id) }}">Delete This Reading List</a>
             </li>
         {% endif %}
+
+        <li class="pull-right book-sort">
+            <span class="muted">sorted by</span>
+            {% if taxonomy and taxonomy.type == 'series' %}
+                series sequence
+            {% else %}
+                <a href="#change-sort-modal" data-toggle="modal" id="book-sort-link">{{ sort }}, {{ dir }}</a>
+            {% endif %}
+        </li>
     </ul>
 
     {% if hasattr(books, 'items') %}
@@ -85,4 +94,40 @@
 {% endblock %}
 
 {% block footer_scripts %}
+    <div id="change-sort-modal" class="modal hide fade">
+    <form method="get">
+        <div class="modal-header">
+            Change Sort
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="span2 offset1">
+                    <h4>Field</h4>
+                    <label class="radio">
+                        <input type="radio" name="sort" value="title" {% if sort == 'title' %}checked="checked"{% endif %}> Title
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="sort" value="created" {% if sort == 'created' %}checked="checked"{% endif %}> Created Date
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="sort" value="pages" {% if sort == 'pages' %}checked="checked"{% endif %}> Page Count
+                    </label>
+                </div>
+                <div class="span2">
+                    <h4>Direction</h4>
+                    <label class="radio">
+                        <input type="radio" name="dir" value="asc" {% if dir == 'asc' %}checked="checked"{% endif %}> Ascending
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="dir" value="desc" {% if dir == 'desc' %}checked="checked"{% endif %}> Descending
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+            <button type="submit" id="change-sort" class="btn btn-primary">Go</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

@@ -235,3 +235,12 @@
 .hierarchical_tax_checkboxes input[type=checkbox] {
     margin: 0;
 }
+
+.book-sort a {
+    border-bottom: 1px dotted;
+}
+
+.book-sort a:hover {
+    text-decoration: none;
+
+}

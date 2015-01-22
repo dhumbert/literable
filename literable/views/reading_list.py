@@ -12,9 +12,16 @@ def reading_lists(rlist='Default List'):
 
     title = u'{} | Reading Lists'.format(current_list.name)
 
+    sort = request.args.get('sort', 'created')
+    sort_dir = request.args.get('dir', 'desc')
+
+    sort_key = 'created_at' if sort == 'created' else sort
+    reverse = True if sort_dir == 'desc' else False
+    books = sorted(current_list.books, key=lambda x: getattr(x, sort_key), reverse=reverse)
+
     return render_template('books/list.html',
-                           reading_list=current_list, books=current_list.books,
-                           title=title)
+                           reading_list=current_list, books=books,
+                           title=title, sort=sort, dir=sort_dir)
 
 
 @app.route("/reading-lists", methods=['POST'])

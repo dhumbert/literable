@@ -4,7 +4,7 @@ import os
 import os.path
 from flask import flash
 from flask.ext.login import current_user
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, desc, asc
 from PIL import Image
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
@@ -46,12 +46,26 @@ def get_book(id):
         return Book.query.get_or_404(id)
 
 
-def get_recent_books(page):
+def _get_sort_objs(sort, sort_dir):
+    sort_dir = asc if sort_dir == 'asc' else desc
+
+    sort_criterion = Book.created_at
+    if sort == 'title':
+        sort_criterion = Book.title
+    elif sort == 'pages':
+        sort_criterion = Book.pages
+
+    return sort_criterion, sort_dir
+
+
+def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
 
-    return Book.query.filter(f).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
+
+    return Book.query.filter(f).order_by(sort_dir(sort_criterion)).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q):
@@ -145,7 +159,7 @@ def get_book_covers():
     return sorted(covers, key=lambda x: x['size'], reverse=True)
 
 
-def get_taxonomy_books(tax_type, tax_slug, page=None):
+def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='desc'):
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
@@ -155,7 +169,8 @@ def get_taxonomy_books(tax_type, tax_slug, page=None):
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title)
     else:
-        q = q.order_by(Book.title)
+        sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
+        q = q.order_by(sort_dir(sort_criterion))
 
     books = q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books

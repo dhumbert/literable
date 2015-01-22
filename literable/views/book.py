@@ -11,9 +11,13 @@ from literable import app, model, content_type
 @login_required
 def recent():
     page = request.args.get('page')
+    sort = request.args.get('sort', 'created')
+    sort_dir = request.args.get('dir', 'desc')
+
     title = 'Recent Books | Page {}'.format(max(page, 1))
-    books = model.get_recent_books(page)
+    books = model.get_recent_books(page, sort, sort_dir)
     return render_template('books/list.html', books=books, recent=True,
+                           sort=sort, dir=sort_dir,
                            title=title, pagination='books/pagination_recent.html')
 
 
