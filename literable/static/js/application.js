@@ -119,6 +119,7 @@ $(document).ready(function(){
                     var item = data['items'][0]['volumeInfo'];
                     $('#author').val(item['authors'][0]);
                     $('#description').val(item['description']);
+                    $('#pages').val(item['pageCount']);
                 }
             });
         });
