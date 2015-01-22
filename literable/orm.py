@@ -98,6 +98,7 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime())
     public = db.Column(db.Boolean())
     series_seq = db.Column(db.Integer)
+    pages = db.Column(db.Integer)
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 

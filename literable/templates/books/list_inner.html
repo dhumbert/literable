@@ -63,6 +63,10 @@
                 {% endfor %}
             </ul>
         {% endif %}
+
+        {% if book.pages %}
+            <p class="book-pages muted"><small><i class="icon-bookmark"></i>{{ book.pages }} pp.</small></p>
+        {% endif %}
     </div>
 
     <div class="span2 cell-actions">

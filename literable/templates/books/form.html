@@ -16,8 +16,17 @@
     <label for="author_sort">Author Sort</label>
     <input type="text" name="author_sort" id="author_sort" value="{{ book.authors[0].name_sort if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 
-    <label for="publisher">Publisher</label>
-    <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span9" autocomplete="off">
+    <div class="row">
+        <div class="span4">
+            <label for="publisher">Publisher</label>
+            <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span4" autocomplete="off">
+        </div>
+
+        <div class="span4">
+            <label for="pages">Pages</label>
+            <input type="number" name="pages" id="pages" class="span1" value="{{ book.pages | none2blank }}">
+        </div>
+    </div>
 
     <label for="description">Description</label>
     <textarea name="description" id="description" class="span9" rows="10">{{ book.description | none2blank }}</textarea>
