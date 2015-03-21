@@ -168,23 +168,31 @@
 }
 
 .nonhierarchical-tax-list {
+    column-count: 4;
+    -moz-column-count: 4;
     -webkit-column-count: 4;
 }
 
 @media (max-width: 980px) {
     .nonhierarchical-tax-list {
+        column-count: 3;
+        -moz-column-count: 3;
         -webkit-column-count: 3;
     }
 }
 
 @media (max-width: 768px) {
     .nonhierarchical-tax-list {
+        column-count: 2;
+        -moz-column-count: 2;
         -webkit-column-count: 2;
     }
 }
 
 @media (max-width: 480px) {
     .nonhierarchical-tax-list {
+        column-count: 1;
+        -moz-column-count: 1;
         -webkit-column-count: 1;
     }
 }
