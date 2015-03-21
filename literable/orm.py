@@ -367,6 +367,9 @@ class User(db.Model):
 
         return None
 
+    def can_modify_book(self, book):
+        return self.admin or book.user_id == self.id
+
     def is_authenticated(self):
         return True
 

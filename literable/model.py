@@ -23,7 +23,7 @@ def _privilege_filter():
 
 
 def user_can_modify_book(book, user):
-    return user.admin or book.user_id == current_user.id
+    return user.can_modify_book(book)
 
 
 def user_can_download_book(book, user):
