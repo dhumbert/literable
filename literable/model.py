@@ -222,7 +222,7 @@ def add_book(form, files):
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
     book.created_at = datetime.now()
-    book.pages = int(form['pages'])
+    book.pages = int(form['pages']) if form['pages'] else None
 
     book.update_taxonomies({
         'author':  [(form['author'], form['author_sort'])],
@@ -259,7 +259,7 @@ def edit_book(id, form, files):
         book.description = form['description']
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
-        book.pages = int(form['pages'])
+        book.pages = int(form['pages']) if form['pages'] else None
 
         book.update_taxonomies({
             'author': [(form['author'], form['author_sort'])],
