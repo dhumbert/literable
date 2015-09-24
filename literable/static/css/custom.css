@@ -95,6 +95,10 @@
     margin-left: 0.35em;
 }
 
+.row-library .cell-info .book-pages {
+    margin-top: 0.5em;
+}
+
 .row-library .cell-info .description ul {
     list-style-type: square;
 }
@@ -164,23 +168,31 @@
 }
 
 .nonhierarchical-tax-list {
+    column-count: 4;
+    -moz-column-count: 4;
     -webkit-column-count: 4;
 }
 
 @media (max-width: 980px) {
     .nonhierarchical-tax-list {
+        column-count: 3;
+        -moz-column-count: 3;
         -webkit-column-count: 3;
     }
 }
 
 @media (max-width: 768px) {
     .nonhierarchical-tax-list {
+        column-count: 2;
+        -moz-column-count: 2;
         -webkit-column-count: 2;
     }
 }
 
 @media (max-width: 480px) {
     .nonhierarchical-tax-list {
+        column-count: 1;
+        -moz-column-count: 1;
         -webkit-column-count: 1;
     }
 }
@@ -221,4 +233,22 @@
 
 .dropdown-menu .divider {
     border-color: #465e71;
+}
+
+.hierarchical_tax_checkboxes label {
+    display: inline-block;
+    margin: 0em 0 0 0.5em;
+}
+
+.hierarchical_tax_checkboxes input[type=checkbox] {
+    margin: 0;
+}
+
+.book-sort a {
+    border-bottom: 1px dotted;
+}
+
+.book-sort a:hover {
+    text-decoration: none;
+
 }

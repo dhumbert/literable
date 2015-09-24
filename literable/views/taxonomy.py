@@ -7,8 +7,16 @@ from literable import app, model, content_type
 @app.route("/t/<ttype>/<slug>")
 @login_required
 def taxonomy(ttype, slug):
-    books, tax = model.get_taxonomy_books(ttype, slug, page=request.args.get('page'))
-    return render_template('books/list.html', books=books, taxonomy=tax, pagination='taxonomies/pagination.html')
+    page = request.args.get('page')
+    sort = request.args.get('sort', 'created')
+    sort_dir = request.args.get('dir', 'desc')
+
+    books, tax = model.get_taxonomy_books(ttype, slug, page=page, sort=sort, sort_dir=sort_dir)
+    title = u'{} | {} | Taxonomies'.format(tax.name, tax.type.title())
+    return render_template('books/list.html', books=books, taxonomy=tax,
+                           sort=sort, dir=sort_dir,
+                           pagination='taxonomies/pagination.html',
+                           title=title)
 
 
 @app.route("/t/<ttype>", methods=["GET", "POST"])
@@ -22,7 +30,10 @@ def taxonomy_terms(ttype):
     order = request.args.get('order')
 
     terms = model.get_taxonomy_terms_and_counts(ttype, order)
-    return render_template('taxonomies/list.html', ttype=ttype, terms=terms, order=order)
+    title = u'{} | Taxonomies'.format(ttype.title())
+    return render_template('taxonomies/list.html', ttype=ttype, terms=terms,
+                           order=order,
+                           title=title)
 
 
 @app.route("/ajax/taxonomy/<ttype>")

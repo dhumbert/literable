@@ -52,6 +52,18 @@ $(document).ready(function(){
         });
     }
 
+    if ($('.hierarchical_tax_checkboxes').length) {
+        $.getScript('/static/js/bonsai/jquery.bonsai.js', function(){
+            $.getScript('/static/js/bonsai/jquery.qubit.js', function(){
+                var e = $('.hierarchical_tax_checkboxes');
+                e.bonsai({
+                    createCheckboxes: true
+                });
+                e.qubit();
+            });
+        });
+    }
+
     if ($('.hierarchical-tax-list').length) {
         $.getScript('/static/js/bonsai/jquery.bonsai.js', function(){
             $('.hierarchical-tax-list').bonsai();
@@ -107,6 +119,7 @@ $(document).ready(function(){
                     var item = data['items'][0]['volumeInfo'];
                     $('#author').val(item['authors'][0]);
                     $('#description').val(item['description']);
+                    $('#pages').val(item['pageCount']);
                 }
             });
         });

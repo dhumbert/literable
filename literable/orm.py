@@ -98,6 +98,7 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime())
     public = db.Column(db.Boolean())
     series_seq = db.Column(db.Integer)
+    pages = db.Column(db.Integer)
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 
@@ -209,29 +210,33 @@ class Book(db.Model):
         self.taxonomies = []
         for tax_slug, terms in tax_map.iteritems():
             for term_name in terms:
-                if isinstance(term_name, tuple):
-                    n = term_name[0].strip()
-                    name_sort = term_name[1].strip()
+                if isinstance(term_name, int):
+                    tax = Taxonomy.query.get(term_name)
+                    self.taxonomies.append(tax)
                 else:
-                    n = term_name.strip()
-                    name_sort = n
-
-                if n:
-                    tax = Taxonomy.query.filter_by(type=tax_slug, name=n).first()
-                    if tax:
-                        tax.name_sort = name_sort
-                        db.session.commit()
+                    if isinstance(term_name, tuple):
+                        n = term_name[0].strip()
+                        name_sort = term_name[1].strip()
                     else:
-                        tax = Taxonomy()
-                        tax.type = tax_slug
-                        tax.name = n
-                        tax.name_sort = name_sort
-                        tax.slug = tax.generate_slug()
+                        n = term_name.strip()
+                        name_sort = n
 
-                        db.session.add(tax)
+                    if n:
+                        tax = Taxonomy.query.filter_by(type=tax_slug, name=n).first()
+                        if tax:
+                            tax.name_sort = name_sort
+                            db.session.commit()
+                        else:
+                            tax = Taxonomy()
+                            tax.type = tax_slug
+                            tax.name = n
+                            tax.name_sort = name_sort
+                            tax.slug = tax.generate_slug()
 
-                    if tax not in self.taxonomies:
-                        self.taxonomies.append(tax)
+                            db.session.add(tax)
+
+                        if tax not in self.taxonomies:
+                            self.taxonomies.append(tax)
 
     def write_meta(self):
         if self.filename:
@@ -361,6 +366,9 @@ class User(db.Model):
                 return rating.rating
 
         return None
+
+    def can_modify_book(self, book):
+        return self.admin or book.user_id == self.id
 
     def is_authenticated(self):
         return True

@@ -2,12 +2,11 @@ from datetime import datetime
 import hashlib
 import os
 import os.path
-from flask import url_for, flash
+from flask import flash
 from flask.ext.login import current_user
-from sqlalchemy import or_, and_
-from sqlalchemy.exc import IntegrityError
-from elasticutils import S, get_es
-from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, epub
+from sqlalchemy import or_, and_, desc, asc
+from PIL import Image
+from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
 
 
@@ -20,11 +19,11 @@ def _get_page(page):
 
 
 def _privilege_filter():
-    return or_(current_user.admin, Book.user_id == current_user.id, Book.public)
+    return or_(Book.user_id == current_user.id, Book.public)
 
 
 def user_can_modify_book(book, user):
-    return user.admin or book.user_id == current_user.id
+    return user.can_modify_book(book)
 
 
 def user_can_download_book(book, user):
@@ -47,62 +46,62 @@ def get_book(id):
         return Book.query.get_or_404(id)
 
 
-def get_recent_books(page):
+def _get_sort_objs(sort, sort_dir):
+    sort_dir = asc if sort_dir == 'asc' else desc
+
+    sort_criterion = Book.created_at
+    if sort == 'title':
+        sort_criterion = Book.title
+    elif sort == 'pages':
+        sort_criterion = Book.pages
+
+    return sort_criterion, sort_dir
+
+
+def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
-    return Book.query.filter(_privilege_filter()).order_by('created_at desc, id desc').paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+
+    f = or_() if current_user.admin else _privilege_filter()
+
+    sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
+
+    return Book.query.filter(f).order_by(sort_dir(sort_criterion)).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q):
-    if app.config['ELASTICSEARCH_ENABLED']:
-        return _search_books_elasticsearch(q)
-    else:
-        return Book.query.filter(and_(Book.title.ilike("%"+q+"%"), _privilege_filter())).order_by('created_at desc, id desc')
+
+    f = or_(
+        Book.title.ilike('%'+q+'%'),
+        Book.description.ilike('%'+q+'%'),
+        Taxonomy.name.ilike('%'+q+'%'),
+    )
+
+    if not current_user.admin:
+        f = and_(f, _privilege_filter())
+
+    query = Book.query.join(Book.taxonomies).filter(f)
+
+    scores = {}
+
+    # super-naive scoring method
+    for result in query.all():
+        score = 0
+        lower_title = result.title.lower().replace("'s", "")
+        if q.lower() in lower_title.split(): # whole words
+            score += 100 * len(filter(lambda x: q.lower() == x.lower(), unicode(lower_title).split()))
+        elif q.lower() in lower_title:
+            score += 75
+
+        for field in [result.description.replace("'s", "")] + result.taxonomies:
+            score += 4 * len(filter(lambda x: q.lower() == x.lower(), unicode(field).split()))  # rank whole-word higher
+            score += len(filter(lambda x: q.lower() == x.lower(), unicode(field)))
 
 
-def _search_books_elasticsearch(q):
-    searcher = S()\
-        .es(urls=app.config['ELASTICSEARCH_NODES'])\
-        .indexes(app.config['ELASTICSEARCH_INDEX'])\
-        .query(_all__match=q)\
-        .highlight('*', pre_tags=['<span class="highlight">'], post_tags=["</span>"], number_of_fragments=0)  # number_of_fragments=0 means the entire field will be returned, not just highlighted snippets
+        scores[result.id] = (score, result,)
 
-    # searcher = searcher[0:searcher.count()]  # get all  = searcher
+    num_results = 25
+    return map(lambda y: y[1][1], sorted(scores.iteritems(), key=lambda x: x[1][0], reverse=True))[0:num_results]
 
-    found_ids = []
-    highlights = {}
-
-    results = list(searcher.values_dict('title', 'id', 'author'))
-    for result in results:
-        # can't find a way to do this with elasticutils, though ES does support min_score.
-        if result.es_meta.score < 0.25:
-            continue
-
-        book_id = result['id'][0]
-
-        found_ids.append(book_id)
-
-        r = {}
-        for field, highlight in result.es_meta.highlight.iteritems():
-            r[field] = highlight[0]
-
-        if r:
-            highlights[book_id] = r
-
-    books = []
-    for id in found_ids:
-        book = Book.query.get(id)
-
-        if id in highlights:
-            if 'title' in highlights[id]:
-                book.title = highlights[id]['title']
-
-            if 'description' in highlights[id]:
-                book.description = highlights[id]['description']
-
-        books.append(book)
-
-    # todo privilege filter
-    return books
 
 
 def get_incomplete_books():
@@ -113,9 +112,18 @@ def get_incomplete_books():
         'without an author': [],
         'without a genre': [],
         'without a publisher': [],
+        'without a page count': [],
+        'that are duplicate': []
     }
 
+    book_titles = set()
+
     for book in get_all_books():
+        if book.title in book_titles:
+            books['that are duplicate'].append(book)
+        else:
+            book_titles.add(book.title)
+
         if not book.authors:
             books['without an author'].append(book)
         if not book.cover:
@@ -128,20 +136,41 @@ def get_incomplete_books():
             books['without a genre'].append(book)
         if not book.publishers:
             books['without a publisher'].append(book)
+        if not book.pages:
+            books['without a page count'].append(book)
 
     return books
 
-def get_taxonomy_books(tax_type, tax_slug, page=None):
+
+def get_book_covers():
+    covers = []
+    for book in get_all_books():
+        if book.cover:
+            f = cover_upload_set.path(book.cover)
+            if os.path.exists(f):
+                filesize = os.stat(f).st_size
+                i = Image.open(f)
+                covers.append({
+                    'book': book,
+                    'dimensions': '{0}x{1}'.format(*i.size),
+                    'size': filesize / 1000
+                })
+
+    return sorted(covers, key=lambda x: x['size'], reverse=True)
+
+
+def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='desc'):
     page = max(1, _get_page(page))
 
-
+    f = or_() if current_user.admin else _privilege_filter()
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter()))
+    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title)
     else:
-        q = q.order_by(Book.title)
+        sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
+        q = q.order_by(sort_dir(sort_criterion))
 
     books = q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
     books = None if len(books.items) == 0 else books
@@ -193,12 +222,13 @@ def add_book(form, files):
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
     book.created_at = datetime.now()
+    book.pages = int(form['pages']) if form['pages'] else None
 
     book.update_taxonomies({
         'author':  [(form['author'], form['author_sort'])],
         'publisher': [form['publisher']],
+        'genre': map(int, form.getlist('hierarchical_tax_genre')),
         'series': [form['series']],
-        'genre': [form['genre']],
         'tag': form['tags'].split(','),
     })
 
@@ -216,8 +246,6 @@ def add_book(form, files):
     if app.config['WRITE_META_ON_SAVE']:
         book.write_meta()
 
-    book_to_elasticsearch(book)
-
     return True
 
 
@@ -231,12 +259,13 @@ def edit_book(id, form, files):
         book.description = form['description']
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
+        book.pages = int(form['pages']) if form['pages'] else None
 
         book.update_taxonomies({
             'author': [(form['author'], form['author_sort'])],
             'publisher': [form['publisher']],
             'series': [form['series']],
-            'genre': [form['genre']],
+            'genre': map(int, form.getlist('hierarchical_tax_genre')),
             'tag': form['tags'].split(','),
         })
 
@@ -253,8 +282,6 @@ def edit_book(id, form, files):
         if app.config['WRITE_META_ON_SAVE']:
             book.write_meta()
 
-        book_to_elasticsearch(book)
-
         return True
     return False
 
@@ -267,8 +294,9 @@ def upload_book(file):
             e = epub.Epub(book_staging_upload_set.path(filename))
             if e:
                 meta = e.metadata
-                meta['author'] = meta['creator']
-                del meta['creator']
+                if 'creator' in meta:
+                    meta['author'] = meta['creator']
+                    del meta['creator']
 
                 # if the book has a cover, copy it to tmp directory
                 if e.cover:
@@ -306,36 +334,6 @@ def rate_book(book_id, score):
     db.session.commit()
 
 
-def book_to_elasticsearch(book):
-    if app.config['ELASTICSEARCH_ENABLED']:
-        es_doc = {'title': book.title,
-                  'description': book.description,
-                  'id': book.id,
-                  }
-        if book.series:
-            es_doc['series'] = book.series[0].name
-
-        if book.authors:
-            es_doc['author'] = book.authors[0].name
-
-        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-        es.index(app.config['ELASTICSEARCH_INDEX'],
-                 app.config['ELASTICSEARCH_DOC_TYPE'],
-                 body=es_doc,
-                 id=book.id)
-
-
-def delete_from_elasticsearch(book):
-    if app.config['ELASTICSEARCH_ENABLED']:
-        es = get_es(urls=app.config['ELASTICSEARCH_NODES'])
-        try:
-            es.delete(app.config['ELASTICSEARCH_INDEX'],
-                     app.config['ELASTICSEARCH_DOC_TYPE'],
-                     id=book.id)
-        except Exception as e:
-            app.logger.warning("Unable to delete book from ES: {}".format(e.message))
-
-
 def delete_book(id):
     book = get_book(id)
 
@@ -355,8 +353,6 @@ def delete_book(id):
 
     db.session.delete(book)
     db.session.commit()
-
-    delete_from_elasticsearch(book)
 
 
 def get_taxonomy_terms_without_parent(ttype):
@@ -496,6 +492,35 @@ def remove_from_reading_list(list_id, book_id):
     r = ReadingListBookAssociation.query.filter_by(reading_list_id=list_id, book_id=book_id).first()
     db.session.delete(r)
     db.session.commit()
+
+
+def generate_hierarchical_taxonomy_list(tax, selected=None, css_class=None):
+    output = '<ul'
+    output += ' class="{}"'.format(css_class) if css_class else ''
+    output += ' data-name="hierarchical_tax_{}"'.format(tax)
+    output += '>'
+
+    for parent in get_taxonomy_terms_without_parent(tax):
+        output += _recurse_hierarchical_list_level(parent, selected=selected)
+
+    return output + "</ul>"
+
+
+def _recurse_hierarchical_list_level(parent, depth=0, selected=None):
+    output = '<li data-value="{}"'.format(parent.id)
+    if selected and parent.id in selected:
+        output += ' data-checked="1"'
+    output += '>'
+
+    output += parent.name
+
+    if parent.children:
+        output += "<ul>"
+        for child in parent.children:
+            output += _recurse_hierarchical_list_level(child, depth=depth+1, selected=selected)
+        output += "</ul>"
+
+    return output + "</li>"
 
 
 def generate_genre_tree_select_options(selected=None, value_id=False):

@@ -19,12 +19,14 @@
         </li>
     </ul>
 
+    <div class="alert alert-info">This page does not yet display hierarchical taxonomies correctly.</div>
+
     {% if terms %}
         <ul class="nonhierarchical-tax-list">
             {% for term in terms %}
                 <li>
                     <a href="{{ url_for('taxonomy', ttype=term.type, slug=term.slug) }}">{{ term.name }}</a>
-                    <span class="tax-count">{{ term.count_books }}</span>
+                    {% if current_user.admin %}<span class="tax-count">{{ term.count_books }}</span>{% endif %}
                 </li>
             {% endfor %}
         </ul>

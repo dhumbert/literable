@@ -1,11 +1,11 @@
 <div class="pagination pagination-large pagination-centered">
     <ul>
         <li{% if not books.has_prev %} class="disabled"{% endif %}>
-            <a href="{{ url_for('recent', page=books.prev_num) }}">&larr; Prev</a>
+            <a href="{{ url_for('recent', page=books.prev_num, sort=sort, dir=dir) }}">&larr; Prev</a>
         </li>
 
         <li{% if not books.has_next %} class="disabled"{% endif %}>
-            <a href="{{ url_for('recent', page=books.next_num) }}">Next &rarr;</a>
+            <a href="{{ url_for('recent', page=books.next_num, sort=sort, dir=dir) }}">Next &rarr;</a>
         </li>
     </ul>
 </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Literable</title>
+    <title>{% if title %}{{ title }} | {% endif %}Literable</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.flatly.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-responsive.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='js/uploadify/uploadify.css') }}">
