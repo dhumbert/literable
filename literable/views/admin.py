@@ -58,3 +58,22 @@ def admin_taxonomy_edit():
         flash('Unable to update term', 'error')
 
     return redirect(url_for('admin_taxonomies'))
+
+
+@app.route("/admin/books/calibre-id", methods=['GET', 'POST'])
+@admin_required
+def admin_bulk_calibre_id():
+    books = model.get_all_books()
+
+    if request.method == 'POST':
+        for book in books:
+            book.id_isbn = request.form.get('id_isbn_' + str(book.id))
+            book.id_calibre = request.form.get('id_calibre_' + str(book.id))
+
+        model.save_updated_books(books)
+
+
+        flash('Saved Identifiers', 'success')
+        return redirect(url_for('admin_bulk_calibre_id'))
+    else:
+        return render_template('admin/bulk_calibre_id.html', books=books)

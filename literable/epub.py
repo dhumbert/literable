@@ -96,21 +96,7 @@ class Epub:
 
     def _read_metadata(self):
         """Read epub metadata as a list"""
-        res = {}
-        metadata = self.metadata_element
-        if metadata is not None:
-            # repackage the data
-            for s in ['title', 'creator', 'description', 'subject', 'identifier', 'language', 'publisher']:
-                item = metadata.xpath('dc:%s/text()' % (s), namespaces=ns)
-                if item:
-                    if len(item) > 1:
-                        res[s] = []
-                        for i in item:
-                            res[s].append(i)
-                    else:
-                        res[s] = item[0]
-
-        return res
+        return read_opf(self.metadata_element)
 
     def _read_metadata_element(self):
         """Read metadata XML element from manifest file"""
@@ -245,6 +231,44 @@ class EpubMetadataCreator:
 
     def __str__(self):
         return etree.tostring(self.meta_element, pretty_print=True)
+
+
+def read_opf(element):
+    """Read epub metadata as a list"""
+    res = {}
+    if element is not None:
+        # repackage the data
+        for s in ['title', 'creator', 'description', 'subject', 'language', 'publisher']:
+            item = element.xpath('dc:%s' % (s), namespaces=ns)
+            if item:
+                if len(item) > 1:
+                    res[s] = []
+                    for i in item:
+                        res[s].append(i.text)
+                else:
+                    i = item[0]
+                    sort_val = i.get('{http://www.idpf.org/2007/opf}file-as')
+                    if sort_val:
+                        res[s + '_sort'] = sort_val
+                    res[s] = i.text
+
+        for s in ['series_index', 'series']:
+            item = element.xpath('opf:meta[@name="calibre:%s"]/@content' % (s), namespaces=ns)
+            if item:
+                if len(item) > 1:
+                    res[s] = []
+                    for i in item:
+                        res[s].append(i)
+                else:
+                    res[s] = item[0]
+
+        identifiers = element.xpath('dc:identifier', namespaces=ns)
+        for identifier in identifiers:
+            scheme = identifier.get('{http://www.idpf.org/2007/opf}scheme')
+            if scheme:
+                res['id_' + scheme.lower()] = identifier.text
+
+    return res
 
 
 def write_epub_meta(epub_file, title, author, description=None, cover=None, subjects=[]):

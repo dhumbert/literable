@@ -1,12 +1,13 @@
 from datetime import datetime
 import hashlib
+import shutil
 import os
 import os.path
 from flask import flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_, desc, asc
 from PIL import Image
-from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, epub
+from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, book_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
 
 
@@ -44,6 +45,10 @@ def get_book(id):
         return Book()  # blank book object
     else:
         return Book.query.get_or_404(id)
+
+
+def get_book_by_identifier(id_type, identifer):
+    return Book.query.filter_by(**{'id_' + id_type: identifer}).first()
 
 
 def _get_sort_objs(sort, sort_dir):
@@ -190,6 +195,10 @@ def get_taxonomy_types():
     return Taxonomy.get_types()
 
 
+def get_taxonomy_term(ttype, term):
+    return Taxonomy.query.filter_by(type=ttype, name=term).first()
+
+
 def get_taxonomies_and_terms():
     taxonomies = {}
     for ttype, hierarchical in get_taxonomy_types().iteritems():
@@ -224,6 +233,9 @@ def add_book(form, files):
     book.created_at = datetime.now()
     book.pages = int(form['pages']) if form['pages'] else None
 
+    book.id_isbn = form['id_isbn']
+    book.id_calibre = form['id_calibre']
+
     book.update_taxonomies({
         'author':  [(form['author'], form['author_sort'])],
         'publisher': [form['publisher']],
@@ -249,6 +261,106 @@ def add_book(form, files):
     return True
 
 
+def add_book_bulk(batch, root, book_file, cover_file, metadata):
+    if 'title' not in metadata or not metadata['title'].strip():
+        raise ValueError("Title must not be blank: " + book_file)
+
+    book = Book()
+    book.batch = batch
+    book.title = metadata['title']
+    book.description = metadata['description'] if 'description' in metadata else None
+    book.series_seq = int(metadata['series_index']) if 'series_index' in metadata else None
+    book.public = True
+    book.user = get_user('devin')
+    book.created_at = datetime.now()
+    book.pages = None
+
+    ids = {'isbn': metadata.get('id_isbn'),
+           'calibre': metadata.get('id_calibre'),
+           'amazon': metadata.get('id_amazon'),
+           'google': metadata.get('id_google')}
+
+    for id_type, identifer in ids.iteritems():
+        if identifer:
+            if get_book_by_identifier(id_type, identifer):
+                raise RuntimeError("There is already a book with identifier [" + id_type + ": " + identifer + "]!")
+
+    book.id_isbn = ids['isbn']
+    book.id_amazon = ids['amazon']
+    book.id_google = ids['google']
+    book.id_calibre = ids['calibre']
+
+    taxonomies = {}
+
+    if 'publisher' in metadata:
+        taxonomies['publisher'] = [metadata['publisher']]
+    if 'series' in metadata:
+        taxonomies['series'] = [metadata['series']]
+
+    if 'creator' in metadata and 'creator_sort' in metadata:
+        if isinstance(metadata['creator'], list):
+            taxonomies['author'] = []
+            for i, c in enumerate(metadata['creator']):
+                taxonomies['author'].append((c, metadata['creator_sort'][i]))
+        else:
+            taxonomies['author'] = [ (metadata['creator'], metadata['creator_sort'])]
+    elif 'creator' in metadata:
+        if isinstance(metadata['creator'], list):
+            taxonomies['author'] = []
+            for i, c in enumerate(metadata['creator']):
+                taxonomies['author'].append((c, c))
+        else:
+            taxonomies['author'] = [ (metadata['creator'], metadata['creator'])]
+
+    if 'subject' in metadata:
+        genres = []
+        tags = []
+        if not isinstance(metadata['subject'], list):
+            metadata['subject'] = [metadata['subject']]
+
+        for subject in metadata['subject']:
+            tax = get_taxonomy_term('genre', subject)
+            if tax:
+                genres.append(tax.id)
+            else:
+                tags.append(subject.lower())
+
+        if len(genres) > 0:
+            taxonomies['genre'] = genres
+
+        if len(tags) > 0:
+            taxonomies['tag'] = tags
+
+    book.update_taxonomies(taxonomies)
+
+    cover_dest_path = cover_upload_set.config.destination
+    new_cover_file = cover_file
+
+    if os.path.exists(os.path.join(cover_dest_path, new_cover_file)):
+        new_cover_file = cover_upload_set.resolve_conflict(cover_dest_path, new_cover_file)
+        
+    shutil.copy(os.path.join(root, cover_file), cover_upload_set.path(new_cover_file))
+    
+    book_dest_path = book_upload_set.config.destination
+    new_book_file = book_file
+
+    if os.path.exists(os.path.join(book_dest_path, new_book_file)):
+        new_book_file = book_upload_set.resolve_conflict(book_dest_path, new_book_file)
+        
+    shutil.copy(os.path.join(root, book_file), book_upload_set.path(new_book_file))
+
+    book.cover = new_cover_file
+    book.filename = new_book_file
+
+    db.session.add(book)
+    db.session.commit()
+
+    if app.config['WRITE_META_ON_SAVE']:
+       book.write_meta()
+
+    return True
+
+
 def edit_book(id, form, files):
     book = get_book(id)
     if book:
@@ -260,6 +372,9 @@ def edit_book(id, form, files):
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
         book.pages = int(form['pages']) if form['pages'] else None
+
+        book.id_isbn = form['id_isbn']
+        book.id_calibre = form['id_calibre']
 
         book.update_taxonomies({
             'author': [(form['author'], form['author_sort'])],
@@ -355,6 +470,29 @@ def delete_book(id):
     db.session.commit()
 
 
+def remove_books_from_batch(batch_id):
+    for book in Book.query.filter_by(batch=batch_id).all():
+        try:
+            book.remove_file()
+        except Exception as e:
+            print "Unable to delete file!"
+            print e
+
+        try:
+            book.remove_cover()
+        except Exception as e:
+            print "Unable to delete cover!"
+            print e
+
+        try:
+            db.session.delete(book)
+        except Exception as e:
+            print "Unable to delete book! " + book
+            print e
+
+    db.session.commit()
+
+
 def get_taxonomy_terms_without_parent(ttype):
     return Taxonomy.query.filter_by(parent_id=None, type=ttype).order_by(Taxonomy.name).all()
 
@@ -440,6 +578,10 @@ def add_user(username, password):
 
 def get_users():
     return User.query.order_by(User.username).all()
+
+
+def get_user(username):
+    return User.query.filter_by(username=username).first()
 
 
 def delete_user(username):
@@ -583,3 +725,7 @@ def authenticate(username, password):
         return user
 
     return None
+
+
+def save_updated_books(books):
+    db.session.commit()

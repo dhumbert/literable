@@ -1,0 +1,30 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+    <form method="post">
+    <input type="submit" class="btn btn-block btn-primary btn-large" value="Save"/>
+
+    <table class="table">
+        <thead>
+            <tr><th>Book</th><th>Calibre ID</th><th>ISBN</th></tr>
+        </thead>
+    {% for book in books %}
+        <tr>
+            <td><a href="{{ url_for('edit_book', id=book.id) }}" target="_blank">{{ book.title }}</a>
+            {% if book.authors %}
+                <small>by {{ book.authors[0].name }}</small></td>
+            {% endif %}
+
+            <td>
+                <input type="text" name="id_calibre_{{ book.id }}" size="2" value="{{ book.id_calibre|none2blank }}"/>
+            </td>
+            <td>
+                <input type="text" name="id_isbn_{{ book.id }}" size="2" value="{{ book.id_isbn|none2blank }}"/>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+        <input type="submit" class="btn btn-block btn-primary btn-large" value="Save"/>
+    </form>
+
+{% endblock %}

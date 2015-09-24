@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import uuid
+import os
+from lxml import etree
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
+import html2text
 from literable import app, model, epub
 
 
@@ -11,7 +15,7 @@ manager.add_command("migrate", ManageMigrations())
 @manager.command
 def debug():
     """ Run the server in debug mode"""
-    app.run('0.0.0.0', debug=True)
+    app.run('0.0.0.0', debug=True, threaded=True)
 
 
 @manager.command
@@ -48,6 +52,60 @@ def delete_user(username):
     model.delete_user(username)
     print "User deleted"
 
+@manager.command
+def batch_import(directory):
+    batch = str(uuid.uuid4())
+    count = 0
+    success = 0
+    print "Importing batch " + batch
+    for root, subdirs, files in os.walk(directory):
+        try:
+            book_file = None
+            metadata = {}
+            cover_file = None
+
+            for filename in files:
+                file_path = os.path.join(root, filename)
+                if filename == "metadata.opf":
+                    with open(file_path) as mf:
+                        e = etree.fromstring(mf.read()).xpath('/pkg:package/pkg:metadata', namespaces={
+                            'n': 'urn:oasis:names:tc:opendocument:xmlns:container',
+                            'pkg': 'http://www.idpf.org/2007/opf',
+                            'dc': 'http://purl.org/dc/elements/1.1/',
+                            'opf': 'http://www.idpf.org/2007/opf'
+                        })[0]
+                        vals = epub.read_opf(e)
+                        if 'description' in vals:
+                            h = html2text.HTML2Text()
+                            vals['description'] = h.handle(vals['description'])
+
+                        metadata = vals
+                elif "epub" in filename or "pdf" in filename:
+                    book_file = filename
+                elif filename == "cover.jpg":
+                    cover_file = filename
+
+            if not book_file:
+                continue
+
+            count += 1
+
+            if not metadata or not cover_file:
+                print "WARN: No metadata or no cover file found for book " + book_file
+
+            model.add_book_bulk(batch, root, book_file, cover_file, metadata)
+        except Exception as e:
+            print "Exception importing files from " + root
+            print e
+        else:
+            success += 1
+
+    print "Finished batch. Imported " + str(success) + " of " + str(count) + " books."
+
+
+@manager.command
+def batch_remove(batch_id):
+    model.remove_books_from_batch(batch_id)
 
 if __name__ == "__main__":
     manager.run()
