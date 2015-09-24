@@ -99,6 +99,11 @@ class Book(db.Model):
     public = db.Column(db.Boolean())
     series_seq = db.Column(db.Integer)
     pages = db.Column(db.Integer)
+    batch = db.Column(db.String)
+    id_isbn = db.Column(db.String)
+    id_amazon = db.Column(db.String)
+    id_google = db.Column(db.String)
+    id_calibre = db.Column(db.String)
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 
@@ -234,6 +239,7 @@ class Book(db.Model):
                             tax.slug = tax.generate_slug()
 
                             db.session.add(tax)
+                            db.session.commit()
 
                         if tax not in self.taxonomies:
                             self.taxonomies.append(tax)
@@ -289,6 +295,12 @@ class Book(db.Model):
     def rate(self, score):
         self.rating = score
         db.session.commit()
+
+    def __str__(self):
+        return "[" + self.title + "]"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class ReadingListBookAssociation(db.Model):

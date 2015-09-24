@@ -17,12 +17,22 @@
     <input type="text" name="author_sort" id="author_sort" value="{{ book.authors[0].name_sort if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 
     <div class="row">
-        <div class="span4">
+        <div class="span3">
             <label for="publisher">Publisher</label>
-            <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span4" autocomplete="off">
+            <input type="text" name="publisher" id="publisher" value="{{ book.publishers[0].name if book.publishers else None | none2blank }}" class="span3" autocomplete="off">
         </div>
 
-        <div class="span4">
+        <div class="span2">
+            <label for="pages">ISBN</label>
+            <input type="text" name="id_isbn" id="id_isbn" class="span2" value="{{ book.id_isbn | none2blank }}">
+        </div>
+
+        <div class="span2">
+            <label for="pages">Calibre ID</label>
+            <input type="text" name="id_calibre" id="id_calibre" class="span2" value="{{ book.id_calibre | none2blank }}">
+        </div>
+
+        <div class="span1">
             <label for="pages">Pages</label>
             <input type="number" name="pages" id="pages" class="span1" value="{{ book.pages | none2blank }}">
         </div>
