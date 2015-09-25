@@ -10,6 +10,9 @@
     <input type="text" name="title" id="title" value="{{ book.title | none2blank }}" class="span8">
     <button type="button" class="btn" id="lookupTitle"><i class="icon-search"></i></button>
 
+    <label for="title_sort">Title Sort</label>
+    <input type="text" name="title_sort" id="title_sort" value="{{ book.title_sort | none2blank }}" class="span8">
+
     <label for="author">Author</label>
     <input type="text" name="author" id="author" value="{{ book.authors[0].name if book.authors else None | none2blank }}" class="span9" autocomplete="off">
 

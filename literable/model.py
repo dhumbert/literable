@@ -33,11 +33,11 @@ def user_can_download_book(book, user):
 
 def get_books(page):
     page = max(1, _get_page(page))
-    return Book.query.order_by(Book.title).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_all_books():
-    return Book.query.order_by(Book.title).all()
+    return Book.query.order_by(Book.title_sort).all()
 
 
 def get_book(id):
@@ -56,7 +56,7 @@ def _get_sort_objs(sort, sort_dir):
 
     sort_criterion = Book.created_at
     if sort == 'title':
-        sort_criterion = Book.title
+        sort_criterion = Book.title_sort
     elif sort == 'pages':
         sort_criterion = Book.pages
 
@@ -172,7 +172,7 @@ def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='
     q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
     if tax_type == 'series':
-        q = q.order_by(Book.series_seq, Book.title)
+        q = q.order_by(Book.series_seq, Book.title_sort)
     else:
         sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
         q = q.order_by(sort_dir(sort_criterion))
@@ -226,6 +226,7 @@ def add_book(form, files):
 
     book = Book()
     book.title = form['title']
+    book.title_sort = form['title_sort']
     book.description = form['description']
     book.series_seq = int(form['series_seq']) if form['series_seq'] else None
     book.public = True if form['privacy'] == 'public' else False
@@ -268,6 +269,7 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book = Book()
     book.batch = batch
     book.title = metadata['title']
+    book.title_sort = metadata['title_sort'] if 'title_sort' in metadata else metadata['title']
     book.description = metadata['description'] if 'description' in metadata else None
     book.series_seq = int(metadata['series_index']) if 'series_index' in metadata else None
     book.public = True
@@ -353,6 +355,14 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book.filename = new_book_file
 
     db.session.add(book)
+
+    if 'rating' in metadata and metadata['rating'] > 0:
+        rating = Rating()
+        rating.user_id = book.user.id
+        rating.book_id = book.id
+        rating.rating = metadata['rating']
+        db.session.add(rating)
+
     db.session.commit()
 
     if app.config['WRITE_META_ON_SAVE']:
@@ -368,6 +378,7 @@ def edit_book(id, form, files):
             return False
 
         book.title = form['title']
+        book.title_sort = form['title_sort']
         book.description = form['description']
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
@@ -471,7 +482,10 @@ def delete_book(id):
 
 
 def remove_books_from_batch(batch_id):
+    total = 0
+    successful = 0
     for book in Book.query.filter_by(batch=batch_id).all():
+        total += 1
         try:
             book.remove_file()
         except Exception as e:
@@ -486,11 +500,15 @@ def remove_books_from_batch(batch_id):
 
         try:
             db.session.delete(book)
+            successful += 1
+
         except Exception as e:
             print "Unable to delete book! " + book
             print e
 
     db.session.commit()
+
+    return successful, total
 
 
 def get_taxonomy_terms_without_parent(ttype):

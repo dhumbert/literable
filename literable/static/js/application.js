@@ -136,11 +136,29 @@ $(document).ready(function(){
         return final;
     }
 
+    function make_title_sort(title) {
+        var final = title;
+        if (title.toLowerCase().substring(0, 2) == 'a ') {
+            final = title.substring(2) + ', A';
+        } else if (title.toLowerCase().substring(0, 4) == 'the ') {
+            final = title.substring(4) + ', The';
+        }
+
+        return final;
+    }
+
     if ($('.book-form').length) {
         $('#author').on('blur', function(e) {
             var author = $(e.target).val();
             if (author) {
                  $('#author_sort').val(authorify(author));
+            }
+        });
+
+        $('#title').on('blur', function(e) {
+            var title = $(e.target).val();
+            if (title) {
+                 $('#title_sort').val(make_title_sort(title));
             }
         });
 

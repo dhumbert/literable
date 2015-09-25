@@ -105,7 +105,8 @@ def batch_import(directory):
 
 @manager.command
 def batch_remove(batch_id):
-    model.remove_books_from_batch(batch_id)
+    successful, total = model.remove_books_from_batch(batch_id)
+    print "Removed " + str(successful) + " of " + str(total) + " books in batch."
 
 if __name__ == "__main__":
     manager.run()
