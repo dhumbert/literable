@@ -353,6 +353,14 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book.filename = new_book_file
 
     db.session.add(book)
+
+    if 'rating' in metadata and metadata['rating'] > 0:
+        rating = Rating()
+        rating.user_id = book.user.id
+        rating.book_id = book.id
+        rating.rating = metadata['rating']
+        db.session.add(rating)
+
     db.session.commit()
 
     if app.config['WRITE_META_ON_SAVE']:
