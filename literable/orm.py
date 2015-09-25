@@ -92,6 +92,7 @@ class Book(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
+    title_sort = db.Column(db.String)
     filename = db.Column(db.String)
     cover = db.Column(db.String)
     description = db.Column(db.Text)

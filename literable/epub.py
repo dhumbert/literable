@@ -252,7 +252,7 @@ def read_opf(element):
                         res[s + '_sort'] = sort_val
                     res[s] = i.text
 
-        for s in ['series_index', 'series']:
+        for s in ['series_index', 'series', 'title_sort']:
             item = element.xpath('opf:meta[@name="calibre:%s"]/@content' % (s), namespaces=ns)
             if item:
                 res[s] = item[0]
