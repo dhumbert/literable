@@ -140,6 +140,8 @@ $(document).ready(function(){
         var final = title;
         if (title.toLowerCase().substring(0, 2) == 'a ') {
             final = title.substring(2) + ', A';
+        } else if (title.toLowerCase().substring(0, 3) == 'an ') {
+            final = title.substring(3) + ', An';
         } else if (title.toLowerCase().substring(0, 4) == 'the ') {
             final = title.substring(4) + ', The';
         }
