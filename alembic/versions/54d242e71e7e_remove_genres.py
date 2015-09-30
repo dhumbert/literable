@@ -34,10 +34,12 @@ def upgrade():
             book_tax_query = books_taxonomies.select().where(books_taxonomies.c.taxonomy_id == tax['id'])
             for book in connection.execute(book_tax_query).fetchall():
                 connection.execute(books_taxonomies.delete().where(books_taxonomies.c.book_id == book['book_id']).where(books_taxonomies.c.taxonomy_id == book['taxonomy_id']))
+                connection.execute(books_taxonomies.delete().where(books_taxonomies.c.book_id == book['book_id']).where(books_taxonomies.c.taxonomy_id == found_tax['id']))
                 connection.execute(
                     books_taxonomies.insert().values(book_id=book['book_id'], taxonomy_id=found_tax['id'])
                 )
 
+            connection.execute(taxonomies.update().where(taxonomies.c.parent_id == tax['id']).values(parent_id=None))
             connection.execute(taxonomies.delete().where(taxonomies.c.id == tax['id']))
 
 
