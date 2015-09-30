@@ -118,6 +118,8 @@ def get_incomplete_books():
         'without a genre': [],
         'without a publisher': [],
         'without a page count': [],
+        'without a calibre id': [],
+        'without an isbn': [],
         'that are duplicate': []
     }
 
@@ -143,6 +145,10 @@ def get_incomplete_books():
             books['without a publisher'].append(book)
         if not book.pages:
             books['without a page count'].append(book)
+        if not book.id_calibre:
+            books['without a calibre id'].append(book)
+        if not book.id_isbn:
+            books['without an isbn'].append(book)
 
     return books
 
