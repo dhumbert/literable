@@ -269,6 +269,16 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     if 'title' not in metadata or not metadata['title'].strip():
         raise ValueError("Title must not be blank: " + book_file)
 
+    ids = {'isbn': metadata.get('id_isbn'),
+           'calibre': metadata.get('id_calibre'),
+           'amazon': metadata.get('id_amazon'),
+           'google': metadata.get('id_google')}
+
+    for id_type, identifer in ids.iteritems():
+        if identifer:
+            if get_book_by_identifier(id_type, identifer):
+                raise RuntimeError("There is already a book with identifier [" + id_type + ": " + identifer + "]!")
+
     book = Book()
     book.batch = batch
     book.title = metadata['title']
@@ -279,16 +289,6 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book.user = get_user('devin')
     book.created_at = datetime.now()
     book.pages = None
-
-    ids = {'isbn': metadata.get('id_isbn'),
-           'calibre': metadata.get('id_calibre'),
-           'amazon': metadata.get('id_amazon'),
-           'google': metadata.get('id_google')}
-
-    for id_type, identifer in ids.iteritems():
-        if identifer:
-            if get_book_by_identifier(id_type, identifer):
-                raise RuntimeError("There is already a book with identifier [" + id_type + ": " + identifer + "]!")
 
     book.id_isbn = ids['isbn']
     book.id_amazon = ids['amazon']
