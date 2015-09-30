@@ -14,16 +14,6 @@
             <li class="active">{{ tag.name }}</li>
         {% endif %}
 
-        {% if genre %}
-            <li><a href="{{ url_for('list_genres') }}">Genres</a><span class="divider">/</span></li>
-
-            {% for genre in genre.get_parents() %}
-                <li><a href="{{ url_for('genre', genre=genre.slug) }}">{{  genre.name }}</a><span class="divider">/</span></li>
-            {% endfor %}
-
-            <li class="active">{{ genre.name }}</li>
-        {% endif %}
-
         {% if series %}
             <li><a href="{{ url_for('list_series') }}">Series</a><span class="divider">/</span></li>
             <li class="active">{{ series.name }}</li>

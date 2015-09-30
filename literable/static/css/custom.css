@@ -84,13 +84,11 @@
     margin: 0 0 0.5em 0;
 }
 
-.row-library .cell-info .book-genre,
 .row-library .cell-info .book-publisher {
     font-size: 90%;
     color: #666;
 }
 
-.row-library .cell-info .book-genre a,
 .row-library .cell-info .book-publisher a {
     margin-left: 0.35em;
 }
@@ -195,11 +193,6 @@
         -moz-column-count: 1;
         -webkit-column-count: 1;
     }
-}
-
-#new-genre .well {
-    margin-top: 1em;
-    padding-top: 0;
 }
 
 .login-form input {

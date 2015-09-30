@@ -33,14 +33,9 @@ def add_book():
     title = 'Add Book'
     book = model.get_book(None)  # blank book obj for form
 
-    genre_options = model.generate_hierarchical_taxonomy_list('genre',
-                                                              selected=[request.args.get('genre')],
-                                                              css_class='hierarchical_tax_checkboxes')
-
     return render_template('books/add.html', book=book, new=True,
                            series=request.args.get('series'),
                            series_seq=request.args.get('series_seq'),
-                           genre_options=genre_options,
                            title=title)
 
 
@@ -59,7 +54,7 @@ def add_book_post():
                     seq = int(request.form['series_seq']) + 1
                 else:
                     seq = None
-                return redirect(url_for('add_book', series=request.form['series'], series_seq=seq, genre=request.form['genre']))
+                return redirect(url_for('add_book', series=request.form['series'], series_seq=seq))
         return redirect(url_for('recent'))
     except ValueError as e:
         flash(e, 'error')
@@ -113,14 +108,7 @@ def edit_book(id):
             abort(403)
         title = u'{} | Edit'.format(book.title)
 
-        genre_options = model.generate_hierarchical_taxonomy_list(
-                                'genre',
-                                selected=[g.id for g in book.genres],
-                                css_class='hierarchical_tax_checkboxes')
-
-        return render_template('books/edit.html', book=book, new=False,
-                               genre_options=genre_options,
-                               title=title)
+        return render_template('books/edit.html', book=book, new=False, title=title)
 
 
 @app.route("/books/edit/<int:id>", methods=['POST'])

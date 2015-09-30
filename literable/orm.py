@@ -120,10 +120,6 @@ class Book(db.Model):
         return self._get_tax_by_type('publisher')
 
     @property
-    def genres(self):
-        return self._get_tax_by_type('genre')
-
-    @property
     def tags(self):
         return self._get_tax_by_type('tag')
 
@@ -260,11 +256,6 @@ class Book(db.Model):
         else:
             cover = None
 
-        if self.genres:
-            genre = [genre.name for genre in self.genres]
-        else:
-            genre = []
-
         if self.tags:
             tags = [tag.name for tag in self.tags]
         else:
@@ -275,7 +266,7 @@ class Book(db.Model):
         else:
             author = None
 
-        subjects = genre + tags
+        subjects = tags
 
         epub.write_epub_meta(epub_file, title, author,
             description=self.description,

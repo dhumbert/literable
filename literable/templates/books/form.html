@@ -56,8 +56,6 @@
         <input class="span1" type="number" name="series_seq" id="series_seq" value="{% if series_seq %}{{ series_seq | none2blank }}{% else %}{{ book.series_seq | none2blank }}{% endif %}">
     </span>
 
-    {{ genre_options | safe }}
-
     <label for="cover">Cover Image</label>
     {% if book.cover %}
         <span class="help-block">Leave blank to keep current cover.</span>
