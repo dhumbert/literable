@@ -42,17 +42,6 @@
             </div>
         {% endfor %}
 
-        {% for genre in book.genres %}
-            <div class="book-genre">
-                <i class="icon-folder-open"></i>
-                {% for parent in genre.get_parents() %}
-                    <a href="{{ url_for('taxonomy', ttype='genre', slug=parent.slug) }}">{{ parent.name }}</a>
-                    <i class="icon-chevron-right"></i>
-                {% endfor %}
-                <a href="{{ url_for('taxonomy', ttype='genre', slug=genre.slug) }}">{{ genre.name }}</a>
-            </div>
-        {% endfor %}
-
         {% if book.tags %}
             <ul class="book-tags">
                 <li><i class="icon-tags"></i></li>

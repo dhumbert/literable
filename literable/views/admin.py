@@ -33,10 +33,7 @@ def admin_covers():
 def admin_taxonomies():
     taxonomies = model.get_taxonomies_and_terms()
     title = 'Taxonomies | Admin'
-    return render_template('admin/taxonomies.html', taxonomies=taxonomies,
-                           generate_hierarchical_list=model.generate_genre_tree_list,
-                           hierarchical_select=model.generate_genre_tree_select_options(value_id=True),
-                           title=title)
+    return render_template('admin/taxonomies.html', taxonomies=taxonomies, title=title)
 
 
 @app.route("/admin/taxonomies/edit", methods=['POST'])

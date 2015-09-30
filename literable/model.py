@@ -116,7 +116,6 @@ def get_incomplete_books():
         'without a description': [],
         'without a file': [],
         'without an author': [],
-        'without a genre': [],
         'without a publisher': [],
         'without a page count': [],
         'without a calibre id': [],
@@ -140,8 +139,6 @@ def get_incomplete_books():
             books['without a file'].append(book)
         if not book.description:
             books['without a description'].append(book)
-        if not book.genres:
-            books['without a genre'].append(book)
         if not book.publishers:
             books['without a publisher'].append(book)
         if not book.pages:
@@ -247,7 +244,6 @@ def add_book(form, files):
     book.update_taxonomies({
         'author':  [(form['author'], form['author_sort'])],
         'publisher': [form['publisher']],
-        'genre': map(int, form.getlist('hierarchical_tax_genre')),
         'series': [form['series']],
         'tag': form['tags'].split(','),
     })
@@ -322,20 +318,12 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
             taxonomies['author'] = [ (metadata['creator'], metadata['creator'])]
 
     if 'subject' in metadata:
-        genres = []
         tags = []
         if not isinstance(metadata['subject'], list):
             metadata['subject'] = [metadata['subject']]
 
         for subject in metadata['subject']:
-            tax = get_taxonomy_term('genre', subject)
-            if tax:
-                genres.append(tax.id)
-            else:
-                tags.append(subject.lower())
-
-        if len(genres) > 0:
-            taxonomies['genre'] = genres
+            tags.append(subject.lower())
 
         if len(tags) > 0:
             taxonomies['tag'] = tags
@@ -398,7 +386,6 @@ def edit_book(id, form, files):
             'author': [(form['author'], form['author_sort'])],
             'publisher': [form['publisher']],
             'series': [form['series']],
-            'genre': map(int, form.getlist('hierarchical_tax_genre')),
             'tag': form['tags'].split(','),
         })
 
@@ -688,59 +675,6 @@ def _recurse_hierarchical_list_level(parent, depth=0, selected=None):
         output += "</ul>"
 
     return output + "</li>"
-
-
-def generate_genre_tree_select_options(selected=None, value_id=False):
-    output = ""
-
-    for parent in get_taxonomy_terms_without_parent('genre'):
-        output += _recurse_select_level(parent, selected=selected, value_id=value_id)
-
-    return output
-
-
-def _recurse_select_level(parent, depth=0, selected=None, value_id=False):
-    name = ("&mdash;" * depth) + " " + parent.name
-    value = parent.id if value_id else parent.name
-
-    selected_string = """ selected="selected" """ if selected == parent.name else ""
-
-    output = """<option value="%s"%s>%s</option>""" % (value, selected_string, name)
-
-    if parent.children:
-        for child in parent.children:
-            output += _recurse_select_level(child, depth=depth + 1, selected=selected, value_id=value_id)
-
-    return output
-
-
-def generate_genre_tree_list():
-    output = ""
-
-    for parent in get_taxonomy_terms_without_parent('genre'):
-        output += _recurse_list_level(parent)
-
-    return output
-
-
-def _recurse_list_level(parent):
-    output = "<li>"
-    output += """<a href="#" data-tax-id="{}" data-tax-slug="{}"
-                             data-tax-name="{}" data-tax-type="{}"
-                             data-tax-parent="{}">{}</a>""".format(
-        parent.id, parent.slug, parent.name, parent.type, parent.parent_id, parent.name)
-
-    output += """ <span class="tax-count">{}</span>""".format(len(parent.books))
-
-    if parent.children:
-        output = output + "<ul>"
-        for child in sorted(parent.children, key=lambda x: x.name):
-            output = output + _recurse_list_level(child)
-
-        output = output + "</ul>"
-
-    output = output + "</li>"
-    return output
 
 
 def authenticate(username, password):
