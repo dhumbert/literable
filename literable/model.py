@@ -1,5 +1,6 @@
 from datetime import datetime
 import hashlib
+import re
 import shutil
 import os
 import os.path
@@ -342,7 +343,7 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book.update_taxonomies(taxonomies)
 
     cover_dest_path = cover_upload_set.config.destination
-    new_cover_file = cover_file
+    new_cover_file = re.sub('[^0-9a-zA-Z\._\-]+', '', cover_file.replace(" ", "_"))
 
     if os.path.exists(os.path.join(cover_dest_path, new_cover_file)):
         new_cover_file = cover_upload_set.resolve_conflict(cover_dest_path, new_cover_file)
@@ -350,7 +351,7 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     shutil.copy(os.path.join(root, cover_file), cover_upload_set.path(new_cover_file))
     
     book_dest_path = book_upload_set.config.destination
-    new_book_file = book_file
+    new_book_file = re.sub('[^0-9a-zA-Z\._\-]+', '', book_file.replace(" ", "_"))
 
     if os.path.exists(os.path.join(book_dest_path, new_book_file)):
         new_book_file = book_upload_set.resolve_conflict(book_dest_path, new_book_file)

@@ -99,7 +99,7 @@ def download_book(id):
     # todo: there has to be a better way to do this.
     # book_upload_set.url doesn't generate the right URL for nginx
     response.headers['X-Accel-Redirect'] = app.config['UPLOADS_DEFAULT_URL'] + 'library/' + book.filename
-    response.headers['Content-Disposition'] = 'attachment; filename=%s' % book.filename
+    response.headers['Content-Disposition'] = 'attachment; filename="%s"' % book.filename
     return response
 
 
