@@ -7,3 +7,4 @@ EBOOK_EXTENSIONS = ('epub', 'pdf', 'ibooks')
 WRITE_META_ON_SAVE = True
 ADD_SERIES_TO_META_TITLE = True
 DEMO = False
+BASE_URL = "http://literable.co"

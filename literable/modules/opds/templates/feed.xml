@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:dcterms="http://purl.org/dc/terms/" xmlns="http://www.w3.org/2005/Atom" xmlns:odl="http://opds-spec.org/odl" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xml:lang="en" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:app="http://www.w3.org/2007/app" xmlns:thr="http://purl.org/syndication/thread/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id>{{ BASE_URL }}/recent.atom</id>
+  <title>Recent</title>
+  <updated>2015-10-08T04:14:16Z</updated>
+{#  <icon>http://assets2.feedbooks.net/images/favicon.ico?t=1444143298</icon>#}
+  <author>
+    <name>Literable</name>
+    <uri>{{ BASE_URL }}</uri>
+  </author>
+  {% if books.has_next %}
+    <link type="application/atom+xml; profile=opds-catalog; kind=acquisition" rel="next" href="?page={{ books.next_num }}" />
+  {% endif %}
+{#  <link type="application/atom+xml; profile=opds-catalog; kind=acquisition" title="Most Popular" href="http://www.feedbooks.com/books/top.atom" rel="self"/>#}
+{#  <link type="application/atom+xml;profile=opds-catalog;kind=navigation" title="Home" href="http://www.feedbooks.com/catalog.atom" rel="start"/>#}
+{#  <link type="application/opensearchdescription+xml" title="Search on Feedbooks" href="http://www.feedbooks.com/opensearch.xml" rel="search"/>#}
+{#  <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Bookshelf" href="https://www.feedbooks.com/user/bookshelf.atom" rel="http://opds-spec.org/shelf"/>#}
+{#<opensearch:totalResults>3485</opensearch:totalResults>#}
+{#<opensearch:itemsPerPage>20</opensearch:itemsPerPage>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Next Page" href="http://www.feedbooks.com/books/top.atom?lang=en&amp;page=2" rel="next"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" opds:activeFacet="true" title="English" href="/books/top.atom?lang=en&amp;range=month" thr:count="3485" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="French" href="/books/top.atom?lang=fr&amp;range=month" thr:count="1226" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="German" href="/books/top.atom?lang=de&amp;range=month" thr:count="156" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Spanish" href="/books/top.atom?lang=es&amp;range=month" thr:count="347" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Italian" href="/books/top.atom?lang=it&amp;range=month" thr:count="285" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+
+    {% for book in books.items %}
+        <entry>
+            <title>{% if book.series %}{{ book.series[0].name }}{% if book.series_seq %} #{{ book.series_seq }}{% endif %} - {% endif %}{{ book.title }}</title>
+            <id>{{ BASE_URL }}/book/{{ book.id }}</id>
+            {% for author in book.authors %}
+                <author>
+                  <name>{{ author.name }}</name>
+                  <uri>{{ BASE_URL }}/t/author/{{ author.slug }}</uri>
+                </author>
+            {% endfor %}
+
+            {% if book.tags %}
+                {% for tag in book.tags %}
+                    <category scheme="{{ BASE_URL }}/t/tag" term="{{ tag.slug }}" label="{{ tag.name }}"/>
+                {% endfor %}
+            {% endif %}
+
+            <summary>{{ book.description }}</summary>
+
+            {% if book.pages %}
+                <dcterms:extent>{{ book.pages }} pages</dcterms:extent>
+            {% endif %}
+
+            <link type="text/html" title="View on Literable" href="{{ BASE_URL }}/book/{{ book.id }}" rel="alternate"/>
+
+            {% if book.get_format() == 'epub' %}
+                <link type="application/epub+zip" href="{{ BASE_URL }}{{ url_for('download_book', id=book.id) }}" rel="http://opds-spec.org/acquisition"/>
+            {% elif book.get_format() == 'pdf' %}
+                <link type="application/pdf" href="{{ BASE_URL }}{{ url_for('download_book', id=book.id) }}" rel="http://opds-spec.org/acquisition"/>
+            {% endif %}
+
+            <link type="image/jpeg" href="{{ BASE_URL }}{{ book.get_cover_url() }}" rel="http://opds-spec.org/image"/>
+            <link type="image/jpeg" href="{{ BASE_URL }}{{ book.get_cover_url() }}" rel="http://opds-spec.org/image/thumbnail"/>
+        </entry>
+    {% endfor %}
+</feed>
