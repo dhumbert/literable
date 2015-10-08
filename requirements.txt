@@ -3,7 +3,7 @@ decorator==3.4.0
 Fabric==1.5.3
 Flask==0.9
 -e git+https://github.com/tobiasandtobias/flask-alembic.git@d0f4d3523e115d6376aeba3b0b0cbba3af888add#egg=Flask_Alembic-master
-Flask-Login==0.2.7
+Flask-Login==0.3.0
 Flask-Markdown==0.3
 Flask-Script==0.5.3
 Flask-SQLAlchemy==0.16

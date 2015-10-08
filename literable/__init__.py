@@ -1,10 +1,10 @@
 import os
 import logging
 from functools import wraps
-from flask import Flask, make_response, abort
+from flask import Flask, make_response, abort, request, Response
 from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager, current_user
+from flask.ext.login import LoginManager, current_user, login_user
 from flaskext.markdown import Markdown
 from literable.filters import nl2br, none2blank
 
@@ -33,6 +33,7 @@ app.jinja_env.filters['none2blank'] = none2blank
 app.jinja_env.globals['hasattr'] = hasattr
 app.jinja_env.globals['len'] = len
 app.jinja_env.globals['demo'] = app.config['DEMO']
+app.jinja_env.globals['BASE_URL'] = app.config['BASE_URL']
 
 #uploads
 current_path = os.path.dirname(os.path.abspath(__file__))
@@ -69,9 +70,33 @@ def admin_required(func):
             abort(403)
     return decorated_view
 
+
+def basic_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth:
+            from literable.model import authenticate
+            user = authenticate(auth.username, auth.password)
+            if user:
+                login_user(user)
+                return f(*args, **kwargs)
+
+        return Response(
+                    'Could not verify your access level for that URL.\n'
+                    'You have to login with proper credentials', 401,
+                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    return decorated
+
+
 @login.user_loader
 def load_user(id):
     from literable.orm import User
     return User.query.get(int(id))
+
+
+from literable.modules.opds import opds_module
+app.register_blueprint(opds_module, url_prefix='/opds')
 
 import literable.base
