@@ -62,7 +62,6 @@ def add_book_post():
 
 
 @app.route("/books/upload", methods=['POST'])
-@login_required
 @content_type("application/json")
 def upload_book():
     try:
