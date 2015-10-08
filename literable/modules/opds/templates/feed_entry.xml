@@ -1,0 +1,33 @@
+<entry>
+    <title>{% if book.series %}{{ book.series[0].name }}{% if book.series_seq %} #{{ book.series_seq }}{% endif %} - {% endif %}{{ book.title }}</title>
+    <id>{{ BASE_URL }}/book/{{ book.id }}</id>
+    {% for author in book.authors %}
+        <author>
+          <name>{{ author.name }}</name>
+          <uri>{{ BASE_URL }}/t/author/{{ author.slug }}</uri>
+        </author>
+    {% endfor %}
+
+    {% if book.tags %}
+        {% for tag in book.tags %}
+            <category scheme="{{ BASE_URL }}/t/tag" term="{{ tag.slug }}" label="{{ tag.name }}"/>
+        {% endfor %}
+    {% endif %}
+
+    <summary>{{ book.description }}</summary>
+
+    {% if book.pages %}
+        <dcterms:extent>{{ book.pages }} pages</dcterms:extent>
+    {% endif %}
+
+    <link type="text/html" title="View on Literable" href="{{ BASE_URL }}/book/{{ book.id }}" rel="alternate"/>
+
+    {% if book.get_format() == 'epub' %}
+        <link type="application/epub+zip" href="{{ BASE_URL }}{{ url_for('download_book', id=book.id) }}" rel="http://opds-spec.org/acquisition"/>
+    {% elif book.get_format() == 'pdf' %}
+        <link type="application/pdf" href="{{ BASE_URL }}{{ url_for('download_book', id=book.id) }}" rel="http://opds-spec.org/acquisition"/>
+    {% endif %}
+
+    <link type="image/jpeg" href="{{ BASE_URL }}{{ book.get_cover_url() }}" rel="http://opds-spec.org/image"/>
+    <link type="image/jpeg" href="{{ BASE_URL }}{{ book.get_cover_url() }}" rel="http://opds-spec.org/image/thumbnail"/>
+</entry>
