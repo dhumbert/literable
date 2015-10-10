@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:dcterms="http://purl.org/dc/terms/" xmlns="http://www.w3.org/2005/Atom" xmlns:odl="http://opds-spec.org/odl" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xml:lang="en" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:app="http://www.w3.org/2007/app" xmlns:thr="http://purl.org/syndication/thread/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id>{{ BASE_URL }}/opds/catalog.atom</id>
+  <title>Literable Catalog</title>
+  <updated>2015-10-08T04:14:16Z</updated>
+{#  <icon>http://assets2.feedbooks.net/images/favicon.ico?t=1444143298</icon>#}
+  <author>
+    <name>Literable</name>
+    <uri>{{ BASE_URL }}</uri>
+  </author>
+
+    <link type="application/opensearchdescription+xml" title="Search on Literable" href="{{ BASE_URL }}/opds/search-manifest.xml" rel="search"/>
+
+    <entry>
+        <title>Recent Books</title>
+        <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="{{ BASE_URL }}/opds/recent.atom"/>
+        <updated>2015-10-09T23:28:50Z</updated>
+        <id>{{ BASE_URL }}/opds/recent.atom</id>
+    </entry>
+
+    <entry>
+        <title>My Lists</title>
+        <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="{{ BASE_URL }}/opds/lists.atom"/>
+        <updated>2015-10-09T23:28:50Z</updated>
+        <id>{{ BASE_URL }}/opds/lists.atom</id>
+    </entry>
+</feed>

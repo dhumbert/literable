@@ -326,6 +326,12 @@ class ReadingList(db.Model):
         else:
             return self.generate_slug(depth + 1)
 
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class Rating(db.Model):
     __tablename__ = 'ratings'
