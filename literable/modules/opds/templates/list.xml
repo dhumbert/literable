@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:dcterms="http://purl.org/dc/terms/" xmlns="http://www.w3.org/2005/Atom" xmlns:odl="http://opds-spec.org/odl" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xml:lang="en" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:app="http://www.w3.org/2007/app" xmlns:thr="http://purl.org/syndication/thread/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id>{{ BASE_URL }}/opds/list.atom?id={{ list.id }}</id>
+  <title>{{ list.name }} Reading List</title>
+  <updated>2015-10-08T04:14:16Z</updated>
+{#  <icon>http://assets2.feedbooks.net/images/favicon.ico?t=1444143298</icon>#}
+  <author>
+    <name>Literable</name>
+    <uri>{{ BASE_URL }}</uri>
+  </author>
+
+    <link type="application/opensearchdescription+xml" title="Search on Literable" href="{{ BASE_URL }}/opds/search-manifest.xml" rel="search"/>
+{#  <link type="application/atom+xml; profile=opds-catalog; kind=acquisition" title="Most Popular" href="http://www.feedbooks.com/books/top.atom" rel="self"/>#}
+{#  <link type="application/atom+xml;profile=opds-catalog;kind=navigation" title="Home" href="http://www.feedbooks.com/catalog.atom" rel="start"/>#}
+
+{#  <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Bookshelf" href="https://www.feedbooks.com/user/bookshelf.atom" rel="http://opds-spec.org/shelf"/>#}
+{#<opensearch:totalResults>3485</opensearch:totalResults>#}
+{#<opensearch:itemsPerPage>20</opensearch:itemsPerPage>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Next Page" href="http://www.feedbooks.com/books/top.atom?lang=en&amp;page=2" rel="next"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" opds:activeFacet="true" title="English" href="/books/top.atom?lang=en&amp;range=month" thr:count="3485" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="French" href="/books/top.atom?lang=fr&amp;range=month" thr:count="1226" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="German" href="/books/top.atom?lang=de&amp;range=month" thr:count="156" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Spanish" href="/books/top.atom?lang=es&amp;range=month" thr:count="347" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+{#<link type="application/atom+xml;profile=opds-catalog;kind=acquisition" title="Italian" href="/books/top.atom?lang=it&amp;range=month" thr:count="285" rel="http://opds-spec.org/facet" opds:facetGroup="Language"/>#}
+
+    {% for book in list.books %}
+        {% include 'feed_entry.xml' %}
+    {% endfor %}
+</feed>
