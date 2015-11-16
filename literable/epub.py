@@ -176,7 +176,9 @@ class Epub:
                     with zip.open(f) as html_file:
                         content = BeautifulSoup(html_file.read(), "lxml")
                         words += len(content.text.split(" "))
-
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
         finally:
             zip.close()
 

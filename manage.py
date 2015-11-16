@@ -46,7 +46,8 @@ def count_words():
     books = model.get_all_books()
 
     for book in books:
-        book.update_word_count()
+        if not book.word_count:
+            book.update_word_count()
 
 
 @manager.command
