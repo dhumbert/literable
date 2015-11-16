@@ -179,9 +179,12 @@ class Epub:
                 if 'OEBPS/' + filename in files:
                     filename = 'OEBPS/' + filename
 
-                with zip.open(filename) as html_file:
-                    content = BeautifulSoup(html_file.read(), "lxml")
-                    words += len(content.text.split(" "))
+                try:
+                    with zip.open(filename) as html_file:
+                        content = BeautifulSoup(html_file.read(), "lxml")
+                        words += len(content.text.split(" "))
+                except KeyError:
+                    pass  # file doesn't exist
 
         return words
 
