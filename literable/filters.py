@@ -1,4 +1,4 @@
-import re
+import re, math
 from jinja2 import evalcontextfilter, Markup, escape
 
 
@@ -17,3 +17,14 @@ def none2blank(value):
         return ""
     else:
         return value
+
+
+def rough_format(value):
+    n = int(value)
+
+    if n < 1000:
+        return str(value)
+    elif n < 1000000: # < 1 million
+        return str(int(math.ceil(value / 1000))) + 'k'
+    else: # > 1 million
+        return str(int(math.ceil(value / 1000000))) + 'm'

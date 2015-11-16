@@ -6,7 +6,7 @@ from flaskext import uploads
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, current_user, login_user
 from flaskext.markdown import Markdown
-from literable.filters import nl2br, none2blank
+from literable.filters import nl2br, none2blank, rough_format
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -30,6 +30,7 @@ login.login_view = "login"
 
 app.jinja_env.filters['nl2br'] = nl2br
 app.jinja_env.filters['none2blank'] = none2blank
+app.jinja_env.filters['rough_format'] = rough_format
 app.jinja_env.globals['hasattr'] = hasattr
 app.jinja_env.globals['len'] = len
 app.jinja_env.globals['demo'] = app.config['DEMO']
