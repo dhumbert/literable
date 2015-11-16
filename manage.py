@@ -43,17 +43,15 @@ def add_user(username, password):
 
 @manager.command
 def count_words():
-    e = epub.Epub("/Users/devin/Downloads/Bryson_Bill-A_Short_History_of_Nearly_Everything.epub")
-    print e.count_words()
-    # books = model.get_all_books()
-    #
-    # for book in books:
-    #     try:
-    #         book.update_word_count()
-    #     except:
-    #         print book
-    #         import traceback
-    #         traceback.print_exc()
+    books = model.get_all_books()
+
+    for book in books:
+        try:
+            book.update_word_count()
+        except:
+            print book
+            import traceback
+            traceback.print_exc()
 
 
 @manager.command
