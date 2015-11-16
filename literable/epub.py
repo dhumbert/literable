@@ -174,12 +174,10 @@ class Epub:
             for f in zip.namelist():
                 if f[-4:] == 'html' or f[-3:] == 'htm' or f[-3:] == 'xml':
                     with zip.open(f) as html_file:
-                        print f
-                        print html_file.read()
                         content = BeautifulSoup(html_file.read(), "lxml")
                         words += len(content.text.split(" "))
 
-            if words < 1000: # something may have gone wrong, try a different approach
+            if words < 1000:  # something may have gone wrong, try a different approach
                 new_words = 0
                 files = map(lambda x : x.filename, zip.infolist())
                 x = self._read_manifest()
