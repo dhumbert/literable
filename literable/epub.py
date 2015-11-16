@@ -170,17 +170,18 @@ class Epub:
         """Read all HTML files from the epub archive and count words"""
         words = 0
         zip = zipfile.ZipFile(self.epub_file)
-        try:
-            for f in zip.namelist():
-                if f[-4:] == 'html' or f[-3:] == 'htm' or f[-3:] == 'xml':
-                    with zip.open(f) as html_file:
-                        content = BeautifulSoup(html_file.read(), "lxml")
-                        words += len(content.text.split(" "))
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-        finally:
-            zip.close()
+        files = map(lambda x : x.filename, zip.infolist())
+        x = self._read_manifest()
+        x = x.xpath('/pkg:package/pkg:manifest', namespaces=ns)[0]
+        for q in x.iter():
+            if 'media-type' in q.attrib and 'htm' in q.attrib['media-type']:
+                filename = q.attrib['href']
+                if 'OEBPS/' + filename in files:
+                    filename = 'OEBPS/' + filename
+
+                with zip.open(filename) as html_file:
+                    content = BeautifulSoup(html_file.read(), "lxml")
+                    words += len(content.text.split(" "))
 
         return words
 
