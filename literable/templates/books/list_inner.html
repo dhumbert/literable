@@ -58,7 +58,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        {{book.word_count}}
+        
         {% if book.word_count %}
             <p class="word-count muted"><small>~ {{ "{:,d}".format(book.word_count) }} words</small></p>
         {% endif %}
