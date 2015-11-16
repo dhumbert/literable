@@ -60,7 +60,7 @@
         {% endif %}
 
         {% if book.word_count %}
-            <p class="word-count muted"><small>~ {{ book.word_count | rough_format }} words</small></p>
+            <p class="word-count muted"><small>{{ book.word_count | rough_format }} words</small></p>
         {% endif %}
     </div>
 
