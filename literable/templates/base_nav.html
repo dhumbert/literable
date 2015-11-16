@@ -39,6 +39,7 @@
                             <li><a href="{{ url_for('taxonomy_terms', ttype='series') }}">by Series</a></li>
                             <li><a href="{{ url_for('taxonomy_terms', ttype='author') }}">by Author</a></li>
                             <li><a href="{{ url_for('taxonomy_terms', ttype='publisher') }}">by Publisher</a></li>
+                                <li><a href="{{ url_for('archived') }}">Archived</a></li>
                         </ul>
                     </li>
                     {% if current_user.admin %}

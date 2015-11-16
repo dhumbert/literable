@@ -8,7 +8,13 @@
     </div>
 
     <div class="span8 cell-info">
-        <h3>{{ book.title | safe }}</h3>
+        <h3>
+            {{ book.title | safe }}
+
+            {% if book.archived %}
+                <span class="archived-label label label-warning">Archived</span>
+            {% endif %}
+        </h3>
         {% if book.series %}
             <div class="book-series">
                 <a href="{{ url_for('taxonomy', ttype='series', slug=book.series[0].slug) }}">
@@ -84,6 +90,11 @@
             </div>
         </p>
         {% if current_user.can_modify_book(book) %}
+            {% if book.archived %}
+                <p><a class="btn btn-success" href="{{ url_for('restore_book', id=book.id, next=request.url) }}"><i class="icon-folder-open icon-white"></i> Restore</a></p>
+            {% else %}
+                <p><a class="btn btn-warning" href="{{ url_for('archive_book', id=book.id, next=request.url) }}"><i class="icon-folder-close icon-white"></i> Archive</a></p>
+            {% endif %}
             <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.url) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
         {% endif %}
     </div>

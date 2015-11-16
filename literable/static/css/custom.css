@@ -84,6 +84,11 @@
     margin: 0 0 0.5em 0;
 }
 
+.row-library .cell-info .archived-label {
+    vertical-align: middle;
+    margin-top: -0.5em;
+}
+
 .row-library .cell-info .book-publisher {
     font-size: 90%;
     color: #666;

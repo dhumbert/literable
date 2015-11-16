@@ -41,6 +41,10 @@
             <li class="active">Search Results for "{{ search }}"</li>
         {% endif %}
 
+        {% if archived %}
+            <li class="active">Archived Books</li>
+        {% endif %}
+
         {% if reading_list %}
             <input type="hidden" id="reading-list-id" value="{{ reading_list.id }}">
             <li class="active">Reading Lists<span class="divider">/</span></li>

@@ -27,6 +27,15 @@ def rated():
     books = current_user.rated_books
     return render_template('books/list.html', books=books, rated=True, title=title)
 
+
+@app.route("/archived")
+def archived():
+    title = 'Archived Books'
+    page = request.args.get('page')
+    books = model.get_archived_books(page)
+    return render_template('books/list.html', books=books, archived=True, title=title)
+
+
 @app.route("/books/add")
 @login_required
 def add_book():
@@ -119,6 +128,34 @@ def edit_book_do(id):
         flash('Error saving changes', 'error')
 
     return redirect(url_for('edit_book', id=id))
+
+
+@app.route("/books/archive/<int:id>")
+@login_required
+def archive_book(id):
+    model.archive_book(id)
+    flash('Book archived', 'success')
+    try:
+        url = request.args.get('next')
+        if not url:
+            url = url_for('recent')
+    except KeyError:
+        url = url_for('recent')
+    return redirect(url)
+
+
+@app.route("/books/restore/<int:id>")
+@login_required
+def restore_book(id):
+    model.restore_book(id)
+    flash('Book restored', 'success')
+    try:
+        url = request.args.get('next')
+        if not url:
+            url = url_for('recent')
+    except KeyError:
+        url = url_for('recent')
+    return redirect(url)
 
 
 @app.route("/books/delete/<int:id>")

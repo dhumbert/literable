@@ -37,6 +37,11 @@ def get_books(page):
     return Book.query.order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
+def get_archived_books(page):
+    page = max(1, _get_page(page))
+    return Book.query.filter(Book.archived == True).order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+
+
 def get_all_books():
     return Book.query.order_by(Book.title_sort).all()
 
@@ -68,6 +73,8 @@ def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
+
+    f = and_(f, Book.archived == False)
 
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
@@ -107,7 +114,6 @@ def search_books(q):
 
     num_results = 25
     return map(lambda y: y[1][1], sorted(scores.iteritems(), key=lambda x: x[1][0], reverse=True))[0:num_results]
-
 
 
 def get_incomplete_books():
@@ -172,6 +178,7 @@ def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
+    f = and_(f, Book.archived == False)
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
     q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
@@ -237,6 +244,7 @@ def add_book(form, files):
     book.user = current_user
     book.created_at = datetime.now()
     book.pages = int(form['pages']) if form['pages'] else None
+    book.archived = False
 
     book.id_isbn = form['id_isbn']
     book.id_calibre = form['id_calibre']
@@ -451,6 +459,28 @@ def rate_book(book_id, score):
         rating.rating = score
         db.session.add(rating)
 
+    db.session.commit()
+
+
+def archive_book(id):
+    book = get_book(id)
+
+    if not user_can_modify_book(book, current_user):
+        flash('You cannot archive a book you do not own', 'error')
+        return False
+
+    book.archived = True
+    db.session.commit()
+
+
+def restore_book(id):
+    book = get_book(id)
+
+    if not user_can_modify_book(book, current_user):
+        flash('You cannot restore a book you do not own', 'error')
+        return False
+
+    book.archived = False
     db.session.commit()
 
 
