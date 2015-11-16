@@ -99,13 +99,13 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime())
     public = db.Column(db.Boolean())
     series_seq = db.Column(db.Integer)
-    pages = db.Column(db.Integer)
     batch = db.Column(db.String)
     id_isbn = db.Column(db.String)
     id_amazon = db.Column(db.String)
     id_google = db.Column(db.String)
     id_calibre = db.Column(db.String)
     archived = db.Column(db.Boolean)
+    word_count = db.Column(db.Integer)
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 
@@ -273,6 +273,21 @@ class Book(db.Model):
             description=self.description,
             cover=cover,
             subjects=subjects)
+
+    def update_word_count(self):
+        if self.filename:
+            word_count = None
+            if self.get_format() == 'epub':
+                word_count = self._update_epub_word_count()
+
+            self.word_count = word_count
+            db.session.commit()
+
+    def _update_epub_word_count(self):
+        epub_file = book_upload_set.path(self.filename)
+        e = epub.Epub(epub_file)
+        return e.count_words()
+
 
     def _build_meta_title(self):
         title = self.title

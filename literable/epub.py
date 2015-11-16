@@ -5,6 +5,7 @@ import os.path
 import uuid
 import mimetypes
 from lxml import etree
+from bs4 import BeautifulSoup
 
 
 # help from http://stackoverflow.com/questions/3114786/python-library-to-extract-epub-information
@@ -164,6 +165,22 @@ class Epub:
         path = os.path.dirname(self.manifest_filename)
         filename = os.path.join(path, filename)
         self._write_file_to_epub(self.cover, filename)
+
+    def count_words(self):
+        """Read all HTML files from the epub archive and count words"""
+        words = 0
+        zip = zipfile.ZipFile(self.epub_file)
+        try:
+            for f in zip.namelist():
+                if f[-4:] == 'html':
+                    with zip.open(f) as html_file:
+                        content = BeautifulSoup(html_file.read(), "lxml")
+                        words += len(content.text.split(" "))
+
+        finally:
+            zip.close()
+
+        return words
 
 
 class EpubMetadataCreator:

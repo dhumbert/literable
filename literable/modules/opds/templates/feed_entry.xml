@@ -16,8 +16,8 @@
 
     <summary>{{ book.description }}</summary>
 
-    {% if book.pages %}
-        <dcterms:extent>{{ book.pages }} pages</dcterms:extent>
+    {% if book.word_count %}
+        <dcterms:extent>{{ book.word_count }} words</dcterms:extent>
     {% endif %}
 
     <link type="text/html" title="View on Literable" href="{{ BASE_URL }}/book/{{ book.id }}" rel="alternate"/>

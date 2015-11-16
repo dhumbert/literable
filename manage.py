@@ -5,7 +5,7 @@ from lxml import etree
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
 import html2text
-from literable import app, model, epub
+from literable import app, model, epub, book_upload_set
 
 
 manager = Manager(app)
@@ -39,6 +39,14 @@ def read_epub_meta(book_path):
 def add_user(username, password):
     id = model.add_user(username, password)
     print "User added with ID {0}".format(id)
+
+
+@manager.command
+def count_words():
+    books = model.get_all_books()
+
+    for book in books:
+        book.update_word_count()
 
 
 @manager.command

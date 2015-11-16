@@ -63,8 +63,8 @@ def _get_sort_objs(sort, sort_dir):
     sort_criterion = Book.created_at
     if sort == 'title':
         sort_criterion = Book.title_sort
-    elif sort == 'pages':
-        sort_criterion = Book.pages
+    elif sort == 'word_count':
+        sort_criterion = Book.word_count
 
     return sort_criterion, sort_dir
 
@@ -147,8 +147,8 @@ def get_incomplete_books():
             books['without a description'].append(book)
         if not book.publishers:
             books['without a publisher'].append(book)
-        if not book.pages:
-            books['without a page count'].append(book)
+        if not book.word_count:
+            books['without a word count'].append(book)
         if not book.id_calibre:
             books['without a calibre id'].append(book)
         if not book.id_isbn:
@@ -243,7 +243,6 @@ def add_book(form, files):
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
     book.created_at = datetime.now()
-    book.pages = int(form['pages']) if form['pages'] else None
     book.archived = False
 
     book.id_isbn = form['id_isbn']
@@ -269,6 +268,8 @@ def add_book(form, files):
 
     if app.config['WRITE_META_ON_SAVE']:
         book.write_meta()
+
+    book.update_word_count()
 
     return True
 
@@ -296,7 +297,6 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     book.public = True
     book.user = get_user('devin')
     book.created_at = datetime.now()
-    book.pages = None
 
     book.id_isbn = ids['isbn']
     book.id_amazon = ids['amazon']
@@ -371,6 +371,8 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     if app.config['WRITE_META_ON_SAVE']:
        book.write_meta()
 
+    book.update_word_count()
+
     return True
 
 
@@ -385,7 +387,6 @@ def edit_book(id, form, files):
         book.description = form['description']
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
-        book.pages = int(form['pages']) if form['pages'] else None
 
         book.id_isbn = form['id_isbn']
         book.id_calibre = form['id_calibre']
@@ -404,6 +405,7 @@ def edit_book(id, form, files):
 
         if 'file' in form and form['file']:
             book.move_file_from_staging(form['file'])
+            book.update_word_count()
 
         db.session.commit()
 

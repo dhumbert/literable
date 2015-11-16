@@ -26,18 +26,13 @@
         </div>
 
         <div class="span2">
-            <label for="pages">ISBN</label>
+            <label for="id_isbn">ISBN</label>
             <input type="text" name="id_isbn" id="id_isbn" class="span2" value="{{ book.id_isbn | none2blank }}">
         </div>
 
         <div class="span2">
-            <label for="pages">Calibre ID</label>
+            <label for="id_calibre">Calibre ID</label>
             <input type="text" name="id_calibre" id="id_calibre" class="span2" value="{{ book.id_calibre | none2blank }}">
-        </div>
-
-        <div class="span1">
-            <label for="pages">Pages</label>
-            <input type="number" name="pages" id="pages" class="span1" value="{{ book.pages | none2blank }}">
         </div>
     </div>
 
