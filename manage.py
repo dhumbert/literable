@@ -47,7 +47,11 @@ def count_words():
 
     for book in books:
         if not book.word_count:
-            book.update_word_count()
+            try:
+                book.update_word_count()
+            except:
+                import traceback
+                traceback.print_exc()
 
 
 @manager.command
