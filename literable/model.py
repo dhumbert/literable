@@ -123,7 +123,8 @@ def get_incomplete_books():
         'without a file': [],
         'without an author': [],
         'without a publisher': [],
-        'without a page count': [],
+        'without a word count': [],
+        'with word count < 1000': [],
         'without a calibre id': [],
         'without an isbn': [],
         'that are duplicate': []
@@ -149,6 +150,8 @@ def get_incomplete_books():
             books['without a publisher'].append(book)
         if not book.word_count:
             books['without a word count'].append(book)
+        if book.word_count and book.word_count < 1000:
+            books['with word count < 1000'].append(book)
         if not book.id_calibre:
             books['without a calibre id'].append(book)
         if not book.id_isbn:

@@ -174,6 +174,7 @@ class Epub:
             for f in zip.namelist():
                 if f[-4:] == 'html' or f[-3:] == 'htm' or f[-3:] == 'xml':
                     with zip.open(f) as html_file:
+                        print html_file.read()
                         content = BeautifulSoup(html_file.read(), "lxml")
                         words += len(content.text.split(" "))
 
