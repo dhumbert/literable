@@ -50,6 +50,7 @@ def count_words():
             try:
                 book.update_word_count()
             except:
+                print book
                 import traceback
                 traceback.print_exc()
 
