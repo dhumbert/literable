@@ -62,7 +62,7 @@
         <div class="length-meta row">
             {% if book.word_count %}
                 <div class="word-count muted span1"><small>{{ book.word_count | rough_format }} words</small></div>
-                <div class="reading-time muted span1"><small>~ {{ book.estimated_reading_time(current_user) }}</small></div>
+                <div class="reading-time muted span2"><small>~ {{ book.estimated_reading_time(current_user) }}</small></div>
             {% endif %}
         </div>
     </div>
