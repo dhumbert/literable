@@ -5,7 +5,7 @@ from lxml import etree
 from flask.ext.script import Manager
 from flask.ext.alembic import ManageMigrations
 import html2text
-from literable import app, model, epub, book_upload_set
+from literable import app, model, epub, book_upload_set, pdf
 
 
 manager = Manager(app)
@@ -46,12 +46,14 @@ def count_words():
     books = model.get_all_books()
 
     for book in books:
-        try:
-            book.update_word_count()
-        except:
-            print book
-            import traceback
-            traceback.print_exc()
+        if book.get_format() == 'pdf':
+            try:
+                book.update_word_count()
+                print "Updated word count for " + book.title
+            except:
+                print book
+                import traceback
+                traceback.print_exc()
 
 
 @manager.command

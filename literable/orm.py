@@ -7,7 +7,7 @@ from sqlalchemy import event
 from sqlalchemy.sql import expression
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
-from literable import db, book_upload_set, book_staging_upload_set, cover_upload_set, tmp_cover_upload_set, utils, epub, app
+from literable import db, book_upload_set, book_staging_upload_set, cover_upload_set, tmp_cover_upload_set, utils, epub, app, pdf
 
 
 books_taxonomies = db.Table('books_taxonomies',
@@ -285,6 +285,8 @@ class Book(db.Model):
             word_count = None
             if self.get_format() == 'epub':
                 word_count = self._update_epub_word_count()
+            elif self.get_format() == 'pdf':
+                word_count = self._update_pdf_word_count()
 
             self.word_count = word_count
             db.session.commit()
@@ -293,6 +295,11 @@ class Book(db.Model):
         epub_file = book_upload_set.path(self.filename)
         e = epub.Epub(epub_file)
         return e.count_words()
+
+    def _update_pdf_word_count(self):
+        pdf_file = book_upload_set.path(self.filename)
+        p = pdf.PDF(pdf_file)
+        return p.count_words()
 
 
     def _build_meta_title(self):
