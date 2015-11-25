@@ -256,6 +256,7 @@ def add_book(form, files):
     book.user = current_user
     book.created_at = datetime.now()
     book.archived = False
+    book.reading_time_formatted = form['reading_time']
 
     book.id_isbn = form['id_isbn']
     book.id_calibre = form['id_calibre']
@@ -402,6 +403,7 @@ def edit_book(id, form, files):
 
         book.id_isbn = form['id_isbn']
         book.id_calibre = form['id_calibre']
+        book.reading_time_formatted = form['reading_time']
 
         book.update_taxonomies({
             'author': [(form['author'], form['author_sort'])],

@@ -131,6 +131,12 @@ class Book(db.Model):
     def _get_tax_by_type(self, type):
         return filter(lambda t: t.type == type, self.taxonomies)
 
+    def estimated_reading_time(self, user):
+        if self.word_count:
+            return utils.format_duration(self.word_count / user.reading_speed)
+        else:
+            return None
+
     def get_cover_url(self):
         if self.cover:
             return cover_upload_set.url(self.cover)
@@ -364,6 +370,7 @@ class User(db.Model):
     username = db.Column(db.String)
     password = db.Column(db.String)
     admin = db.Column(db.Boolean)
+    reading_wpm = db.Column(db.Integer)
 
     reading_lists = db.relationship(ReadingList, order_by=[ReadingList.name], backref=db.backref('user'))
 
@@ -371,6 +378,10 @@ class User(db.Model):
                                     collection_class=ordering_list('rating'))
 
     rated_books = association_proxy('ratings', 'book')
+
+    @property
+    def reading_speed(self):
+        return self.reading_wpm if self.reading_wpm else 250
 
     def get_reading_list(self, slug):
         for rlist in self.reading_lists:
