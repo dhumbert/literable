@@ -7,6 +7,7 @@ import os.path
 from flask import flash
 from flask.ext.login import current_user
 from sqlalchemy import or_, and_, desc, asc
+from sqlalchemy.sql.expression import func
 from PIL import Image
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, book_upload_set, epub
 from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
@@ -35,6 +36,10 @@ def user_can_download_book(book, user):
 def get_books(page):
     page = max(1, _get_page(page))
     return Book.query.order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+
+
+def get_random_books(n):
+    return Book.query.filter(Book.archived == False).order_by(func.random()).limit(n).all()
 
 
 def get_archived_books(page):

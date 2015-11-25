@@ -21,7 +21,17 @@ def recent():
                            title=title, pagination='books/pagination_recent.html')
 
 
+@app.route("/random")
+@login_required
+def random():
+    n = request.args.get('n', app.config['BOOKS_PER_PAGE'])
+    title = str(n) + ' Random Books'
+    books = model.get_random_books(n)
+    return render_template('books/list.html', books=books, random=n, title=title)
+
+
 @app.route("/rated")
+@login_required
 def rated():
     title = 'Rated Books'
     books = current_user.rated_books
@@ -29,6 +39,7 @@ def rated():
 
 
 @app.route("/archived")
+@login_required
 def archived():
     title = 'Archived Books'
     page = request.args.get('page')
