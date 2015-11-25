@@ -39,12 +39,16 @@ def get_books(page):
 
 
 def get_random_books(n):
-    return Book.query.filter(Book.archived == False).order_by(func.random()).limit(n).all()
+    f = or_() if current_user.admin else _privilege_filter()
+    f = and_(f, Book.archived == False)
+    return Book.query.filter(f).order_by(func.random()).limit(n).all()
 
 
 def get_archived_books(page):
     page = max(1, _get_page(page))
-    return Book.query.filter(Book.archived == True).order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    f = or_() if current_user.admin else _privilege_filter()
+    f = and_(f, Book.archived == True)
+    return Book.query.filter(f).order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_all_books():
