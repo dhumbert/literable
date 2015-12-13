@@ -40,10 +40,7 @@ def get_books(page):
 
 def get_random_books(n):
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, UserBookMeta.hidden.isnot(True))
-    return Book.query\
-        .outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
-        .filter(f).order_by(func.random()).limit(n).all()
+    return Book.query.filter(f).order_by(func.random()).limit(n).all()
 
 
 def get_hidden_books(page):
@@ -87,11 +84,9 @@ def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, UserBookMeta.hidden.isnot(True))
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
-    q = Book.query.outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id)).filter(f)\
-        .order_by(sort_dir(sort_criterion))
+    q = Book.query.filter(f).order_by(sort_dir(sort_criterion))
 
     return q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
 
@@ -196,13 +191,10 @@ def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, UserBookMeta.hidden.isnot(True))
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    q = Book.query\
-        .outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
-        .filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
+    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title_sort)

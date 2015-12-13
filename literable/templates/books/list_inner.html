@@ -6,10 +6,6 @@
 
         <p><a href="{{ url_for('download_book', id=book.id) }}" class="btn btn-primary"><i class="icon-download-alt icon-white"></i> {{ book.get_format() }}</a></p>
 
-        {% if current_user.can_modify_book(book) %}
-            <p><a href="{{ url_for('edit_book', id=book.id) }}" class="btn btn-info"><i class="icon-edit icon-white"></i> Edit</a></p>
-        {% endif %}
-
         <p id="reading-list-btn">
             <div class="btn-group">
                 <a href="javascript:void(0);" class="btn btn-success dropdown-toggle" data-toggle="dropdown"><i class="icon-list icon-white"></i> Lists</a>
@@ -19,25 +15,24 @@
                         <li><a class="{% if isInList %}remove-from-reading-list{% else %}add-to-reading-list{% endif %}" href="javascript:void(0);" data-list-id="{{ list.id }}" data-book-id="{{ book.id }}">
                             <i class="icon-white {% if isInList %}icon-check{% else %}icon-blank{% endif %}"></i>
 
-
                             {{ list.name }}
                         </a></li>
                     {% endfor %}
                 </ul>
             </div>
         </p>
-        {% if current_user.can_modify_book(book) %}
-            {% if current_user.has_hidden_book(book.id) %}
-                <p><a class="btn" href="{{ url_for('unhide_book', id=book.id, next=request.url) }}"><i class="icon-eye-open icon-white"></i> Unhide</a></p>
-            {% else %}
-                <p><a class="btn" href="{{ url_for('hide_book', id=book.id, next=request.url) }}"><i class="icon-eye-close icon-white"></i> Hide</a></p>
-            {% endif %}
-            <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.url) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
-        {% endif %}
-
         <p>
             <a href="javascript:void(0);" class="recommend-book-btn btn btn-warning" data-book-id="{{ book.id }}">
                 <i class="icon-share icon-white"></i> Recommend</a>
         </p>
+        {#{% if current_user.has_hidden_book(book.id) %}
+            <p><a class="btn" href="{{ url_for('unhide_book', id=book.id, next=request.url) }}"><i class="icon-eye-open icon-white"></i> Unhide</a></p>
+        {% else %}
+            <p><a class="btn" href="{{ url_for('hide_book', id=book.id, next=request.url) }}"><i class="icon-eye-close icon-white"></i> Hide</a></p>
+        {% endif %}#}
+        
+        {% if current_user.can_modify_book(book) %}
+            <p><a href="{{ url_for('edit_book', id=book.id) }}" class="btn btn-info"><i class="icon-edit icon-white"></i> Edit</a></p>
+        {% endif %}
     </div>
 </div>
