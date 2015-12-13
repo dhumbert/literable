@@ -35,7 +35,7 @@ def user_can_download_book(book, user):
 
 def get_books(page):
     page = max(1, _get_page(page))
-    return Book.query.order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return Book.query.order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
 
 
 def get_random_books(n):
@@ -53,7 +53,7 @@ def get_hidden_books(page):
 
     return Book.query.join(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
         .filter(f)\
-        .order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+        .order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
 
 
 def get_all_books():
@@ -93,7 +93,7 @@ def get_recent_books(page, sort, sort_dir):
     q = Book.query.outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id)).filter(f)\
         .order_by(sort_dir(sort_criterion))
 
-    return q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    return q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
 
 
 def search_books(q):
@@ -210,7 +210,7 @@ def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='
         sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
         q = q.order_by(sort_dir(sort_criterion))
 
-    books = q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    books = q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
     books = None if len(books.items) == 0 else books
 
     return (books, tax)

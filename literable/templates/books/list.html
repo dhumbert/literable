@@ -73,7 +73,7 @@
         </div>
 
         {% if books.pages > 1 %}
-            {% include pagination %}
+            {% include 'books/pagination.html' %}
         {% endif %}
     {% elif books %}
         <div id="book-list">
