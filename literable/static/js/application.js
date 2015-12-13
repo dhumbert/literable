@@ -198,6 +198,7 @@ $(document).ready(function(){
         $('#use-meta').on('click', function(){
             if ($('#use-title').is(':checked')) {
                 $('#title').val($('#meta-title').text());
+                $('#title_sort').val(make_title_sort($('#meta-title').text()));
             }
 
             if ($('#use-author').is(':checked')) {
