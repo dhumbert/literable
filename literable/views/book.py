@@ -206,12 +206,13 @@ def recommend():
         flash("You've already recommended this book to that user", 'error')
 
     try:
-        url = request.args.get('next')
+        url = request.form['next']
         if not url:
             url = url_for('recent')
     except KeyError:
         url = url_for('recent')
     return redirect(url)
+
 
 @app.route("/recommended")
 @login_required
