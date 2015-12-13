@@ -10,7 +10,7 @@ from sqlalchemy import or_, and_, desc, asc
 from sqlalchemy.sql.expression import func
 from PIL import Image
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, book_upload_set, epub
-from literable.orm import Book, User, ReadingList, Taxonomy, ReadingListBookAssociation, UserBookMeta
+from literable.orm import Book, User, ReadingList, Taxonomy, ReadingListBookAssociation, UserBookMeta, Recommendation
 
 
 def _get_page(page):
@@ -481,6 +481,18 @@ def hide_book(user, book_id):
 def unhide_book(user, book_id):
     meta = user.get_book_meta(book_id)
     meta.hidden = False
+    db.session.commit()
+
+
+def recommend_book(book_id, from_user, to_user_id, message):
+    r = Recommendation()
+    r.to_user_id = to_user_id
+    r.from_user = from_user
+    r.book_id = book_id
+    r.message = message
+    r.created_at = datetime.now()
+    r.seen = False
+    db.session.add(r)
     db.session.commit()
 
 

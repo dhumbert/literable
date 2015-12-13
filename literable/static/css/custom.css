@@ -19,6 +19,11 @@
     list-style-type: none;
 }
 
+.badge-unread {
+    padding: 3px 6px;
+    margin-right: 0.5em;
+}
+
 .row-library {
     margin-bottom: 2em;
     padding-bottom: 2em;

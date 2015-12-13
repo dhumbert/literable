@@ -13,6 +13,21 @@ $(document).ready(function(){
         show: false
     });
 
+    if ($('.recommend-book-btn').length) {
+        $.get('/ajax/users', {}, function(data) {
+            var sel = $('#recommend_to_user');
+            $.each(data, function ( index, user ) {
+                sel.append($('<option>', { value : user.id }).text(user.name));
+            } );
+        });
+
+        $('.recommend-book-btn').on('click', function(e) {
+            var book_id = $(this).data('book-id');
+            $('#recommend_book_id').val(book_id);
+            $('#recommend-modal').modal('show');
+        });
+    }
+
     if ($('.warn').length) {
         $('.warn').on('click', function(e){
             e.preventDefault();

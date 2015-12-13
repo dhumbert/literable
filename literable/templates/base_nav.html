@@ -16,8 +16,12 @@
                 <ul class="nav pull-right">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                          My Books
-                          <b class="caret"></b>
+                            {% if current_user.has_unread %}
+                                <span class="badge-unread badge badge-success">{{ current_user.unread_count }}</span>
+                            {% endif %}
+
+                            My Books
+                            <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
                             {% for rlist in current_user.reading_lists %}
@@ -26,6 +30,10 @@
                             <li class="divider"></li>
                             <li><a href="#new-list-modal" data-toggle="modal">+ New List</a></li>
                             <li class="divider"></li>
+                            <li><a href="{{ url_for('recommended') }}">
+                                Recommended
+                                <span class="badge-unread badge badge-success">{{ current_user.unread_count }}</span>
+                            </a></li>
                             <li><a href="{{ url_for('rated') }}">Rated Books</a></li>
                             <li><a href="{{ url_for('hidden') }}">Hidden Books</a></li>
                         </ul>
@@ -96,6 +104,27 @@
         <div class="modal-footer">
             <a href="#" class="btn" data-dismiss="modal">Cancel</a>
             <button type="submit" id="save-reading-list" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</div>
+
+<div id="recommend-modal" class="modal hide fade">
+    <form method="post" action="{{ url_for('recommend') }}">
+        <input type="hidden" name="next" value="{{ request.url }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Recommend Book</h3>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" name="recommend_book_id" id="recommend_book_id"/>
+            <label for="recommend_to_user">Recommend to User</label>
+            <select id="recommend_to_user" name="recommend_to_user"></select>
+            <label for="recommend_message">Message (optional)</label>
+            <textarea id="recommend_message" name="recommend_message"></textarea>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+            <button type="submit" class="btn btn-primary">Send <i class="icon-share icon-white"></i></button>
         </div>
     </form>
 </div>

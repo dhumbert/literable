@@ -1,71 +1,5 @@
 <div class="row row-library" data-book-id="{{ book.id }}">
-    <div class="span2 cell-cover hidden-phone">
-        {% if reading_list %}
-            <div class="reading-list-reposition" title="Click and drag to reorder">
-        {% endif %}
-        <img src="{{ book.get_cover_url() }}" />
-        {% if reading_list %}</div>{% endif %}
-    </div>
-
-    <div class="span8 cell-info">
-        <h3>
-            {{ book.title | safe }}
-
-            {% if current_user.has_hidden_book(book.id) %}
-                <span class="hidden-label label label-warning">Hidden</span>
-            {% endif %}
-        </h3>
-        {% if book.series %}
-            <div class="book-series">
-                <a href="{{ url_for('taxonomy', ttype='series', slug=book.series[0].slug) }}">
-                    <span class="label label-info">{{ book.series[0].name }}</span></a>
-                {% if book.series_seq %}
-                    <span class="seq label">Book {{ book.series_seq }}</span>
-                {% endif %}
-            </div>
-        {% endif %}
-
-        {% if book.authors %}
-            <h4 class="author">
-                <a href="{{ url_for('taxonomy', ttype='author', slug=book.authors[0].slug) }}">
-                    {{ book.authors[0].name }}
-                </a>
-            </h4>
-        {% endif %}
-
-        {% if book.description %}
-            <div class="description">
-               {{ book.description | markdown }}
-            </div>
-        {% endif %}
-
-        {% for publisher in book.publishers %}
-            <div class="book-publisher">
-                <i class="icon-book"></i>
-                <a href="{{ url_for('taxonomy', ttype='publisher', slug=publisher.slug) }}">
-                    {{ publisher.name }}
-                </a>
-            </div>
-        {% endfor %}
-
-        {% if book.tags %}
-            <ul class="book-tags">
-                <li><i class="icon-tags"></i></li>
-                {% for tag in book.tags %}
-                    <li>
-                        <a href="{{ url_for('taxonomy', ttype='tag', slug=tag.slug) }}">{{ tag.name }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <div class="length-meta row">
-            {% if book.word_count %}
-                <div class="word-count muted span1"><small>{{ book.word_count | rough_format }} words</small></div>
-                <div class="reading-time muted span2"><small>~ {{ book.estimated_reading_time(current_user) }}</small></div>
-            {% endif %}
-        </div>
-    </div>
+    {% include 'books/book_detail.html' %}
 
     <div class="span2 cell-actions">
         <div class="rating" data-book-id="{{ book.id }}" data-score="{{ current_user.get_book_meta(book.id).rating }}"></div>
@@ -100,5 +34,10 @@
             {% endif %}
             <p><a class="btn btn-danger warn" data-warning="Are you sure you want to delete this book? This action is irrevocable." href="{{ url_for('delete_book', id=book.id, next=request.url) }}"><i class="icon-trash icon-white"></i> Delete</a></p>
         {% endif %}
+
+        <p>
+            <a href="javascript:void(0);" class="recommend-book-btn btn btn-warning" data-book-id="{{ book.id }}">
+                <i class="icon-share icon-white"></i> Recommend</a>
+        </p>
     </div>
 </div>

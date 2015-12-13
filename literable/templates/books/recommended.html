@@ -1,0 +1,32 @@
+{% extends "base_nav.html" %}
+
+{% block content %}
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('recent') }}">Library</a><span class="divider">/</span></li>
+        <li class="active">Recommended For You</li>
+    </ul>
+
+    <div id="book-list">
+        {% if not recommendations %}
+            No recommendations :(
+        {% else %}
+            {% for recommendation in recommendations %}
+                <div class="row row-library">
+                    <div class="recommendation span12">
+                        <div class="recommendation-details alert alert-info">
+                            Recommended for you by {{ recommendation.from_user }}.
+                            {% if recommendation.message %}
+                                <strong >{{ recommendation.message }}</strong>
+                            {% endif %}
+
+                            <a style="float:right;color:white;" href="{{ url_for('delete_recommendation', from_user_id=recommendation.from_user_id, book_id=recommendation.book_id) }}">Remove</a>
+                        </div>
+                        {% set book = recommendation.book %}
+                        {% include 'books/book_detail.html' %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+{% endblock %}}

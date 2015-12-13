@@ -7,3 +7,4 @@ from literable.views import admin
 from literable.views import taxonomy
 from literable.views import auth
 from literable.views import search
+from literable.views import users

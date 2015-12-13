@@ -430,6 +430,28 @@ class User(db.Model):
     def can_modify_book(self, book):
         return self.admin or book.user_id == self.id
 
+    @property
+    def has_unread(self):
+        return any([x for x in self.received_recommendations if not x.seen])
+
+    @property
+    def unread_count(self):
+        return len([x for x in self.received_recommendations if not x.seen])
+
+    def mark_recommendations_seen(self):
+        for r in self.received_recommendations:
+            r.seen = True
+
+        db.session.commit()
+
+    def remove_recommendation(self, from_user_id, book_id):
+        for r in self.received_recommendations:
+            if r.from_user_id == from_user_id and r.book_id == book_id:
+                db.session.delete(r)
+                db.session.commit()
+                break
+
+
     def is_authenticated(self):
         return True
 
@@ -448,3 +470,16 @@ class User(db.Model):
     def __repr__(self):
         return unicode(self.username)
 
+
+class Recommendation(db.Model):
+    __tablename__ = 'recommendations'
+    from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    seen = db.Column(db.Boolean)
+    message = db.Column(db.String)
+    created_at = db.Column(db.DateTime)
+
+    book = db.relationship(Book)
+    from_user = db.relationship(User, foreign_keys=[from_user_id], backref=db.backref('sent_recommendations'))
+    to_user = db.relationship(User, foreign_keys=[to_user_id], backref=db.backref('received_recommendations'))

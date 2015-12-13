@@ -2,6 +2,7 @@ import json
 from functools import partial
 from flask import render_template, request, redirect, url_for, flash, Response, abort
 from flask.ext.login import login_required, current_user
+from sqlalchemy.exc import IntegrityError
 from literable import app, model, content_type
 
 
@@ -191,6 +192,40 @@ def write_book_meta(id):
     flash('Saved file metadata', 'success')
     return redirect(url_for('edit_book', id=id))
 
+
+@app.route("/recommend", methods=['POST'])
+@login_required
+def recommend():
+    book_id = request.form['recommend_book_id']
+    to_user_id = request.form['recommend_to_user']
+    message = request.form['recommend_message']
+    try:
+        model.recommend_book(book_id, current_user, to_user_id, message)
+        flash('Recommendation sent!', 'success')
+    except IntegrityError as e:
+        flash("You've already recommended this book to that user", 'error')
+
+    try:
+        url = request.args.get('next')
+        if not url:
+            url = url_for('recent')
+    except KeyError:
+        url = url_for('recent')
+    return redirect(url)
+
+@app.route("/recommended")
+@login_required
+def recommended():
+    current_user.mark_recommendations_seen()
+    recommendations = current_user.received_recommendations
+    return render_template('books/recommended.html', title='Recommended', recommendations=recommendations)
+
+
+@app.route("/recommended/delete/<int:from_user_id>/<int:book_id>")
+@login_required
+def delete_recommendation(from_user_id, book_id):
+    current_user.remove_recommendation(from_user_id, book_id)
+    return redirect(url_for('recommended'))
 
 @app.route("/ajax/rate", methods=['POST'])
 @login_required
