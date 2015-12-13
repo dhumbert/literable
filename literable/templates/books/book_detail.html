@@ -10,9 +10,9 @@
     <h3>
         {{ book.title | safe }}
 
-        {% if current_user.has_hidden_book(book.id) %}
+        {#{% if current_user.has_hidden_book(book.id) %}
             <span class="hidden-label label label-warning">Hidden</span>
-        {% endif %}
+        {% endif %}#}
     </h3>
     {% if book.series %}
         <div class="book-series">
