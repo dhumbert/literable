@@ -4,7 +4,7 @@
             <a href="{{ url_for(pagination_page, page=books.prev_num, sort=sort, dir=dir) }}">&larr; Prev</a>
         </li>
 
-        {%- for page in books.iter_pages(right_current=3, right_edge=1, left_edge=1) %}
+        {%- for page in books.iter_pages(left_current=1, right_current=2, right_edge=1, left_edge=1) %}
             <li{% if not page or page == books.page %} class="disabled"{% endif %}>
             {% if page %}
                 {% if page != books.page %}
