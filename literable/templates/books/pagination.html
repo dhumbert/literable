@@ -1,14 +1,14 @@
 <div class="pagination pagination-large pagination-centered">
     <ul>
         <li{% if not books.has_prev %} class="disabled"{% endif %}>
-            <a href="{{ url_for(pagination_page, page=books.prev_num, sort=sort, dir=dir) }}">&larr; Prev</a>
+            <a href="{{ url_for(pagination_page, page=books.prev_num, sort=sort, dir=dir, **pagination_args) }}">&larr; Prev</a>
         </li>
 
         {%- for page in books.iter_pages(left_current=1, right_current=2, right_edge=1, left_edge=1) %}
             <li{% if not page or page == books.page %} class="disabled"{% endif %}>
             {% if page %}
                 {% if page != books.page %}
-                    <a href="{{ url_for(pagination_page, page=page, sort=sort, dir=dir) }}">{{ page }}</a>
+                    <a href="{{ url_for(pagination_page, page=page, sort=sort, dir=dir, **pagination_args) }}">{{ page }}</a>
                 {% else %}
                     <a class="disabled"><strong>{{ page }}</strong></a>
                 {% endif %}
@@ -19,7 +19,7 @@
         {% endfor %}
 
         <li{% if not books.has_next %} class="disabled"{% endif %}>
-            <a {% if books.has_next %}href="{{ url_for(pagination_page, page=books.next_num, sort=sort, dir=dir) }}"{% endif %}>Next &rarr;</a>
+            <a {% if books.has_next %}href="{{ url_for(pagination_page, page=books.next_num, sort=sort, dir=dir, **pagination_args) }}"{% endif %}>Next &rarr;</a>
         </li>
     </ul>
 </div>

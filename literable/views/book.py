@@ -19,7 +19,7 @@ def recent():
     books = model.get_recent_books(page, sort, sort_dir)
     return render_template('books/list.html', books=books, recent=True,
                            sort=sort, dir=sort_dir,
-                           title=title, pagination_page='recent')
+                           title=title, pagination_page='recent', pagination_args={})
 
 
 @app.route("/random")
@@ -45,7 +45,7 @@ def hidden():
     title = 'Hidden Books'
     page = request.args.get('page')
     books = model.get_hidden_books(page)
-    return render_template('books/list.html', books=books, hidden=True, title=title, pagination_page='hidden')
+    return render_template('books/list.html', books=books, hidden=True, title=title, pagination_page='hidden', pagination_args={})
 
 
 @app.route("/books/add")

@@ -15,7 +15,8 @@ def taxonomy(ttype, slug):
     title = u'{} | {} | Taxonomies'.format(tax.name, tax.type.title())
     return render_template('books/list.html', books=books, taxonomy=tax,
                            sort=sort, dir=sort_dir,
-                           pagination='taxonomies/pagination.html',
+                           pagination_page='taxonomy',
+                           pagination_args={'ttype': ttype, 'slug': slug},
                            title=title)
 
 
