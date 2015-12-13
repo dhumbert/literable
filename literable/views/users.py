@@ -9,5 +9,8 @@ from literable import app, model, content_type
 @content_type("application/json")
 @login_required
 def other_users():
-    # todo fetch from DB and do not include self
-    return json.dumps([{'id': 1, 'name': 'Devin'}])
+    users = []
+    for u in model.get_users():
+        users.append({'id': u.id, 'name': u.username})
+
+    return json.dumps(users)
