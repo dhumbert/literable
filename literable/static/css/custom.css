@@ -84,7 +84,7 @@
     margin: 0 0 0.5em 0;
 }
 
-.row-library .cell-info .archived-label {
+.row-library .cell-info .hidden-label {
     vertical-align: middle;
     margin-top: -0.5em;
 }

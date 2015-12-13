@@ -104,7 +104,6 @@ class Book(db.Model):
     id_amazon = db.Column(db.String)
     id_google = db.Column(db.String)
     id_calibre = db.Column(db.String)
-    archived = db.Column(db.Boolean)
     word_count = db.Column(db.Integer)
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
@@ -219,6 +218,9 @@ class Book(db.Model):
         self.taxonomies = []
         for tax_slug, terms in tax_map.iteritems():
             for term_name in terms:
+                if not term_name:
+                    continue
+
                 if isinstance(term_name, int):
                     tax = Taxonomy.query.get(term_name)
                     self.taxonomies.append(tax)
@@ -362,11 +364,13 @@ class ReadingList(db.Model):
         return self.__str__()
 
 
-class Rating(db.Model):
-    __tablename__ = 'ratings'
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+class UserBookMeta(db.Model):
+    __tablename__ = 'user_book_meta'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    hidden = db.Column(db.Boolean)
     rating = db.Column(db.Integer)
+    notes = db.Column(db.Text)
 
     book = db.relationship(Book)
 
@@ -380,11 +384,10 @@ class User(db.Model):
     reading_wpm = db.Column(db.Integer)
 
     reading_lists = db.relationship(ReadingList, order_by=[ReadingList.name], backref=db.backref('user'))
+    book_meta = db.relationship(UserBookMeta, backref=db.backref('user'))
 
-    ratings = db.relationship(Rating, order_by=[Rating.rating.desc()],
-                                    collection_class=ordering_list('rating'))
-
-    rated_books = association_proxy('ratings', 'book')
+    # to keep track of book meta objects before they're committed to DB
+    staging_book_meta = {}
 
     @property
     def reading_speed(self):
@@ -404,12 +407,25 @@ class User(db.Model):
         list = self.get_reading_list_by_id(reading_list_id)
         return book_id in [book.id for book in list.books]
 
-    def get_rating(self, book_id):
-        for rating in self.ratings:
-            if rating.book_id == book_id:
-                return rating.rating
+    def get_book_meta(self, book_id):
+        for b in self.book_meta:
+            if b.book_id == int(book_id):
+                return b
 
-        return None
+        # if we didn't find it, create a new one
+        m = UserBookMeta()
+        m.user_id = self.id
+        m.book_id = book_id
+        db.session.add(m)
+        #db.session.commit()
+        return m
+
+    @property
+    def rated_books(self):
+        return [b.book for b in sorted(self.book_meta, key=lambda x: x.rating, reverse=True) if b.rating]
+
+    def has_hidden_book(self, book_id):
+        return self.get_book_meta(book_id).hidden
 
     def can_modify_book(self, book):
         return self.admin or book.user_id == self.id

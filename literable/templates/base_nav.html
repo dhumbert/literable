@@ -27,6 +27,7 @@
                             <li><a href="#new-list-modal" data-toggle="modal">+ New List</a></li>
                             <li class="divider"></li>
                             <li><a href="{{ url_for('rated') }}">Rated Books</a></li>
+                            <li><a href="{{ url_for('hidden') }}">Hidden Books</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -39,7 +40,6 @@
                             <li><a href="{{ url_for('taxonomy_terms', ttype='series') }}">by Series</a></li>
                             <li><a href="{{ url_for('taxonomy_terms', ttype='author') }}">by Author</a></li>
                             <li><a href="{{ url_for('taxonomy_terms', ttype='publisher') }}">by Publisher</a></li>
-                                <li><a href="{{ url_for('archived') }}">Archived</a></li>
                         </ul>
                     </li>
                     <li>

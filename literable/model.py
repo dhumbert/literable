@@ -10,7 +10,7 @@ from sqlalchemy import or_, and_, desc, asc
 from sqlalchemy.sql.expression import func
 from PIL import Image
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, book_upload_set, epub
-from literable.orm import Book, User, ReadingList, Taxonomy, Rating, ReadingListBookAssociation
+from literable.orm import Book, User, ReadingList, Taxonomy, ReadingListBookAssociation, UserBookMeta
 
 
 def _get_page(page):
@@ -40,15 +40,20 @@ def get_books(page):
 
 def get_random_books(n):
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, Book.archived == False)
-    return Book.query.filter(f).order_by(func.random()).limit(n).all()
+    f = and_(f, UserBookMeta.hidden.isnot(True))
+    return Book.query\
+        .outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
+        .filter(f).order_by(func.random()).limit(n).all()
 
 
-def get_archived_books(page):
+def get_hidden_books(page):
     page = max(1, _get_page(page))
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, Book.archived == True)
-    return Book.query.filter(f).order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    f = and_(f, UserBookMeta.hidden.is_(True))
+
+    return Book.query.join(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
+        .filter(f)\
+        .order_by(Book.title_sort).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def get_all_books():
@@ -82,12 +87,13 @@ def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
-
-    f = and_(f, Book.archived == False)
-
+    f = and_(f, UserBookMeta.hidden.isnot(True))
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
-    return Book.query.filter(f).order_by(sort_dir(sort_criterion)).paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
+    q = Book.query.outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id)).filter(f)\
+        .order_by(sort_dir(sort_criterion))
+
+    return q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'])
 
 
 def search_books(q):
@@ -190,9 +196,13 @@ def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='
     page = max(1, _get_page(page))
 
     f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, Book.archived == False)
+    f = and_(f, UserBookMeta.hidden.isnot(True))
+    sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
+
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
+    q = Book.query\
+        .outerjoin(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
+        .filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
 
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title_sort)
@@ -255,7 +265,6 @@ def add_book(form, files):
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
     book.created_at = datetime.now()
-    book.archived = False
 
     book.id_isbn = form['id_isbn']
     book.id_calibre = form['id_calibre']
@@ -372,11 +381,7 @@ def add_book_bulk(batch, root, book_file, cover_file, metadata):
     db.session.add(book)
 
     if 'rating' in metadata and metadata['rating'] > 0:
-        rating = Rating()
-        rating.user_id = book.user.id
-        rating.book_id = book.id
-        rating.rating = metadata['rating']
-        db.session.add(rating)
+        book.user.get_book_meta(book.id).rating = metadata['rating']
 
     db.session.commit()
 
@@ -462,39 +467,20 @@ def upload_book(file):
         return None
 
 
-def rate_book(book_id, score):
-    rating = Rating.query.filter_by(book_id=book_id, user_id=current_user.id).first()
-    if rating:
-        rating.rating = score
-    else:
-        rating = Rating()
-        rating.user_id = current_user.id
-        rating.book_id = book_id
-        rating.rating = score
-        db.session.add(rating)
-
+def rate_book(user, book_id, score):
+    user.get_book_meta(book_id).rating = score
     db.session.commit()
 
 
-def archive_book(id):
-    book = get_book(id)
-
-    if not user_can_modify_book(book, current_user):
-        flash('You cannot archive a book you do not own', 'error')
-        return False
-
-    book.archived = True
+def hide_book(user, book_id):
+    meta = user.get_book_meta(book_id)
+    meta.hidden = True
     db.session.commit()
 
 
-def restore_book(id):
-    book = get_book(id)
-
-    if not user_can_modify_book(book, current_user):
-        flash('You cannot restore a book you do not own', 'error')
-        return False
-
-    book.archived = False
+def unhide_book(user, book_id):
+    meta = user.get_book_meta(book_id)
+    meta.hidden = False
     db.session.commit()
 
 

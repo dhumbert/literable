@@ -38,13 +38,13 @@ def rated():
     return render_template('books/list.html', books=books, rated=True, title=title)
 
 
-@app.route("/archived")
+@app.route("/hidden")
 @login_required
-def archived():
-    title = 'Archived Books'
+def hidden():
+    title = 'Hidden Books'
     page = request.args.get('page')
-    books = model.get_archived_books(page)
-    return render_template('books/list.html', books=books, archived=True, title=title)
+    books = model.get_hidden_books(page)
+    return render_template('books/list.html', books=books, hidden=True, title=title)
 
 
 @app.route("/books/add")
@@ -141,11 +141,11 @@ def edit_book_do(id):
     return redirect(url_for('edit_book', id=id))
 
 
-@app.route("/books/archive/<int:id>")
+@app.route("/books/hide/<int:id>")
 @login_required
-def archive_book(id):
-    model.archive_book(id)
-    flash('Book archived', 'success')
+def hide_book(id):
+    model.hide_book(current_user, id)
+    flash('Book hidden', 'success')
     try:
         url = request.args.get('next')
         if not url:
@@ -155,11 +155,11 @@ def archive_book(id):
     return redirect(url)
 
 
-@app.route("/books/restore/<int:id>")
+@app.route("/books/unhide/<int:id>")
 @login_required
-def restore_book(id):
-    model.restore_book(id)
-    flash('Book restored', 'success')
+def unhide_book(id):
+    model.unhide_book(current_user, id)
+    flash('Book unhidden', 'success')
     try:
         url = request.args.get('next')
         if not url:
@@ -198,5 +198,5 @@ def ajax_rate():
     score = request.form['score']
     book_id = request.form['book_id']
 
-    model.rate_book(book_id, score)
+    model.rate_book(current_user, book_id, score)
     return json.dumps(True)
