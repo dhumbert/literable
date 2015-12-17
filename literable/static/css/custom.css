@@ -107,6 +107,13 @@
     margin-top: 0.5em;
 }
 
+.row-library .cell-info .description h1,
+.row-library .cell-info .description h2,
+.row-library .cell-info .description h3,
+.row-library .cell-info .description h4 {
+    font-size: 1.25em;
+}
+
 .row-library .cell-info .description ul {
     list-style-type: square;
 }
