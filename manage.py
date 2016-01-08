@@ -46,7 +46,7 @@ def count_words():
     books = model.get_all_books()
 
     for book in books:
-        if book.get_format() == 'pdf':
+        if not book.word_count:
             try:
                 book.update_word_count()
                 print "Updated word count for " + book.title

@@ -282,12 +282,14 @@ class Book(db.Model):
             cover=cover,
             subjects=subjects)
 
-    def update_word_count(self):
+    def update_word_count(self, is_web_request=True):
         if self.filename:
             word_count = None
             if self.get_format() == 'epub':
                 word_count = self._update_epub_word_count()
-            elif self.get_format() == 'pdf':
+            # updating PDF word counts can get hairy, don't do that in web request
+            # (require running manage.py command)
+            elif self.get_format() == 'pdf' and not is_web_request:
                 word_count = self._update_pdf_word_count()
 
             self.word_count = word_count
