@@ -43,19 +43,17 @@ def add_user(username, password):
 
 @manager.command
 def count_words():
-    e = epub.Epub("/Users/devin/Downloads/King_Stephen-On_Writing__A_Memoir_of_the_Craft.epub")
-    print e.count_words()
-    # books = model.get_all_books()
-    #
-    # for book in books:
-    #     if not book.word_count:
-    #         try:
-    #             book.update_word_count(is_web_request=False)
-    #             print "Updated word count for " + book.title
-    #         except:
-    #             print book
-    #             import traceback
-    #             traceback.print_exc()
+    books = model.get_all_books()
+
+    for book in books:
+        if not book.word_count:
+            try:
+                book.update_word_count(is_web_request=False)
+                print "Updated word count for " + book.title
+            except:
+                print book
+                import traceback
+                traceback.print_exc()
 
 
 @manager.command
