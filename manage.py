@@ -48,7 +48,7 @@ def count_words():
     for book in books:
         if not book.word_count:
             try:
-                book.update_word_count()
+                book.update_word_count(is_web_request=False)
                 print "Updated word count for " + book.title
             except:
                 print book
