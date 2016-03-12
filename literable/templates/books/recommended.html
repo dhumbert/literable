@@ -12,7 +12,7 @@
         {% else %}
             {% for recommendation in recommendations %}
                 <div class="row row-library">
-                    <div class="recommendation span12">
+                    <div class="recommendation">
                         <div class="recommendation-details alert alert-info">
                             Recommended for you by {{ recommendation.from_user }}.
                             {% if recommendation.message %}
@@ -23,6 +23,28 @@
                         </div>
                         {% set book = recommendation.book %}
                         {% include 'books/book_detail.html' %}
+
+                        <div class="span2 cell-actions">
+                            <div class="rating" data-book-id="{{ book.id }}" data-score="{{ current_user.get_book_meta(book.id).rating }}"></div>
+
+                            <p><a href="{{ url_for('download_book', id=book.id) }}" class="btn btn-primary"><i class="icon-download-alt icon-white"></i> {{ book.get_format() }}</a></p>
+
+                            <p id="reading-list-btn">
+                                <div class="btn-group">
+                                    <a href="javascript:void(0);" class="btn btn-success dropdown-toggle" data-toggle="dropdown"><i class="icon-list icon-white"></i> Lists</a>
+                                    <ul class="dropdown-menu">
+                                        {% for list in current_user.reading_lists %}
+                                            {% set isInList = current_user.book_is_in_reading_list(list.id, book.id) %}
+                                            <li><a class="{% if isInList %}remove-from-reading-list{% else %}add-to-reading-list{% endif %}" href="javascript:void(0);" data-list-id="{{ list.id }}" data-book-id="{{ book.id }}">
+                                                <i class="icon-white {% if isInList %}icon-check{% else %}icon-blank{% endif %}"></i>
+
+                                                {{ list.name }}
+                                            </a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </p>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
