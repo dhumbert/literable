@@ -489,7 +489,11 @@ def recommend_book(book_id, from_user, to_user_id, message):
 
 
 def get_similar_books(user, book_id):
-    return db.session.query(Book).from_statement(text("select b.* from books as b where b.id in (select book_id from books_taxonomies where book_id != 6054 and taxonomy_id in (select taxonomy_id from books_taxonomies where book_id = 6054) group by book_id order by count(*) desc limit 5)")).all()
+    return db.session.query(Book).from_statement(text("select b.* from books as b where b.id in "
+                                                      "(select book_id from books_taxonomies where book_id != :book_id "
+                                                      "and taxonomy_id in (select taxonomy_id from books_taxonomies "
+                                                      "where book_id = :book_id) group by book_id order by count(*) desc "
+                                                      "limit 5)")).params(book_id=book_id).all()
 
 
 def delete_book(id):
