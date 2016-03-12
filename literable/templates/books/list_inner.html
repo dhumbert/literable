@@ -22,8 +22,12 @@
             </div>
         </p>
         <p>
-            <a href="javascript:void(0);" class="recommend-book-btn btn btn-warning" data-book-id="{{ book.id }}">
+            <a href="javascript:void(0);" class="recommend-book-btn btn btn-success" data-book-id="{{ book.id }}">
                 <i class="icon-share icon-white"></i> Recommend</a>
+        </p>
+        <p>
+            <a href="javascript:void(0);" class="similar-books-btn btn btn-success" data-book-id="{{ book.id }}">
+                <i class="icon-magnet icon-white"></i> Similar</a>
         </p>
         {#{% if current_user.has_hidden_book(book.id) %}
             <p><a class="btn" href="{{ url_for('unhide_book', id=book.id, next=request.url) }}"><i class="icon-eye-open icon-white"></i> Unhide</a></p>

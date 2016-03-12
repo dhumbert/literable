@@ -28,6 +28,16 @@ $(document).ready(function(){
         });
     }
 
+    if ($('.similar-books-btn').length) {
+        $('.similar-books-btn').on('click', function(e) {
+            var book_id = $(this).data('book-id');
+            $.get('/ajax/similar', { book_id: book_id }, function(data) {
+                $('#similar-modal .modal-body').html(data);
+                $('#similar-modal').modal('show');
+            });
+        });
+    }
+
     if ($('.warn').length) {
         $('.warn').on('click', function(e){
             e.preventDefault();

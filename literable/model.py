@@ -6,7 +6,7 @@ import os
 import os.path
 from flask import flash
 from flask.ext.login import current_user
-from sqlalchemy import or_, and_, desc, asc
+from sqlalchemy import or_, and_, desc, asc, text
 from sqlalchemy.sql.expression import func
 from PIL import Image
 from literable import db, app, book_staging_upload_set, tmp_cover_upload_set, cover_upload_set, book_upload_set, epub
@@ -486,6 +486,10 @@ def recommend_book(book_id, from_user, to_user_id, message):
     r.seen = False
     db.session.add(r)
     db.session.commit()
+
+
+def get_similar_books(user, book_id):
+    return db.session.query(Book).from_statement(text("select b.* from books as b where b.id in (select book_id from books_taxonomies where book_id != 6054 and taxonomy_id in (select taxonomy_id from books_taxonomies where book_id = 6054) group by book_id order by count(*) desc limit 5)")).all()
 
 
 def delete_book(id):

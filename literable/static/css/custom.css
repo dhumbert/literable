@@ -262,3 +262,10 @@
     text-decoration: none;
 
 }
+
+#similar-modal .span2 {
+    width: 90px;
+}
+#similar-modal .span8 {
+    width: 268px;
+}

@@ -228,6 +228,7 @@ def delete_recommendation(from_user_id, book_id):
     current_user.remove_recommendation(from_user_id, book_id)
     return redirect(url_for('recommended'))
 
+
 @app.route("/ajax/rate", methods=['POST'])
 @login_required
 def ajax_rate():
@@ -236,3 +237,12 @@ def ajax_rate():
 
     model.rate_book(current_user, book_id, score)
     return json.dumps(True)
+
+
+@app.route("/ajax/similar")
+@login_required
+def ajax_similar():
+    book_id = request.args.get('book_id')
+
+    books = model.get_similar_books(current_user, book_id)
+    return render_template('books/similar.html', books=books)
