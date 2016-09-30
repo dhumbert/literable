@@ -64,13 +64,15 @@
     <input type="file" name="cover" id="cover" />
 
     <label class="radio">
-        <input type="radio" name="privacy" id="privacy" value="private" {% if not new and not book.public %}checked="checked"{% endif %}>
+        <input type="radio" name="privacy" id="privacy" value="private" {% if not new and not book.public %}checked{% endif %}>
         Private
     </label>
     <label class="radio">
-        <input type="radio" name="privacy" id="privacy" value="public" {% if new or book.public %}checked="checked"{% endif %}>
+        <input type="radio" name="privacy" id="privacy" value="public" {% if new or book.public %}checked{% endif %}>
         Public
     </label>
+
+    <label class="checkbox">Owned <input type="checkbox" name="owned" {% if book.owned %}checked{% endif %}></label>
 
     <div class="form-actions">
         <input type="hidden" name="post-submit-action" id="post-submit-action" value="">

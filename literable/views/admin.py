@@ -8,7 +8,7 @@ def admin_books_all():
     books = model.get_all_books()
     title = 'All Books | Admin'
     return render_template('admin/all.html', books=books, num_books=len(books),
-                           title=title)
+                           title=title, heading='All Books')
 
 @app.route("/admin/books/incomplete")
 @admin_required
@@ -17,6 +17,14 @@ def admin_books_incomplete():
     title = 'Incomplete Books | Admin'
     return render_template('admin/incomplete.html', incomplete=incomplete,
                            title=title)
+
+@app.route("/admin/books/not-owned")
+@admin_required
+def admin_books_not_owned():
+    books = model.get_not_owned_books()
+    title = 'Not Owned Books | Admin'
+    return render_template('admin/all.html', books=books, num_books=len(books),
+                           title=title, heading='Not Owned Books')
 
 
 @app.route("/admin/books/covers")

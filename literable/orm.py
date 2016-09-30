@@ -105,6 +105,7 @@ class Book(db.Model):
     id_google = db.Column(db.String)
     id_calibre = db.Column(db.String)
     word_count = db.Column(db.Integer)
+    owned = db.Column(db.Boolean())
 
     taxonomies = db.relationship('Taxonomy', secondary=books_taxonomies, backref=db.backref('books'))
 

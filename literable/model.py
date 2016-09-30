@@ -22,7 +22,10 @@ def _get_page(page):
 
 
 def _privilege_filter():
-    return or_(Book.user_id == current_user.id, Book.public)
+    if current_user.admin:
+        return and_(Book.owned)
+    else:
+        return and_(Book.owned, or_(Book.user_id == current_user.id, Book.public))
 
 
 def user_can_modify_book(book, user):
@@ -39,14 +42,12 @@ def get_books(page):
 
 
 def get_random_books(n):
-    f = or_() if current_user.admin else _privilege_filter()
-    return Book.query.filter(f).order_by(func.random()).limit(n).all()
+    return Book.query.filter(_privilege_filter()).order_by(func.random()).limit(n).all()
 
 
 def get_hidden_books(page):
     page = max(1, _get_page(page))
-    f = or_() if current_user.admin else _privilege_filter()
-    f = and_(f, UserBookMeta.hidden.is_(True))
+    f = and_(_privilege_filter(), UserBookMeta.hidden.is_(True))
 
     return Book.query.join(UserBookMeta, and_(UserBookMeta.book_id == Book.id, UserBookMeta.user_id == current_user.id))\
         .filter(f)\
@@ -55,6 +56,10 @@ def get_hidden_books(page):
 
 def get_all_books():
     return Book.query.order_by(Book.title_sort).all()
+
+
+def get_not_owned_books():
+    return Book.query.filter(Book.owned == False).order_by(Book.title_sort).all()
 
 
 def get_book(id):
@@ -83,10 +88,9 @@ def _get_sort_objs(sort, sort_dir):
 def get_recent_books(page, sort, sort_dir):
     page = max(1, _get_page(page))
 
-    f = or_() if current_user.admin else _privilege_filter()
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
-    q = Book.query.filter(f).order_by(sort_dir(sort_criterion))
+    q = Book.query.filter(_privilege_filter()).order_by(sort_dir(sort_criterion))
 
     return q.paginate(page, per_page=app.config['BOOKS_PER_PAGE'], error_out=False)
 
@@ -99,8 +103,7 @@ def search_books(q):
         Taxonomy.name.ilike('%'+q+'%'),
     )
 
-    if not current_user.admin:
-        f = and_(f, _privilege_filter())
+    f = and_(f, _privilege_filter())
 
     query = Book.query.join(Book.taxonomies).filter(f)
 
@@ -190,11 +193,10 @@ def get_book_covers():
 def get_taxonomy_books(tax_type, tax_slug, page=None, sort='created', sort_dir='desc'):
     page = max(1, _get_page(page))
 
-    f = or_() if current_user.admin else _privilege_filter()
     sort_criterion, sort_dir = _get_sort_objs(sort, sort_dir)
 
     tax = Taxonomy.query.filter_by(type=tax_type, slug=tax_slug).first_or_404()
-    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), f))
+    q = Book.query.filter(and_(Book.taxonomies.any(Taxonomy.id == tax.id), _privilege_filter()))
 
     if tax_type == 'series':
         q = q.order_by(Book.series_seq, Book.title_sort)
@@ -257,6 +259,7 @@ def add_book(form, files):
     book.public = True if form['privacy'] == 'public' else False
     book.user = current_user
     book.created_at = datetime.now()
+    book.owned = True if form['owned'] else False
 
     book.id_isbn = form['id_isbn']
     book.id_calibre = form['id_calibre']
@@ -396,6 +399,7 @@ def edit_book(id, form, files):
         book.description = form['description']
         book.series_seq = int(form['series_seq']) if form['series_seq'] else None
         book.public = True if form['privacy'] == 'public' else False
+        book.owned = True if 'owned' in form else False
 
         book.id_isbn = form['id_isbn']
         book.id_calibre = form['id_calibre']

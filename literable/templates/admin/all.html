@@ -1,7 +1,7 @@
 {% extends "base_nav.html" %}
 
 {% block content %}
-    <h1>All Books ({{ num_books }})</h1>
+    <h1>{{ heading }} ({{ num_books }})</h1>
 
     <ul class="unstyled">
         {% for book in books %}
